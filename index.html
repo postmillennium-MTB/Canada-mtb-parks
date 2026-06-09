@@ -1157,6 +1157,57 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 /* ═══════════════════════════════════════════════════════════ UTILITY */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 .hidden { display: none !important; }
+/* ════════════════════════════════════ ORIGIN DETAILS */
+.origin-details { max-width: 860px; margin: 0 auto 1.5rem; padding: 0 1.25rem; }
+.origin-details > summary { list-style: none; }
+.origin-details > summary::-webkit-details-marker { display: none; }
+.origin-summary {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0.7rem 1.25rem;
+  background: var(--bg-origin); border: 1px solid #203A18; border-radius: var(--r-lg);
+  cursor: pointer; user-select: none;
+  transition: background 0.15s;
+}
+.origin-summary:hover { background: #182E10; }
+.origin-summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.origin-details[open] > .origin-summary {
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+  border-bottom-color: transparent;
+}
+.origin-sum-left { display: flex; align-items: center; gap: 0.5rem; }
+.origin-sum-icon { font-size: 1rem; }
+#origin-sum-label {
+  font-family: var(--font-d); font-size: 0.82rem; font-weight: 700;
+  letter-spacing: 0.06em; color: var(--green); text-transform: uppercase;
+}
+.origin-sum-chevron {
+  font-size: 0.65rem; color: var(--text-dim);
+  transition: transform 0.2s; flex-shrink: 0;
+}
+.origin-details[open] .origin-sum-chevron { transform: rotate(180deg); }
+.origin-details .origin-card {
+  max-width: none; margin: 0; padding: 0;
+}
+.origin-details .origin-inner {
+  border-radius: 0 0 var(--r-lg) var(--r-lg);
+}
+
+/* ════════════════════════════════════ MAP COLLAPSE */
+.map-right-controls {
+  display: flex; align-items: flex-end; gap: 0.5rem; padding-bottom: 8px;
+}
+.map-collapse-btn {
+  background: var(--bg-raised); border: 1px solid var(--border);
+  border-radius: var(--r-sm); width: 28px; height: 28px;
+  font-size: 1.1rem; font-weight: 700; line-height: 1;
+  color: var(--text-muted); cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s, color 0.15s;
+}
+.map-collapse-btn:hover { background: var(--bg-hover); color: var(--text); border-color: var(--border-lit); }
+.map-collapse-btn:focus-visible { outline: 2px solid var(--gold); }
+#map-body { transition: none; }
+
 /* ════════ STATS BADGE FILTER */
 .stats-badge-row {
   display: flex; flex-wrap: wrap; gap: 0.4rem; padding: 0.5rem 0 0.25rem;
@@ -1283,7 +1334,15 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 </header>
 
 <!-- WHISTLER ORIGIN CALLOUT -->
-<div class="origin-card">
+<details class="origin-details" id="origin-details">
+  <summary class="origin-summary" aria-label="Origin Story">
+    <div class="origin-sum-left">
+      <span class="origin-sum-icon">🍁</span>
+      <span id="origin-sum-label">Origin Story / Histoire des origines</span>
+    </div>
+    <span class="origin-sum-chevron" aria-hidden="true">▼</span>
+  </summary>
+  <div class="origin-card">
   <div class="origin-inner">
     <div class="origin-eyebrow" id="origin-eyebrow">Origin Story / Histoire des origines</div>
     <h2 class="origin-title" id="origin-title">Where It All Began</h2>
@@ -1313,6 +1372,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     </p>
   </div>
 </div>
+</details>
 
 <!-- CONTROLS -->
 <div class="controls">
@@ -1350,19 +1410,24 @@ details[open] .prov-chevron { transform: rotate(180deg); }
       <button class="view-tab active" id="tab-map" onclick="toggleView('map')">🗺 Map</button>
       <button class="view-tab" id="tab-stats" onclick="toggleView('stats')">📊 Stats</button>
     </div>
-    <div class="map-zoom-btns" id="map-zoom-btns">
-      <button class="map-zoom-btn active" id="btn-canada" onclick="zoomMap('canada')">🇨🇦 Canada</button>
-      <button class="map-zoom-btn" id="btn-bc" onclick="zoomMap('BC')">BC (11)</button>
-      <button class="map-zoom-btn" id="btn-qc" onclick="zoomMap('QC')">QC (8)</button>
-      <button class="map-zoom-btn" id="btn-east" onclick="zoomMap('east')">East</button>
+    <div class="map-right-controls">
+      <div class="map-zoom-btns" id="map-zoom-btns">
+        <button class="map-zoom-btn active" id="btn-canada" onclick="zoomMap('canada')">🇨🇦 Canada</button>
+        <button class="map-zoom-btn" id="btn-bc" onclick="zoomMap('BC')">BC (11)</button>
+        <button class="map-zoom-btn" id="btn-qc" onclick="zoomMap('QC')">QC (8)</button>
+        <button class="map-zoom-btn" id="btn-east" onclick="zoomMap('east')">East</button>
+      </div>
+      <button class="map-collapse-btn" id="map-collapse-btn" onclick="toggleMapSection()" aria-expanded="true" aria-label="Collapse map">−</button>
     </div>
   </div>
+  <div id="map-body">
   <div class="map-wrap" id="map-wrap"><div id="park-map"></div></div>
   <div class="stats-widget" id="stats-widget" hidden></div>
   <div class="map-note" id="map-note">
     <strong>Provinces with no lift-served parks:</strong>
     Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.
   </div>
+  </div><!-- /map-body -->
 </section>
 
 <!-- FOOTER -->
@@ -2212,6 +2277,36 @@ function renderStats() {
 }
 
 
+
+/* ═══════════════ ORIGIN + MAP SECTION COLLAPSE */
+function toggleMapSection() {
+  var body = document.getElementById('map-body');
+  var btn  = document.getElementById('map-collapse-btn');
+  var zoomBtns = document.getElementById('map-zoom-btns');
+  var expanded = btn.getAttribute('aria-expanded') === 'true';
+  expanded = !expanded;
+  body.hidden = !expanded;
+  btn.textContent = expanded ? '−' : '+';
+  btn.setAttribute('aria-expanded', String(expanded));
+  if (expanded && mapInstance) {
+    setTimeout(function() { mapInstance.invalidateSize(); }, 100);
+  }
+}
+
+function applyMobileDefaults() {
+  var mobile = window.innerWidth < 768;
+  /* Origin story: closed on mobile, open on desktop */
+  var od = document.getElementById('origin-details');
+  if (od && !mobile) od.setAttribute('open', '');
+  /* Map section: collapsed on mobile */
+  if (mobile) {
+    var body = document.getElementById('map-body');
+    var btn  = document.getElementById('map-collapse-btn');
+    if (body) body.hidden = true;
+    if (btn)  { btn.textContent = '+'; btn.setAttribute('aria-expanded', 'false'); }
+  }
+}
+
 /* ══════════════════════════════════════════════════ MAP */
 const PROV_BOUNDS = {
   BC:   [[48.3, -139.1], [60.0, -114.0]],
@@ -2232,7 +2327,7 @@ const PROV_COLORS = {
 function initMap() {
   mapInstance = L.map('park-map', { zoomControl: true }).setView([56.0, -96.0], 4);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}{r}.png', {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>',
     maxZoom: 18, subdomains: 'abcd'
   }).addTo(mapInstance);

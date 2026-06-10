@@ -1157,6 +1157,21 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 /* ═══════════════════════════════════════════════════════════ UTILITY */
 .visually-hidden { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; }
 .hidden { display: none !important; }
+/* ════════════════════════════════════ PROVINCE LEGEND */
+.prov-legend {
+  display: flex; flex-wrap: wrap; gap: 0.35rem 0.9rem;
+  padding: 0 2px 10px; align-items: center;
+}
+.prov-legend-item {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-family: var(--font-d); font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 0.04em; color: var(--text-dim); cursor: default;
+}
+.prov-legend-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  flex-shrink: 0; box-shadow: 0 0 0 1.5px rgba(0,0,0,0.35);
+}
+
 /* ════════════════════════════════════ ORIGIN DETAILS */
 .origin-details { max-width: 860px; margin: 0 auto 1.5rem; padding: 0 1.25rem; }
 .origin-details > summary { list-style: none; }
@@ -1421,6 +1436,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     </div>
   </div>
   <div id="map-body">
+  <div class="prov-legend" id="prov-legend"></div>
   <div class="map-wrap" id="map-wrap"><div id="park-map"></div></div>
   <div class="stats-widget" id="stats-widget" hidden></div>
   <div class="map-note" id="map-note">
@@ -1493,7 +1509,7 @@ const T = {
     sortTrails: 'Trail Distance',
     sortBadge: 'Badge',
     badgeFilterAll: 'All Parks',
-    trailDistNote: 'Trail distances are confirmed for Whistler, Sun Peaks and Mont-Sainte-Anne; others are estimates.',
+    trailDistNote: 'Trail distances confirmed for Whistler and Sun Peaks (official sources); others are estimates from secondary sources (~).',
     mapTitle: 'Map',
     btnCanada: '🇨🇦 Canada', btnBC: 'BC (11)', btnQC: 'QC (8)', btnEast: 'East',
     mapNote: `<strong>Provinces with no lift-served parks:</strong> Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.`,
@@ -1550,7 +1566,7 @@ const T = {
     sortTrails: 'Distance de sentiers',
     sortBadge: 'Badge',
     badgeFilterAll: 'Tous les parcs',
-    trailDistNote: 'Distances confirmées pour Whistler, Sun Peaks et Mont-Sainte-Anne ; estimations pour les autres.',
+    trailDistNote: 'Distances confirmées pour Whistler et Sun Peaks (sources officielles) ; estimations de sources secondaires pour les autres (~).',
     mapTitle: 'Carte',
     btnCanada: '🇨🇦 Canada', btnBC: 'C.-B. (11)', btnQC: 'QC (8)', btnEast: 'Est',
     mapNote: `<strong>Provinces sans parc avec remontée :</strong> Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique. La concentration des infrastructures se trouve principalement en Colombie-Britannique et dans le corridor skiable des Laurentides au Québec.`,
@@ -1590,7 +1606,7 @@ const PARKS = [
   { id:1, province:'BC', slug:'whistler',
     name:{en:'Whistler Mountain Bike Park', fr:'Parc de vélo de montagne de Whistler'},
     city:{en:'Whistler, BC', fr:'Whistler, C.-B.'},
-    coords:[50.0860,-122.9580], vertM:1230, vertFt:4035, trails:'80+',
+    coords:[50.0860,-122.9580], vertM:1508, vertFt:4949, trails:'80+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'2 gondolas + 2 chairlifts', fr:'2 télécabines + 2 télésièges'},
     badges:['gl'],
@@ -1611,7 +1627,7 @@ const PARKS = [
           fr:'Plus grande dénivellation desservie par remontée au Canada : 1 720 m du sommet au village.'},
     url:'https://www.revelstokemountainresort.com/explore/summer/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/revelstoke-mountain-resort-2/',
-    trailNum:40, trailKm:55, trailKmEst:true },
+    trailNum:40, trailKm:49, trailKmEst:true },
 
   { id:3, province:'BC', slug:'kickinghorse',
     name:{en:'Kicking Horse Bike Park', fr:'Parc de vélo de Kicking Horse'},
@@ -1624,7 +1640,7 @@ const PARKS = [
           fr:'Vélo dans les Rocheuses avec un caractère alpin prononcé et un terrain technique au-dessus de la limite des arbres.'},
     url:'https://www.kickinghorseresort.com/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/kicking-horse-mountain-resort/',
-    trailNum:35, trailKm:45, trailKmEst:true },
+    trailNum:35, trailKm:35, trailKmEst:true },
 
   { id:4, province:'BC', slug:'fernie',
     name:{en:'Fernie Alpine Resort Bike Park', fr:'Parc de vélo de Fernie Alpine Resort'},
@@ -1637,7 +1653,7 @@ const PARKS = [
           fr:'Au cœur de la vallée Elk, avec un caractère rocheux et racineux typique de la C.-B.'},
     url:'https://skifernie.com/activities/summer/biking/',
     mapUrl:'https://skifernie.com/the-mountain/trail-map/',
-    trailNum:50, trailKm:60, trailKmEst:true },
+    trailNum:50, trailKm:32, trailKmEst:true },
 
   { id:5, province:'BC', slug:'mountwashington',
     name:{en:'Mount Washington Bike Park', fr:'Parc de vélo de Mount Washington'},
@@ -1668,7 +1684,7 @@ const PARKS = [
   { id:7, province:'BC', slug:'silverstar',
     name:{en:'SilverStar Bike Park', fr:'Parc de vélo de SilverStar'},
     city:{en:'Vernon, BC', fr:'Vernon, C.-B.'},
-    coords:[50.3667,-119.0582], vertM:490, vertFt:1608, trails:'50+',
+    coords:[50.3667,-119.0582], vertM:823, vertFt:2700, trails:'50+',
     season:{en:'May – September', fr:'Mai – septembre'},
     lift:{en:'Gondola + chairlift', fr:'Télécabine + télésiège'},
     badges:[],
@@ -1676,12 +1692,12 @@ const PARKS = [
           fr:"Okanagan intérieur — conditions sèches et réseau varié de flow jusqu'au technique."},
     url:'https://www.skisilverstar.com/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/silverstar-mountain-resort/',
-    trailNum:50, trailKm:55, trailKmEst:true },
+    trailNum:50, trailKm:69, trailKmEst:true },
 
   { id:8, province:'BC', slug:'bigwhite',
     name:{en:'Big White Bike Park', fr:'Parc de vélo de Big White'},
     city:{en:'Big White (Kelowna area), BC', fr:'Big White (région de Kelowna), C.-B.'},
-    coords:[49.7227,-118.9367], vertM:500, vertFt:1640, trails:'30+',
+    coords:[49.7227,-118.9367], vertM:699, vertFt:2293, trails:'30+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:[],
@@ -1689,7 +1705,7 @@ const PARKS = [
           fr:'Station Okanagan adaptée aux familles, avec du bon terrain de descente et de flow.'},
     url:'https://www.bigwhite.com/activities/mountain-biking',
     mapUrl:'https://www.trailforks.com/region/big-white-ski-resort/',
-    trailNum:30, trailKm:35, trailKmEst:true },
+    trailNum:30, trailKm:45, trailKmEst:true },
 
   { id:9, province:'BC', slug:'panorama',
     name:{en:'Panorama Bike Park', fr:'Parc de vélo de Panorama'},
@@ -1742,7 +1758,7 @@ const PARKS = [
           fr:'Ancien Parc olympique du Canada. OBNL communautaire axé sur le développement junior. Conçu par Gravity Logic.'},
     url:'https://winsport.ca/sports/mountain-biking/',
     mapUrl:'https://www.winsport.ca/assets/PDFs/Bike-Park/WinSport-Bike-Park-Map-Centre-2025.pdf',
-    trailNum:15, trailKm:8, trailKmEst:true },
+    trailNum:15, trailKm:14, trailKmEst:true },
 
   { id:13, province:'AB', slug:'nitehawk',
     name:{en:'Nitehawk Adventure Park', fr:"Parc d'aventure Nitehawk"},
@@ -1769,7 +1785,7 @@ const PARKS = [
           fr:"Le plus grand parc de vélo avec remontée en Ontario. Terrain pour tous les niveaux, incluant une bonne progression pour débutants."},
     url:'https://www.horseshoeresort.com/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/horseshoe-resort/',
-    trailNum:30, trailKm:25, trailKmEst:true },
+    trailNum:30, trailKm:18, trailKmEst:true },
 
   { id:15, province:'ON', slug:'sirsams',
     name:{en:"Sir Sam's Bike Park", fr:"Parc de vélo Sir Sam's"},
@@ -1782,7 +1798,7 @@ const PARKS = [
           fr:'Télésiège remplacé par un tapis roulant pour l\'été 2025. Accès par remontée les fins de semaine seulement, juillet–août. Situation susceptible d\'évoluer.'},
     url:'https://sirsams.ca/',
     mapUrl:'https://sirsams.ca/',
-    trailNum:12, trailKm:10, trailKmEst:true },
+    trailNum:12, trailKm:9, trailKmEst:true },
 
   // ─── QUÉBEC ─────────────────────────────────────────────────────────
   { id:16, province:'QC', slug:'msa',
@@ -1798,7 +1814,7 @@ const PARKS = [
           fr:"Site de Coupe du Monde UCI depuis 1991 — la plus ancienne étape du circuit et la première en Amérique du Nord. Championnats du Monde en 1998, 2010 et 2019."},
     url:'https://mont-sainte-anne.com/en/activities/mountain-biking/',
     mapUrl:'https://mont-sainte-anne.com/en/activities/mountain-biking/',
-    trailNum:40, trailKm:30, trailKmEst:false },
+    trailNum:40, trailKm:55, trailKmEst:true },
 
   { id:17, province:'QC', slug:'bromont',
     name:{en:'Bromont Bike Park', fr:'Parc de vélo de Bromont'},
@@ -1812,7 +1828,7 @@ const PARKS = [
           fr:"Hôte des Championnats du Monde UCI 1992 — les deuxièmes de l'histoire, seulement trois ans après la fondation officielle du sport. Lieu historique."},
     url:'https://www.skibromont.com/en/summer-activities/mountain-biking/',
     mapUrl:'https://www.skibromont.com/en/summer-activities/mountain-biking/',
-    trailNum:30, trailKm:40, trailKmEst:true },
+    trailNum:30, trailKm:50, trailKmEst:true },
 
   { id:18, province:'QC', slug:'massif',
     name:{en:'Le Massif de Charlevoix', fr:'Le Massif de Charlevoix'},
@@ -1838,7 +1854,7 @@ const PARKS = [
           fr:"Situé dans le parc de la Gatineau — le vélo avec remontée le plus proche de la région d'Ottawa/Gatineau."},
     url:'https://campfortune.com/en/biking/',
     mapUrl:'https://www.trailforks.com/region/camp-fortune/',
-    trailNum:15, trailKm:15, trailKmEst:true },
+    trailNum:15, trailKm:24, trailKmEst:true },
 
   { id:20, province:'QC', slug:'montcalm',
     name:{en:'Montcalm Bike Park', fr:'Parc de vélo Montcalm'},
@@ -1851,7 +1867,7 @@ const PARKS = [
           fr:'9 sentiers de descente + 9 XC/enduro. Pumptrack et zone habiletés au départ. Fins de semaine à partir de juillet.'},
     url:'https://skimontcalm.com/en/tickets-and-passes/mountain-biking/',
     mapUrl:'https://skimontcalm.com/en/maps/mountain-biking/',
-    trailNum:18, trailKm:15, trailKmEst:true },
+    trailNum:18, trailKm:14, trailKmEst:true },
 
   { id:21, province:'QC', slug:'saintsauveur',
     name:{en:'Sommet Saint-Sauveur Bike Park', fr:'Parc de vélo Sommet Saint-Sauveur'},
@@ -1904,7 +1920,7 @@ const PARKS = [
           fr:"Premier parc de vélo avec remontée au Canada atlantique (~2008). Conçu et construit par Gravity Logic dans le parc provincial Sugarloaf."},
     url:'https://parcvelo.ca/',
     mapUrl:'https://www.trailforks.com/region/sugarloaf-provincial-park/',
-    trailNum:15, trailKm:18, trailKmEst:true },
+    trailNum:15, trailKm:43, trailKmEst:true },
 
   { id:25, province:'NB', slug:'poley',
     name:{en:'Poley Mountain Bike Park', fr:'Parc de vélo Poley Mountain'},
@@ -1945,7 +1961,7 @@ const PARKS = [
           fr:"Le parc de vélo avec remontée le plus au nord du Canada. Horaire très limité — vérifier les jours d'opération avant de planifier une visite."},
     url:'https://mountsima.com/',
     mapUrl:'https://www.trailforks.com/region/mount-sima/',
-    trailNum:10, trailKm:12, trailKmEst:true },
+    trailNum:10, trailKm:14, trailKmEst:true },
 ];
 
 const PROVINCE_ORDER = ['BC','QC','ON','AB','NB','NS','YK'];
@@ -2146,6 +2162,7 @@ function renderAll() {
   renderProvOptions();
   renderBadgeKey();
   renderProvinces();
+  renderProvLegend();
   updateMapPopups();
   if (mapView === 'stats') renderStats();
 }
@@ -2307,6 +2324,24 @@ function applyMobileDefaults() {
   }
 }
 
+
+/* ══════════════════════════════════════════ PROVINCE LEGEND */
+function renderProvLegend() {
+  var el = document.getElementById('prov-legend');
+  if (!el) return;
+  var tx = T[lang];
+  var html = '';
+  PROVINCE_ORDER.forEach(function(p) {
+    var color = PROV_COLORS[p] || '#C49A3E';
+    var full  = tx.provNames[p] || p;
+    html += '<span class="prov-legend-item" title="' + full + '">'
+      + '<span class="prov-legend-dot" style="background:' + color + '"></span>'
+      + full
+      + '</span>';
+  });
+  el.innerHTML = html;
+}
+
 /* ══════════════════════════════════════════════════ MAP */
 const PROV_BOUNDS = {
   BC:   [[48.3, -139.1], [60.0, -114.0]],
@@ -2409,11 +2444,13 @@ function onProvClick(pcode) {
 document.getElementById('lang-btn').addEventListener('click', () => {
   lang = lang === 'en' ? 'fr' : 'en';
   renderAll();
+  syncUrlParams();
 });
 
 document.getElementById('units-toggle').addEventListener('change', e => {
   units = e.target.value;
   renderAll();
+  syncUrlParams();
 });
 
 document.getElementById('search-input').addEventListener('input', e => {
@@ -2427,6 +2464,33 @@ document.getElementById('prov-filter').addEventListener('change', e => {
 });
 
 /* ══════════════════════════════════════════════════ INIT */
+/* Read URL parameters: ?lang=fr&units=imperial — enables shareable
+   pre-configured links (e.g. a French-default link for Québec audiences) */
+(function readUrlParams() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    var pLang  = params.get('lang');
+    var pUnits = params.get('units');
+    if (pLang === 'fr' || pLang === 'en') lang = pLang;
+    if (pUnits === 'metric' || pUnits === 'imperial' || pUnits === 'both') {
+      units = pUnits;
+      var sel = document.getElementById('units-toggle');
+      if (sel) sel.value = pUnits;
+    }
+  } catch (e) { /* URL parsing unavailable — use defaults */ }
+})();
+
+function syncUrlParams() {
+  try {
+    var params = new URLSearchParams(window.location.search);
+    if (lang  !== 'en')     params.set('lang', lang);   else params.delete('lang');
+    if (units !== 'metric') params.set('units', units); else params.delete('units');
+    var qs = params.toString();
+    var newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+    history.replaceState(null, '', newUrl);
+  } catch (e) { /* history API unavailable (e.g. some file:// contexts) — skip */ }
+}
+
 // renderAll() doesn't need Leaflet — run it immediately
 renderAll();
 

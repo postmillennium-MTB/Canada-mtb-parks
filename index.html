@@ -781,12 +781,175 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --text-dim:     #8A8A78;
   --text-muted:   #585852;
 
+  /* previously hardcoded — extracted so themes can override them */
+  --bg-topbar:    #0D130B;
+  --border-accent:#203A18;
+  --gold-lit:     #E0B85A;
+  --bg-hover-accent: #182E10;
+
+  /* map chrome */
+  --map-ring:       rgba(20,24,16,0.9);
+  --map-cluster-fg: #111810;
+
   --font-d:       'Outfit', sans-serif;
   --font-b:       'Inter', sans-serif;
 
   --r:            8px;
   --r-sm:         4px;
   --r-lg:         12px;
+}
+
+/* ═══════════════════════════════════════════════ COLOR SCHEMES
+   Default (no data-theme) = Boreal, the original palette above.
+   Each theme only overrides surface/accent/text vars — badge colors
+   and province marker colors are data encodings and stay constant. */
+
+/* GRANITE — North Shore slate + glacier blue */
+body[data-theme="granite"] {
+  --bg:           #14181C;
+  --bg-card:      #1D2329;
+  --bg-raised:    #242C34;
+  --bg-hover:     #2B3540;
+  --bg-origin:    #131A21;
+  --bg-strip:     #191F26;
+  --bg-topbar:    #0F1317;
+  --border:       #2B343E;
+  --border-lit:   #3C4956;
+  --border-accent:#22333F;
+  --gold:         #6FB3D6;
+  --gold-dim:     #3E6E8A;
+  --gold-lit:     #8FCBE8;
+  --bg-hover-accent: #16242E;
+  --text:         #DFE6EC;
+  --text-dim:     #8A97A3;
+  --text-muted:   #566068;
+  --map-ring:       rgba(16,21,26,0.9);
+  --map-cluster-fg: #10151A;
+}
+
+/* MAPLE — fall ember, Laurentian red-brown */
+body[data-theme="maple"] {
+  --bg:           #1A1210;
+  --bg-card:      #241A16;
+  --bg-raised:    #2C201B;
+  --bg-hover:     #362822;
+  --bg-origin:    #201310;
+  --bg-strip:     #201713;
+  --bg-topbar:    #140D0B;
+  --border:       #38281F;
+  --border-lit:   #4E382C;
+  --border-accent:#3A2418;
+  --gold:         #D4693F;
+  --gold-dim:     #8A4426;
+  --gold-lit:     #E88A5C;
+  --bg-hover-accent: #2A1812;
+  --text:         #EADFD2;
+  --text-dim:     #9A8A7C;
+  --text-muted:   #605650;
+  --map-ring:       rgba(26,18,16,0.9);
+  --map-cluster-fg: #1A1210;
+}
+
+/* ALPINE — above-treeline snowfield, deep pine text, bronze accent */
+body[data-theme="alpine"] {
+  --bg:           #EFEDE6;
+  --bg-card:      #F7F5EF;
+  --bg-raised:    #FFFFFF;
+  --bg-hover:     #E6E2D6;
+  --bg-origin:    #E9E9DF;
+  --bg-strip:     #E7E4DA;
+  --bg-topbar:    #FBFAF6;
+  --border:       #D5D0C2;
+  --border-lit:   #BDB6A4;
+  --border-accent:#CFD6C4;
+  --gold:         #8A6A1E;
+  --gold-dim:     #A98A3E;
+  --gold-lit:     #6E5416;
+  --bg-hover-accent: #E4E8D8;
+  --green:        #3A7420;
+  --green-dim:    #6FA352;
+  --text:         #26301F;
+  --text-dim:     #5C6454;
+  --text-muted:   #8A8F80;
+  --map-ring:       rgba(255,255,255,0.95);
+  --map-cluster-fg: #FFFFFF;
+}
+
+body { transition: background 0.25s ease, color 0.25s ease; }
+
+/* ═══════════════════════════════════════════════ THEME DOTS + PMR LINK */
+.theme-dots { display: flex; align-items: center; gap: 7px; margin-right: 2px; }
+.theme-dot {
+  width: 17px; height: 17px; border-radius: 50%;
+  border: 1.5px solid var(--border-lit);
+  padding: 0; cursor: pointer; flex: 0 0 auto;
+  background: linear-gradient(135deg, var(--dot-a) 50%, var(--dot-b) 50%);
+  transition: transform 0.15s, box-shadow 0.15s, border-color 0.15s;
+}
+.theme-dot:hover { transform: scale(1.18); border-color: var(--text-dim); }
+.theme-dot.active {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 2px var(--bg-topbar), 0 0 0 3.5px var(--gold);
+}
+.theme-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+.pmr-link {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 27px; padding: 0 10px; border-radius: 20px;
+  background: var(--gold); color: var(--map-cluster-fg);
+  font-family: var(--font-d); font-weight: 800; font-size: 0.68rem;
+  letter-spacing: 0.09em; text-decoration: none; flex: 0 0 auto;
+  border: 1px solid var(--gold-dim);
+  transition: background 0.15s, transform 0.15s;
+}
+.pmr-link:hover { background: var(--gold-lit); text-decoration: none; transform: translateY(-1px); }
+.pmr-link:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .topbar { padding: 0 0.75rem; gap: 0.5rem; }
+  .topbar-right { gap: 0.4rem; }
+  .topbar-brand #tb-brand { display: none; }  /* keep the maple leaf, drop the words */
+  .theme-dots { gap: 5px; }
+}
+
+/* ═══════════════════════════════════════════════ LEAFLET CHROME THEMING
+   Overrides Leaflet's stock white UI so the map matches the active theme. */
+.leaflet-container { background: var(--bg-strip); font-family: var(--font-b); }
+.leaflet-popup-content-wrapper, .leaflet-popup-tip {
+  background: var(--bg-raised);
+  color: var(--text);
+  border: 1px solid var(--border-lit);
+  box-shadow: 0 3px 14px rgba(0,0,0,0.35);
+}
+.leaflet-container a.leaflet-popup-close-button { color: var(--text-dim); }
+.leaflet-container a.leaflet-popup-close-button:hover { color: var(--text); }
+.leaflet-bar { border: 1px solid var(--border-lit) !important; box-shadow: 0 1px 5px rgba(0,0,0,0.3); }
+.leaflet-bar a {
+  background: var(--bg-raised) !important;
+  color: var(--text) !important;
+  border-bottom: 1px solid var(--border) !important;
+}
+.leaflet-bar a:hover, .leaflet-bar a:focus { background: var(--bg-hover) !important; }
+.leaflet-bar a.leaflet-disabled { background: var(--bg-card) !important; color: var(--text-muted) !important; }
+.leaflet-control-attribution {
+  background: color-mix(in srgb, var(--bg-strip) 82%, transparent) !important;
+  color: var(--text-muted) !important;
+}
+.leaflet-control-attribution a { color: var(--text-dim) !important; }
+
+/* park markers + clusters (classes so theme switches apply live) */
+.map-cluster {
+  background: var(--gold);
+  color: var(--map-cluster-fg);
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-d); font-weight: 800; font-size: 13px;
+  border: 2px solid color-mix(in srgb, var(--gold) 40%, transparent);
+  box-shadow: 0 1px 5px rgba(0,0,0,0.35);
+}
+.park-dot {
+  width: 12px; height: 12px; border-radius: 50%;
+  border: 2.5px solid var(--map-ring);
 }
 
 /* ═══════════════════════════════════════════════════════════ RESET */
@@ -810,7 +973,7 @@ details summary::-webkit-details-marker { display: none; }
 /* ═══════════════════════════════════════════════════════════ TOP BAR */
 .topbar {
   position: sticky; top: 0; z-index: 200;
-  background: #0D130B;
+  background: var(--bg-topbar);
   border-bottom: 1px solid var(--border);
   display: flex; align-items: center; justify-content: space-between;
   padding: 0 1.25rem;
@@ -885,7 +1048,7 @@ details summary::-webkit-details-marker { display: none; }
     0deg, transparent, transparent 28px,
     rgba(78,139,46,0.055) 28px, rgba(78,139,46,0.055) 29px
   );
-  border: 1px solid #203A18;
+  border: 1px solid var(--border-accent);
   border-radius: var(--r-lg); padding: 1.75rem 2rem;
   position: relative; overflow: hidden;
 }
@@ -1101,7 +1264,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   color: var(--gold); letter-spacing: 0.03em;
   text-decoration: none; transition: color 0.15s;
 }
-.card-link:hover { color: #E0B85A; text-decoration: none; }
+.card-link:hover { color: var(--gold-lit); text-decoration: none; }
 .card-link:focus-visible { outline: 2px solid var(--gold); border-radius: 3px; }
 
 /* ═══════════════════════════════════════════════════════════ NO RESULTS */
@@ -1179,11 +1342,11 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .origin-summary {
   display: flex; align-items: center; justify-content: space-between;
   padding: 0.7rem 1.25rem;
-  background: var(--bg-origin); border: 1px solid #203A18; border-radius: var(--r-lg);
+  background: var(--bg-origin); border: 1px solid var(--border-accent); border-radius: var(--r-lg);
   cursor: pointer; user-select: none;
   transition: background 0.15s;
 }
-.origin-summary:hover { background: #182E10; }
+.origin-summary:hover { background: var(--bg-hover-accent); }
 .origin-summary:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 .origin-details[open] > .origin-summary {
   border-radius: var(--r-lg) var(--r-lg) 0 0;
@@ -1329,12 +1492,20 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     <span class="topbar-brand"><span class="maple">🍁</span> <span id="tb-brand">Canada MTB Parks</span></span>
   </div>
   <div class="topbar-right">
+    <div class="theme-dots" role="group" aria-label="Color scheme / Palette de couleurs">
+      <button class="theme-dot" data-theme-id="boreal"  style="--dot-a:#111810;--dot-b:#C49A3E;" aria-label="Boreal theme · Thème boréal"   title="Boreal"></button>
+      <button class="theme-dot" data-theme-id="granite" style="--dot-a:#14181C;--dot-b:#6FB3D6;" aria-label="Granite theme · Thème granit"  title="Granite"></button>
+      <button class="theme-dot" data-theme-id="maple"   style="--dot-a:#1A1210;--dot-b:#D4693F;" aria-label="Maple theme · Thème érable"    title="Maple"></button>
+      <button class="theme-dot" data-theme-id="alpine"  style="--dot-a:#EFEDE6;--dot-b:#8A6A1E;" aria-label="Alpine theme · Thème alpin"    title="Alpine"></button>
+    </div>
     <select class="units-select" id="units-toggle" aria-label="Units">
       <option value="metric">Metric</option>
       <option value="imperial">Imperial</option>
       <option value="both">Both</option>
     </select>
     <button class="lang-btn" id="lang-btn" aria-label="Switch language">FR</button>
+    <a class="pmr-link" href="https://www.postmillenniumrenaissance.com/parks-ca/" target="_top" rel="noopener"
+       title="Post Millennium Renaissance MTB" aria-label="Back to Post Millennium Renaissance">PMR</a>
   </div>
 </div>
 
@@ -2359,18 +2530,59 @@ const PROV_COLORS = {
   NB:'#7A5A20', NS:'#3A8A7A', YK:'#C49A3E'
 };
 
+/* ── Basemap handling ─────────────────────────────────────────
+   NOTE: the previous tile URL used "dark_matter_nolabels", which is
+   not a real CARTO style path (the style is *named* Dark Matter but
+   the URL path is "dark_nolabels") — every tile 404'd, hence the
+   permanently blank map. Valid raster paths: dark_all, dark_nolabels,
+   light_all, light_nolabels, rastertiles/voyager.
+   {r} = retina (@2x) tiles, handled natively by Leaflet.           */
+const BASEMAPS = {
+  dark:  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
+  light: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
+};
+const OSM_FALLBACK = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+let tileLayerRef = null;
+let tileErrorCount = 0;
+let usingFallbackTiles = false;
+
+function basemapForTheme() {
+  return (document.body.dataset.theme === 'alpine') ? BASEMAPS.light : BASEMAPS.dark;
+}
+
+function addBasemap(url, subs, attrib) {
+  if (tileLayerRef) { mapInstance.removeLayer(tileLayerRef); }
+  tileLayerRef = L.tileLayer(url, { attribution: attrib, maxZoom: 18, subdomains: subs });
+  tileLayerRef.on('tileerror', function() {
+    tileErrorCount++;
+    // If CARTO can't be reached at all, drop to standard OSM tiles once
+    if (tileErrorCount > 5 && !usingFallbackTiles) {
+      usingFallbackTiles = true;
+      console.warn('CARTO tiles unreachable — falling back to OpenStreetMap tiles.');
+      addBasemap(OSM_FALLBACK, 'abc',
+        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
+    }
+  });
+  tileLayerRef.addTo(mapInstance);
+}
+
+function updateBasemapForTheme() {
+  if (!mapInstance || usingFallbackTiles) return;
+  tileErrorCount = 0;
+  addBasemap(basemapForTheme(), 'abcd',
+    '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>');
+}
+
 function initMap() {
   mapInstance = L.map('park-map', { zoomControl: true }).setView([56.0, -96.0], 4);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_matter_nolabels/{z}/{x}/{y}.png', {
-    attribution: '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>',
-    maxZoom: 18, subdomains: 'abcd'
-  }).addTo(mapInstance);
+  addBasemap(basemapForTheme(), 'abcd',
+    '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>');
 
   markerCluster = L.markerClusterGroup({
     iconCreateFunction: function(cluster) {
       return L.divIcon({
-        html: `<div style="background:rgba(196,154,62,0.85);color:#111810;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Outfit',sans-serif;font-weight:800;font-size:13px;border:2px solid rgba(196,154,62,0.4);">${cluster.getChildCount()}</div>`,
+        html: `<div class="map-cluster">${cluster.getChildCount()}</div>`,
         iconSize: [32, 32], iconAnchor: [16, 16], className: ''
       });
     },
@@ -2380,7 +2592,7 @@ function initMap() {
   PARKS.forEach(park => {
     const color = PROV_COLORS[park.province] || '#C49A3E';
     const icon = L.divIcon({
-      html: `<div style="background:${color};width:12px;height:12px;border-radius:50%;border:2.5px solid rgba(20,24,16,0.9);box-shadow:0 0 0 1.5px ${color}66,0 1px 4px rgba(0,0,0,0.6);"></div>`,
+      html: `<div class="park-dot" style="background:${color};box-shadow:0 0 0 1.5px ${color}66,0 1px 4px rgba(0,0,0,0.5);"></div>`,
       iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -10], className: ''
     });
     const marker = L.marker(park.coords, { icon });
@@ -2408,9 +2620,9 @@ function updateMapPopups() {
     const badges = park.badges.map(b => renderBadge(b)).join(' ');
     m.bindPopup(`
       <div style="font-family:'Outfit',sans-serif;min-width:180px;padding:2px;">
-        <div style="font-weight:700;font-size:13px;color:#E3DBC8;margin-bottom:2px;">${nm}</div>
-        <div style="font-size:11px;color:#8A8A78;margin-bottom:6px;">${cy}</div>
-        <div style="font-size:12px;color:#C49A3E;font-weight:600;margin-bottom:4px;">${tx.vert}: ${vertLine}</div>
+        <div style="font-weight:700;font-size:13px;color:var(--text);margin-bottom:2px;">${nm}</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">${cy}</div>
+        <div style="font-size:12px;color:var(--gold);font-weight:600;margin-bottom:4px;">${tx.vert}: ${vertLine}</div>
         ${badges ? `<div style="display:flex;flex-wrap:wrap;gap:3px;">${badges}</div>` : ''}
       </div>`, { maxWidth: 240 });
   });
@@ -2491,6 +2703,34 @@ function syncUrlParams() {
   } catch (e) { /* history API unavailable (e.g. some file:// contexts) — skip */ }
 }
 
+/* ══════════════════════════════════════════════════ COLOR SCHEMES */
+const THEME_IDS = ['boreal', 'granite', 'maple', 'alpine'];
+const THEME_STORAGE_KEY = 'pmr-ca-parks-theme';
+
+function setTheme(id) {
+  if (THEME_IDS.indexOf(id) === -1) id = 'boreal';
+  if (id === 'boreal') {
+    delete document.body.dataset.theme;          // default palette lives in :root
+  } else {
+    document.body.dataset.theme = id;
+  }
+  document.querySelectorAll('.theme-dot').forEach(d =>
+    d.classList.toggle('active', d.dataset.themeId === id));
+  try {
+    localStorage.setItem(THEME_STORAGE_KEY, id);
+  } catch (e) { /* storage blocked (private mode / some iframes) — theme won't persist, everything else works */ }
+  updateBasemapForTheme();                        // no-op until the map exists
+}
+
+document.querySelectorAll('.theme-dot').forEach(d => {
+  d.addEventListener('click', () => setTheme(d.dataset.themeId));
+});
+
+// Restore saved theme before the map initializes so it starts on the right basemap
+let savedTheme = 'boreal';
+try { savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'boreal'; } catch (e) {}
+setTheme(savedTheme);
+
 // renderAll() doesn't need Leaflet — run it immediately
 renderAll();
 
@@ -2502,7 +2742,7 @@ function startMap() {
     // Leaflet CDN didn't load — show a graceful fallback
     var el = document.getElementById('park-map');
     if (el) {
-      el.style.cssText = 'display:flex;align-items:center;justify-content:center;color:#8A8A78;font-size:0.85rem;letter-spacing:0.03em;';
+      el.style.cssText = 'display:flex;align-items:center;justify-content:center;color:var(--text-dim);font-size:0.85rem;letter-spacing:0.03em;';
       el.textContent = 'Map requires an internet connection to load.';
     }
     return;

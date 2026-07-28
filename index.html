@@ -778,9 +778,9 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --badge-lim-bg:    #2E1004; --badge-lim-fg:    #D47040; --badge-lim-bd:    #5E2A10;
   --badge-loam-bg:   #1E2E04; --badge-loam-fg:   #A8D848; --badge-loam-bd:   #4E6E14;
 
-  --text:         #E3DBC8;
-  --text-dim:     #8A8A78;
-  --text-muted:   #585852;
+  --text:         #F2ECDD;
+  --text-dim:     #ADAD9A;
+  --text-muted:   #83837A;
 
   /* previously hardcoded — extracted so themes can override them */
   --bg-topbar:    #0D130B;
@@ -844,9 +844,9 @@ body[data-theme="maple"] {
   --gold-dim:     #8A4426;
   --gold-lit:     #E88A5C;
   --bg-hover-accent: #2A1812;
-  --text:         #EADFD2;
-  --text-dim:     #9A8A7C;
-  --text-muted:   #605650;
+  --text:         #F6ECE1;
+  --text-dim:     #BCAB9C;
+  --text-muted:   #8B7C72;
   --map-ring:       rgba(26,18,16,0.9);
   --map-cluster-fg: #1A1210;
 }
@@ -1017,7 +1017,20 @@ details summary::-webkit-details-marker { display: none; }
   padding: 2.5rem 1.25rem 1.5rem;
   max-width: 900px; margin: 0 auto;
   text-align: center;
+  position: relative;
 }
+/* Mountain skyline generated from the full park dataset — sits behind the
+   hero text. Purely decorative: no labels, no controls, no pointer events.
+   Adding parks to PARKS automatically adds peaks here. */
+.hero-mountains {
+  position: absolute; left: 0; right: 0; bottom: 0;
+  height: 78%; min-height: 110px;
+  z-index: 0; pointer-events: none; overflow: hidden;
+  -webkit-mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+          mask-image: linear-gradient(to bottom, transparent 0%, #000 45%, #000 100%);
+}
+.hero-mountains svg { display: block; width: 100%; height: 100%; }
+.hero > .hero-eyebrow, .hero > .hero-title, .hero > .hero-sub { position: relative; z-index: 1; }
 .hero-eyebrow {
   font-family: var(--font-d); font-size: 0.72rem; font-weight: 600;
   letter-spacing: 0.12em; text-transform: uppercase;
@@ -1132,28 +1145,49 @@ details summary::-webkit-details-marker { display: none; }
 .province-select:focus { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 /* ═══════════════════════════════════════════════════════════ BADGE KEY */
-.badge-key-wrap {
-  background: var(--bg-strip); border: 1px solid var(--border);
-  border-radius: var(--r); overflow: hidden;
-}
-.badge-key-summary {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 10px 14px; cursor: pointer; user-select: none;
+.key-split { display: flex; gap: 0.55rem; }
+.key-split-btn {
+  flex: 1 1 0; min-width: 0;
+  display: flex; align-items: center; justify-content: space-between; gap: 0.5rem;
+  padding: 10px 14px; cursor: pointer; user-select: none; text-align: left;
+  background: var(--bg-strip); border: 1px solid var(--border); border-radius: var(--r);
   font-family: var(--font-d); font-size: 0.8rem; font-weight: 600;
   color: var(--text-dim); letter-spacing: 0.06em; text-transform: uppercase;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
 }
-.badge-key-summary:hover { color: var(--text); }
-.badge-key-summary:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
-.bk-chevron { font-size: 0.65rem; transition: transform 0.2s; }
-details[open] .bk-chevron { transform: rotate(180deg); }
+.key-split-btn:hover { color: var(--text); border-color: var(--border-lit); }
+.key-split-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
+.key-split-btn.open { color: var(--text); border-color: var(--border-lit); }
+.key-split-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bk-chevron { font-size: 0.65rem; transition: transform 0.2s; flex: 0 0 auto; }
+.key-split-btn.open .bk-chevron { transform: rotate(180deg); }
+.mv-icon { font-size: 0.85rem; flex: 0 0 auto; }
+#mountain-view-btn:hover { color: var(--gold); border-color: var(--gold-dim); }
+
 .badge-key-content {
-  padding: 0.75rem 1rem 1rem;
-  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.6rem;
-  border-top: 1px solid var(--border);
+  margin-top: 0.55rem;
+  padding: 0.85rem 1rem 1rem;
+  background: var(--bg-strip); border: 1px solid var(--border); border-radius: var(--r);
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 0.5rem;
 }
-.bk-item { display: flex; align-items: flex-start; gap: 0.6rem; }
+.badge-key-content[hidden] { display: none; }
+/* each key row is a shortcut into the Stats tab, filtered to that badge */
+.bk-item {
+  display: flex; align-items: flex-start; gap: 0.6rem; text-align: left;
+  background: none; border: 1px solid transparent; border-radius: var(--r-sm);
+  padding: 5px 7px; cursor: pointer; font: inherit;
+  transition: background 0.15s, border-color 0.15s;
+}
+.bk-item:hover { background: var(--bg-hover); border-color: var(--border-lit); }
+.bk-item:focus-visible { outline: 2px solid var(--gold); outline-offset: 1px; }
 .bk-badge { flex-shrink: 0; margin-top: 2px; }
 .bk-desc { font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; }
+.bk-item:hover .bk-desc { color: var(--text); }
+
+@media (max-width: 560px) {
+  .key-split { flex-direction: column; }
+  .badge-key-content { grid-template-columns: 1fr; }
+}
 
 /* ═══════════════════════════════════════════════════════════ BADGES */
 .badge {
@@ -1308,6 +1342,12 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   border-radius: var(--r); font-size: 0.8rem; color: var(--text-dim); line-height: 1.55;
 }
 .map-note strong { color: var(--text-dim); font-weight: 600; }
+/* cable-car glyph in front of the "no lift-served parks" note.
+   Uses currentColor so it tracks whatever the active theme sets. */
+.map-note-icon {
+  width: 22px; height: 22px; color: var(--gold);
+  vertical-align: -6px; margin-right: 8px; flex: 0 0 auto;
+}
 
 /* ═══════════════════════════════════════════════════════════ FOOTER */
 .footer {
@@ -1582,6 +1622,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 
 <!-- HERO -->
 <header class="hero">
+  <div class="hero-mountains" id="hero-mountains" aria-hidden="true"></div>
   <div class="hero-eyebrow" id="hero-eyebrow">Lift-Served · All Provinces & Territories</div>
   <h1 class="hero-title" id="hero-title">Canada <em>MTB Parks</em> Guide</h1>
   <div class="hero-sub">
@@ -1643,16 +1684,21 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     </select>
   </div>
 
-  <!-- BADGE KEY -->
-  <details class="badge-key-wrap" id="badge-key-details">
-    <summary class="badge-key-summary">
-      <span id="bk-label">Badge Key</span>
+  <!-- BADGE KEY / MOUNTAIN VIEW -->
+  <div class="key-split">
+    <button type="button" class="key-split-btn" id="badge-key-toggle"
+            aria-expanded="false" aria-controls="badge-key-content" onclick="toggleBadgeKey()">
+      <span class="key-split-label" id="bk-label">Badge Key</span>
       <span class="bk-chevron" aria-hidden="true">▼</span>
-    </summary>
-    <div class="badge-key-content" id="badge-key-content">
-      <!-- rendered by JS -->
-    </div>
-  </details>
+    </button>
+    <button type="button" class="key-split-btn" id="mountain-view-btn" onclick="goToMountainView()">
+      <span class="key-split-label" id="mv-label">Mountain View</span>
+      <span class="mv-icon" aria-hidden="true">⛰</span>
+    </button>
+  </div>
+  <div class="badge-key-content" id="badge-key-content" hidden>
+    <!-- rendered by JS -->
+  </div>
 </div>
 
 <!-- PROVINCE ACCORDIONS -->
@@ -1673,7 +1719,6 @@ details[open] .prov-chevron { transform: rotate(180deg); }
         <button class="map-zoom-btn active" id="btn-canada" onclick="zoomMap('canada')">🇨🇦 Canada</button>
         <button class="map-zoom-btn" id="btn-bc" onclick="zoomMap('BC')">BC (11)</button>
         <button class="map-zoom-btn" id="btn-qc" onclick="zoomMap('QC')">QC (9)</button>
-        <button class="map-zoom-btn" id="btn-east" onclick="zoomMap('east')">East</button>
       </div>
       <button class="map-collapse-btn" id="map-collapse-btn" onclick="toggleMapSection()" aria-expanded="true" aria-label="Collapse map">−</button>
     </div>
@@ -1746,6 +1791,8 @@ const T = {
     searchPH: 'Search parks…',
     allProvs: 'All Provinces',
     bkLabel: 'Badge Key',
+    mvLabel: 'Mountain View',
+    bkJumpHint: 'Show parks with this badge in the Stats tab',
     vert: 'Vertical', trails: 'Trails', season: 'Season', lift: 'Lift',
     learnMore: '↗ Learn more',
     mapBtn: '🗺 Map',
@@ -1810,6 +1857,8 @@ const T = {
     searchPH: 'Rechercher un parc…',
     allProvs: 'Toutes les provinces',
     bkLabel: 'Légende des badges',
+    mvLabel: 'Vue montagnes',
+    bkJumpHint: 'Voir les parcs avec ce badge dans l\u2019onglet Stats',
     vert: 'Dénivelé', trails: 'Sentiers', season: 'Saison', lift: 'Remontée',
     learnMore: '↗ En savoir plus',
     mapBtn: '🗺 Carte',
@@ -2369,12 +2418,52 @@ function renderBadgeKey() {
   let html = '';
   keys.forEach(k => {
     html += `
-<div class="bk-item">
+<button type="button" class="bk-item" onclick="badgeKeyJump('${k}')" title="${tx.bkJumpHint}">
   <span class="bk-badge">${renderBadge(k)}</span>
   <span class="bk-desc">${tx.badgeDesc[k]}</span>
-</div>`;
+</button>`;
   });
   document.getElementById('badge-key-content').innerHTML = html;
+}
+
+/* Open / close the badge key panel (replaces the old <details> element so the
+   panel can span the full width beneath the two-up Badge Key / Mountain View bar) */
+function toggleBadgeKey() {
+  var btn   = document.getElementById('badge-key-toggle');
+  var panel = document.getElementById('badge-key-content');
+  var open  = btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', String(open));
+  btn.classList.toggle('open', open);
+  panel.hidden = !open;
+}
+
+/* Shared helper: make sure the map/stats/mountain section is expanded
+   (it auto-collapses on mobile) and bring it into view. */
+function revealMapSection() {
+  var body = document.getElementById('map-body');
+  var btn  = document.getElementById('map-collapse-btn');
+  if (body && body.hidden) {
+    body.hidden = false;
+    if (btn) { btn.textContent = '−'; btn.setAttribute('aria-expanded', 'true'); }
+  }
+  var section = document.querySelector('.map-section');
+  if (section && section.scrollIntoView) {
+    section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+}
+
+/* Click a badge in the key → jump to Stats, pre-filtered to that badge */
+function badgeKeyJump(k) {
+  statsSort  = 'badge';
+  statsBadge = k;
+  revealMapSection();
+  toggleView('stats');
+}
+
+/* "Mountain View" button → jump to the Mountain tab */
+function goToMountainView() {
+  revealMapSection();
+  toggleView('mountain');
 }
 
 /* ══════════════════════════════════════════════════ PROVINCE FILTER OPTIONS */
@@ -2390,6 +2479,15 @@ function renderProvOptions() {
 }
 
 /* ══════════════════════════════════════════════════ STATIC TEXT */
+/* Lucide "cable-car" glyph. stroke="currentColor" + .map-note-icon's
+   color: var(--gold) means it re-tints itself with the active theme. */
+var CABLE_CAR_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"'
+  + ' stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"'
+  + ' class="map-note-icon" aria-hidden="true" focusable="false">'
+  + '<path d="M10 3h.01"/><path d="M14 2h.01"/><path d="m2 9 20-5"/><path d="M12 12V6.5"/>'
+  + '<rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/>'
+  + '<path d="M4 17h16"/></svg>';
+
 function applyStaticText() {
   const tx = T[lang];
   const app = document.getElementById('app');
@@ -2414,11 +2512,11 @@ function applyStaticText() {
   document.getElementById('origin-text').innerHTML = tx.originText;
   document.getElementById('search-input').placeholder = tx.searchPH;
   document.getElementById('bk-label').textContent = tx.bkLabel;
+  document.getElementById('mv-label').textContent = tx.mvLabel;
   document.getElementById('btn-canada').textContent = tx.btnCanada;
   document.getElementById('btn-bc').textContent = tx.btnBC;
   document.getElementById('btn-qc').textContent = tx.btnQC;
-  document.getElementById('btn-east').textContent = tx.btnEast;
-  document.getElementById('map-note').innerHTML = tx.mapNote;
+  document.getElementById('map-note').innerHTML = CABLE_CAR_ICON + tx.mapNote;
   document.getElementById('footer-note').innerHTML = tx.footerNote;
 
   // units dropdown labels
@@ -2431,6 +2529,7 @@ function applyStaticText() {
 /* ══════════════════════════════════════════════════ RENDER ALL */
 function renderAll() {
   applyStaticText();
+  renderHeroMountains();
   renderProvOptions();
   renderBadgeKey();
   renderProvinces();
@@ -2586,6 +2685,32 @@ function hexToRgba(hex, alpha) {
   var g = parseInt(h.substring(2,4), 16);
   var b = parseInt(h.substring(4,6), 16);
   return 'rgba(' + r + ',' + g + ',' + b + ',' + alpha + ')';
+}
+
+/* Decorative skyline behind the hero eyebrow/title. Built from the FULL park
+   dataset (not the mountain-tab selection), sorted west→east by longitude and
+   scaled by vertical drop — so adding parks to PARKS adds peaks here too.
+   No labels, no toolbar: those stay in the Mountain tab. */
+function renderHeroMountains() {
+  var el = document.getElementById('hero-mountains');
+  if (!el || !PARKS.length) return;
+  var parks = PARKS.slice().sort(function(a, b) { return a.coords[1] - b.coords[1]; });
+  var H = 100, step = 40, hw = step * 0.95;
+  var W = parks.length * step;
+  var maxVert = Math.max.apply(null, parks.map(function(p) { return p.vertM; }));
+  var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" '
+          + 'xmlns="http://www.w3.org/2000/svg">';
+  parks.forEach(function(park, i) {
+    var color = PROV_COLORS[park.province] || '#C49A3E';
+    var h  = Math.max(10, (park.vertM / maxVert) * (H - 4));
+    var cx = i * step + step / 2;
+    svg += '<polygon points="'
+        + (cx - hw) + ',' + H + ' ' + cx + ',' + (H - h) + ' ' + (cx + hw) + ',' + H
+        + '" fill="' + hexToRgba(color, 0.20) + '"'
+        + ' stroke="' + hexToRgba(color, 0.42) + '" stroke-width="1"'
+        + ' vector-effect="non-scaling-stroke"/>';
+  });
+  el.innerHTML = svg + '</svg>';
 }
 
 function toggleMountainPark(id) {
@@ -2746,7 +2871,6 @@ const PROV_BOUNDS = {
   NB:   [[45.0, -67.0],  [48.0, -63.5]],
   NS:   [[43.4, -66.5],  [47.0, -59.6]],
   YK:   [[59.0, -141.0], [70.0, -120.0]],
-  east: [[43.5, -75.0],  [49.0, -57.0]],
 };
 
 const PROV_COLORS = {
@@ -2860,8 +2984,9 @@ function zoomMap(target) {
     document.getElementById('btn-canada').classList.add('active');
   } else if (PROV_BOUNDS[target]) {
     mapInstance.fitBounds(PROV_BOUNDS[target], { padding: [30, 30] });
-    const btnId = {BC:'btn-bc', QC:'btn-qc', east:'btn-east'}[target];
-    if (btnId) document.getElementById(btnId).classList.add('active');
+    const btnId = {BC:'btn-bc', QC:'btn-qc'}[target];
+    var btnEl = btnId && document.getElementById(btnId);
+    if (btnEl) btnEl.classList.add('active');
   }
 }
 
@@ -2930,9 +3055,10 @@ function syncUrlParams() {
 /* ══════════════════════════════════════════════════ COLOR SCHEMES */
 const THEME_IDS = ['boreal', 'granite', 'maple', 'alpine'];
 const THEME_STORAGE_KEY = 'pmr-ca-parks-theme';
+const DEFAULT_THEME = 'alpine';   // Alpine is the default palette
 
 function setTheme(id) {
-  if (THEME_IDS.indexOf(id) === -1) id = 'boreal';
+  if (THEME_IDS.indexOf(id) === -1) id = DEFAULT_THEME;
   if (id === 'boreal') {
     delete document.body.dataset.theme;          // default palette lives in :root
   } else {
@@ -2951,9 +3077,12 @@ document.querySelectorAll('.theme-dot').forEach(d => {
 });
 
 // Restore saved theme before the map initializes so it starts on the right basemap
-let savedTheme = 'boreal';
-try { savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || 'boreal'; } catch (e) {}
+let savedTheme = DEFAULT_THEME;
+try { savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || DEFAULT_THEME; } catch (e) {}
 setTheme(savedTheme);
+
+/* Seed the Mountain tab with 5 random parks so it never opens blank */
+pickRandomMountains();
 
 // renderAll() doesn't need Leaflet — run it immediately
 renderAll();

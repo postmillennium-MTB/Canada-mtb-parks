@@ -1615,12 +1615,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     <span class="topbar-brand"><span class="maple">🍁</span> <span id="tb-brand">Canada MTB Parks</span></span>
   </div>
   <div class="topbar-right">
-    <div class="theme-dots" role="group" aria-label="Color scheme / Palette de couleurs">
-      <button class="theme-dot" data-theme-id="boreal"  style="--dot-a:#111810;--dot-b:#C49A3E;" aria-label="Boreal theme · Thème boréal"   title="Boreal"></button>
-      <button class="theme-dot" data-theme-id="granite" style="--dot-a:#14181C;--dot-b:#6FB3D6;" aria-label="Granite theme · Thème granit"  title="Granite"></button>
-      <button class="theme-dot" data-theme-id="maple"   style="--dot-a:#1A1210;--dot-b:#D4693F;" aria-label="Maple theme · Thème érable"    title="Maple"></button>
-      <button class="theme-dot" data-theme-id="alpine"  style="--dot-a:#EFEDE6;--dot-b:#8A6A1E;" aria-label="Alpine theme · Thème alpin"    title="Alpine"></button>
-    </div>
+    <!-- swatch buttons are rendered from the THEMES registry by renderThemeDots() -->
+    <div class="theme-dots" id="theme-dots" role="group" aria-label="Color scheme / Palette de couleurs"></div>
     <select class="units-select" id="units-toggle" aria-label="Units">
       <option value="metric">Metric</option>
       <option value="imperial">Imperial</option>
@@ -1638,6 +1634,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   <div class="hero-eyebrow" id="hero-eyebrow">Lift-Served · All Provinces & Territories</div>
   <h1 class="hero-title" id="hero-title">Canada <em>MTB Parks</em> Guide</h1>
   <div class="hero-sub">
+    <!-- placeholder text only: applyStaticText() overwrites these with counts computed from PARKS -->
     <span class="hero-pill" id="hero-pill-parks">28 lift-served parks</span>
     <span class="hero-pill" id="hero-pill-provs">7 provinces & territories</span>
   </div>
@@ -1727,11 +1724,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
       <button class="view-tab" id="tab-mountain" onclick="toggleView('mountain')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/></svg>Mountain</button>
     </div>
     <div class="map-right-controls">
-      <div class="map-zoom-btns" id="map-zoom-btns">
-        <button class="map-zoom-btn active" id="btn-canada" onclick="zoomMap('canada')">🇨🇦 Canada</button>
-        <button class="map-zoom-btn" id="btn-bc" onclick="zoomMap('BC')">BC (11)</button>
-        <button class="map-zoom-btn" id="btn-qc" onclick="zoomMap('QC')">QC (9)</button>
-      </div>
+      <!-- buttons rendered from PROVINCES (zoomBtn:true) by renderZoomButtons() -->
+      <div class="map-zoom-btns" id="map-zoom-btns"></div>
       <button class="map-collapse-btn" id="map-collapse-btn" onclick="toggleMapSection()" aria-expanded="true" aria-label="Collapse map">−</button>
     </div>
   </div>
@@ -1784,22 +1778,49 @@ let mapInstance = null;
 let markerCluster = null;
 let mapMarkers = {};
 
+/* ══════════════════════════════════════════════════ THEME REGISTRY
+   Single source of truth for every colour scheme. To add a scheme:
+     1. add a body[data-theme="id"] block in the CSS above
+     2. add one entry here
+   Nothing else needs editing — the swatch dots, the id whitelist and the
+   map basemap choice are all derived from this array.
+
+   id      — must match the CSS body[data-theme="…"] selector.
+             'boreal' is special: it's the :root default, so setTheme()
+             removes the data-theme attribute instead of setting it.
+   swatch  — [background, accent] for the little two-tone dot in the topbar.
+   basemap — 'light' or 'dark'. This is why the registry matters: the old
+             code asked `theme === 'alpine' ? light : dark`, so any second
+             light theme would silently have loaded dark map tiles. */
+const THEMES = [
+  { id:'boreal',  label:{en:'Boreal',  fr:'Boréal'},  swatch:['#111810','#C49A3E'], basemap:'dark'  },
+  { id:'granite', label:{en:'Granite', fr:'Granit'},  swatch:['#14181C','#6FB3D6'], basemap:'dark'  },
+  { id:'maple',   label:{en:'Maple',   fr:'Érable'},  swatch:['#1A1210','#D4693F'], basemap:'dark'  },
+  { id:'alpine',  label:{en:'Alpine',  fr:'Alpin'},   swatch:['#EFEDE6','#8A6A1E'], basemap:'light' }
+];
+
+/* ══════════════════════════════════════════════════ BADGE ORDER
+   The canonical badge list and its display order. Used by both the Badge Key
+   panel and the Stats filter pills — previously this array was written out
+   twice, so adding a badge to one and not the other left it unfilterable. */
+const BADGE_ORDER = ['new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
+
 /* ══════════════════════════════════════════════════ TRANSLATIONS */
 const T = {
   en: {
     topbrand: 'Canada MTB Parks',
     eyebrow: 'Lift-Served · All Provinces & Territories',
     title: 'Canada MTB Parks Guide',
-    pillParks: '28 lift-served parks',
-    pillProvs: '7 provinces & territories',
+    pillParks: '{n} lift-served parks',
+    pillProvs: '{p} provinces & territories',
     langBtn: 'FR',
     units: {metric:'Metric', imperial:'Imperial', both:'Both'},
     originEyebrow: 'Origin Story / Histoire des origines',
     originTitle: 'Where It All Began',
     tl1: '1999', tl1l: 'Whistler opens',
     tl2: '2007', tl2l: 'Gravity Logic founded',
-    tl3: '2025', tl3l: '28 parks across Canada',
-    originText: `Whistler Mountain Bike Park opened in 1999 in British Columbia — the world's first purpose-built, lift-served downhill mountain bike park at resort scale. Every park on this guide is downstream of that experiment. <strong>Gravity Logic</strong>, founded by Whistler's original trail crew in 2007, has since designed six of the 28 parks listed here — and consulted on dozens more worldwide.`,
+    tl3: '2025', tl3l: '{n} parks across Canada',
+    originText: `Whistler Mountain Bike Park opened in 1999 in British Columbia — the world's first purpose-built, lift-served downhill mountain bike park at resort scale. Every park on this guide is downstream of that experiment. <strong>Gravity Logic</strong>, founded by Whistler's original trail crew in 2007, has since designed {glWord} of the {n} parks listed here — and consulted on dozens more worldwide.`,
     searchPH: 'Search parks…',
     allProvs: 'All Provinces',
     bkLabel: 'Badge Key',
@@ -1815,7 +1836,7 @@ const T = {
     badgeFilterAll: 'All Parks',
     trailDistNote: 'Trail distances confirmed for Whistler and Sun Peaks (official sources); others are estimates from secondary sources (~).',
     mapTitle: 'Map',
-    btnCanada: '🇨🇦 Canada', btnBC: 'BC (11)', btnQC: 'QC (9)', btnEast: 'East',
+    btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces with no lift-served parks:</strong> Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.`,
     footerNote: `Data current as of July 2026 · Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
     noResults: 'No parks match your filters.',
@@ -1842,10 +1863,6 @@ const T = {
       lim:    'Lift access is limited: specific days, times, or ride counts only',
       loam:   'Included in the Loam Pass multi-resort pass',
     },
-    provNames: {
-      BC:'British Columbia', AB:'Alberta', ON:'Ontario', QC:'Québec',
-      NB:'New Brunswick', NS:'Nova Scotia', YK:'Yukon'
-    },
     mountainPick5: 'Pick 5',
     mountainCountOf: 'added',
     mountainClear: 'Clear all',
@@ -1856,16 +1873,16 @@ const T = {
     topbrand: 'Parcs vélo Canada',
     eyebrow: 'Remontée mécanique · Toutes les provinces et territoires',
     title: 'Guide des parcs vélo du Canada',
-    pillParks: '28 parcs avec remontée',
-    pillProvs: '7 provinces et territoires',
+    pillParks: '{n} parcs avec remontée',
+    pillProvs: '{p} provinces et territoires',
     langBtn: 'EN',
     units: {metric:'Métrique', imperial:'Impérial', both:'Les deux'},
     originEyebrow: 'Origin Story / Histoire des origines',
     originTitle: 'Là où tout a commencé',
     tl1: '1999', tl1l: 'Ouverture de Whistler',
     tl2: '2007', tl2l: 'Fondation de Gravity Logic',
-    tl3: '2025', tl3l: '28 parcs à travers le Canada',
-    originText: `Le parc de vélo de montagne de Whistler a ouvert en 1999 en Colombie-Britannique — le premier parc de descente à vélo construit à l'échelle d'une station de ski dans le monde. Chaque parc de ce guide est, d'une certaine façon, l'héritier de cette expérience. <strong>Gravity Logic</strong>, fondée en 2007 par l'équipe originale de constructeurs de sentiers de Whistler, a depuis conçu six des 28 parcs répertoriés ici — et conseillé des dizaines d'autres à travers le monde.`,
+    tl3: '2025', tl3l: '{n} parcs à travers le Canada',
+    originText: `Le parc de vélo de montagne de Whistler a ouvert en 1999 en Colombie-Britannique — le premier parc de descente à vélo construit à l'échelle d'une station de ski dans le monde. Chaque parc de ce guide est, d'une certaine façon, l'héritier de cette expérience. <strong>Gravity Logic</strong>, fondée en 2007 par l'équipe originale de constructeurs de sentiers de Whistler, a depuis conçu {glWord} des {n} parcs répertoriés ici — et conseillé des dizaines d'autres à travers le monde.`,
     searchPH: 'Rechercher un parc…',
     allProvs: 'Toutes les provinces',
     bkLabel: 'Légende des badges',
@@ -1881,7 +1898,7 @@ const T = {
     badgeFilterAll: 'Tous les parcs',
     trailDistNote: 'Distances confirmées pour Whistler et Sun Peaks (sources officielles) ; estimations de sources secondaires pour les autres (~).',
     mapTitle: 'Carte',
-    btnCanada: '🇨🇦 Canada', btnBC: 'C.-B. (11)', btnQC: 'QC (9)', btnEast: 'Est',
+    btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces sans parc avec remontée :</strong> Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique. La concentration des infrastructures se trouve principalement en Colombie-Britannique et dans le corridor skiable des Laurentides au Québec.`,
     footerNote: `Données à jour de juillet 2026 · Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
     noResults: 'Aucun parc ne correspond à vos filtres.',
@@ -1908,10 +1925,6 @@ const T = {
       lim:    "Accès par remontée limité : jours, horaires ou nombre de montées spécifiques seulement",
       loam:   'Inclus dans le laissez-passer multi-destinations Loam Pass',
     },
-    provNames: {
-      BC:'Colombie-Britannique', AB:'Alberta', ON:'Ontario', QC:'Québec',
-      NB:'Nouveau-Brunswick', NS:'Nouvelle-Écosse', YK:'Yukon'
-    },
     mountainPick5: 'Choisir 5',
     mountainCountOf: 'ajoutés',
     mountainClear: 'Tout effacer',
@@ -1920,13 +1933,37 @@ const T = {
   }
 };
 
-/* ══════════════════════════════════════════════════ PARK DATA */
+/* ══════════════════════════════════════════════════ PARK DATA
+   One entry per lift-served park. Everything the UI shows about a park comes
+   from here — counts, graphs and prose are all derived, never hardcoded.
+
+   id           stable numeric key
+   slug         used for DOM ids (card-<slug>) and deep links
+   province     must match a code in the PROVINCES registry below
+   coords       [lat, lng] — lng also sets west→east order in both skylines
+   vertM/vertFt vertical drop, stored in both units rather than converted so
+                published figures aren't distorted by rounding
+
+   The three trail fields are deliberately distinct — they were previously
+   named trails/trailNum/trailKm, which was easy to mix up because two of
+   them usually hold the same number:
+     trailsLabel  display string as published, e.g. '80+'  (text, not math)
+     trailCount   integer trail count                       (data only today)
+     trailKm      network length in km, used by the 'trails' metric
+     trailKmEst   true when trailKm is an estimate — shown with a ~ prefix
+
+   trailCount is not currently plotted anywhere. It's kept because it's a
+   published figure worth having; to surface it, add an entry to METRICS.
+
+   NOTE ON TRUST: these strings are authored here and injected via innerHTML
+   without escaping. That's fine while this file is the only source. If park
+   data ever arrives from a form, feed or API, escape it first. */
 const PARKS = [
   // ─── BRITISH COLUMBIA ───────────────────────────────────────────────
   { id:1, province:'BC', slug:'whistler',
     name:{en:'Whistler Mountain Bike Park', fr:'Parc de vélo de montagne de Whistler'},
     city:{en:'Whistler, BC', fr:'Whistler, C.-B.'},
-    coords:[50.0860,-122.9580], vertM:1508, vertFt:4949, trails:'80+',
+    coords:[50.0860,-122.9580], vertM:1508, vertFt:4949, trailsLabel:'80+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'2 gondolas + 2 chairlifts', fr:'2 télécabines + 2 télésièges'},
     badges:['gl'],
@@ -1934,12 +1971,12 @@ const PARKS = [
           fr:"Le parc qui a tout lancé (1999). Premier parc de descente à l'échelle d'une station au monde. L'équipe originale de Whistler a fondé Gravity Logic en 2007."},
     url:'https://www.whistlerblackcomb.com/explore-the-resort/bike-park',
     mapUrl:'https://www.trailforks.com/region/whistler-mountain-bike-park/',
-    trailNum:80, trailKm:80, trailKmEst:false },
+    trailCount:80, trailKm:80, trailKmEst:false },
 
   { id:2, province:'BC', slug:'revelstoke',
     name:{en:'Revelstoke Mountain Bike Park', fr:'Parc de vélo de montagne de Revelstoke'},
     city:{en:'Revelstoke, BC', fr:'Revelstoke, C.-B.'},
-    coords:[51.0152,-118.1659], vertM:1720, vertFt:5643, trails:'40+',
+    coords:[51.0152,-118.1659], vertM:1720, vertFt:5643, trailsLabel:'40+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Revelation Gondola', fr:'Télécabine Revelation'},
     badges:[],
@@ -1947,12 +1984,12 @@ const PARKS = [
           fr:'Plus grande dénivellation desservie par remontée au Canada : 1 720 m du sommet au village.'},
     url:'https://www.revelstokemountainresort.com/explore/summer/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/revelstoke-mountain-resort-2/',
-    trailNum:40, trailKm:49, trailKmEst:true },
+    trailCount:40, trailKm:49, trailKmEst:true },
 
   { id:3, province:'BC', slug:'kickinghorse',
     name:{en:'Kicking Horse Bike Park', fr:'Parc de vélo de Kicking Horse'},
     city:{en:'Golden, BC', fr:'Golden, C.-B.'},
-    coords:[51.3535,-117.0440], vertM:1050, vertFt:3445, trails:'35+',
+    coords:[51.3535,-117.0440], vertM:1050, vertFt:3445, trailsLabel:'35+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Golden Eagle Express gondola', fr:'Télécabine Golden Eagle Express'},
     badges:[],
@@ -1960,12 +1997,12 @@ const PARKS = [
           fr:'Vélo dans les Rocheuses avec un caractère alpin prononcé et un terrain technique au-dessus de la limite des arbres.'},
     url:'https://www.kickinghorseresort.com/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/kicking-horse-mountain-resort/',
-    trailNum:35, trailKm:35, trailKmEst:true },
+    trailCount:35, trailKm:35, trailKmEst:true },
 
   { id:4, province:'BC', slug:'fernie',
     name:{en:'Fernie Alpine Resort Bike Park', fr:'Parc de vélo de Fernie Alpine Resort'},
     city:{en:'Fernie, BC', fr:'Fernie, C.-B.'},
-    coords:[49.4688,-115.0907], vertM:1031, vertFt:3382, trails:'50+',
+    coords:[49.4688,-115.0907], vertM:1031, vertFt:3382, trailsLabel:'50+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Timber chairlift', fr:'Télésiège Timber'},
     badges:[],
@@ -1973,12 +2010,12 @@ const PARKS = [
           fr:'Au cœur de la vallée Elk, avec un caractère rocheux et racineux typique de la C.-B.'},
     url:'https://skifernie.com/activities/summer/biking/',
     mapUrl:'https://skifernie.com/the-mountain/trail-map/',
-    trailNum:50, trailKm:32, trailKmEst:true },
+    trailCount:50, trailKm:32, trailKmEst:true },
 
   { id:5, province:'BC', slug:'mountwashington',
     name:{en:'Mount Washington Bike Park', fr:'Parc de vélo de Mount Washington'},
     city:{en:'Courtenay, BC (Vancouver Island)', fr:'Courtenay, C.-B. (île de Vancouver)'},
-    coords:[49.7538,-125.2995], vertM:500, vertFt:1640, trails:'50+',
+    coords:[49.7538,-125.2995], vertM:500, vertFt:1640, trailsLabel:'50+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Raven chairlift', fr:'Télésiège Raven'},
     badges:[],
@@ -1986,12 +2023,12 @@ const PARKS = [
           fr:"Seul parc de vélo avec remontée sur l'île de Vancouver. Cadre de forêt ancienne."},
     url:'https://mountwashington.ca/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/mt-washington/',
-    trailNum:50, trailKm:40, trailKmEst:true },
+    trailCount:50, trailKm:40, trailKmEst:true },
 
   { id:6, province:'BC', slug:'sunpeaks',
     name:{en:'Sun Peaks Bike Park', fr:'Parc de vélo de Sun Peaks'},
     city:{en:'Sun Peaks, BC', fr:'Sun Peaks, C.-B.'},
-    coords:[50.8828,-119.8877], vertM:595, vertFt:1952, trails:'89+ km',
+    coords:[50.8828,-119.8877], vertM:595, vertFt:1952, trailsLabel:'89+ km',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'2 chairlifts + progression carpet', fr:'2 télésièges + tapis de progression'},
     badges:[],
@@ -1999,12 +2036,12 @@ const PARKS = [
           fr:'Deux montagnes, 89+ km de sentiers. Site des Championnats nationaux canadiens de descente.'},
     url:'https://www.sunpeaksresort.com/bike-hike/bike/bike-park',
     mapUrl:'https://www.trailforks.com/region/sun-peaks-resort/',
-    trailNum:89, trailKm:89, trailKmEst:false },
+    trailCount:89, trailKm:89, trailKmEst:false },
 
   { id:7, province:'BC', slug:'silverstar',
     name:{en:'SilverStar Bike Park', fr:'Parc de vélo de SilverStar'},
     city:{en:'Vernon, BC', fr:'Vernon, C.-B.'},
-    coords:[50.3667,-119.0582], vertM:823, vertFt:2700, trails:'50+',
+    coords:[50.3667,-119.0582], vertM:823, vertFt:2700, trailsLabel:'50+',
     season:{en:'May – September', fr:'Mai – septembre'},
     lift:{en:'Gondola + chairlift', fr:'Télécabine + télésiège'},
     badges:[],
@@ -2012,12 +2049,12 @@ const PARKS = [
           fr:"Okanagan intérieur — conditions sèches et réseau varié de flow jusqu'au technique."},
     url:'https://www.skisilverstar.com/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/silverstar-mountain-resort/',
-    trailNum:50, trailKm:69, trailKmEst:true },
+    trailCount:50, trailKm:69, trailKmEst:true },
 
   { id:8, province:'BC', slug:'bigwhite',
     name:{en:'Big White Bike Park', fr:'Parc de vélo de Big White'},
     city:{en:'Big White (Kelowna area), BC', fr:'Big White (région de Kelowna), C.-B.'},
-    coords:[49.7227,-118.9367], vertM:699, vertFt:2293, trails:'30+',
+    coords:[49.7227,-118.9367], vertM:699, vertFt:2293, trailsLabel:'30+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:[],
@@ -2025,12 +2062,12 @@ const PARKS = [
           fr:'Station Okanagan adaptée aux familles, avec du bon terrain de descente et de flow.'},
     url:'https://www.bigwhite.com/activities/mountain-biking',
     mapUrl:'https://www.trailforks.com/region/big-white-ski-resort/',
-    trailNum:30, trailKm:45, trailKmEst:true },
+    trailCount:30, trailKm:45, trailKmEst:true },
 
   { id:9, province:'BC', slug:'panorama',
     name:{en:'Panorama Bike Park', fr:'Parc de vélo de Panorama'},
     city:{en:'Invermere, BC', fr:'Invermere, C.-B.'},
-    coords:[50.4617,-116.2362], vertM:379, vertFt:1243, trails:'20+',
+    coords:[50.4617,-116.2362], vertM:379, vertFt:1243, trailsLabel:'20+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Champagne Express chairlift', fr:'Télésiège Champagne Express'},
     badges:[],
@@ -2038,12 +2075,12 @@ const PARKS = [
           fr:'Vélo dans les montagnes Purcell avec vue panoramique sur la vallée de la Columbia.'},
     url:'https://www.panoramaresort.com/activities/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/panorama-mountain-resort/',
-    trailNum:20, trailKm:25, trailKmEst:true },
+    trailCount:20, trailKm:25, trailKmEst:true },
 
   { id:10, province:'BC', slug:'grouse',
     name:{en:'Grouse Mountain Bike Park', fr:'Parc de vélo de Grouse Mountain'},
     city:{en:'North Vancouver, BC', fr:'Vancouver-Nord, C.-B.'},
-    coords:[49.3700,-123.0780], vertM:250, vertFt:820, trails:'13',
+    coords:[49.3700,-123.0780], vertM:250, vertFt:820, trailsLabel:'13',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Screaming Eagle chairlift', fr:'Télésiège Screaming Eagle'},
     badges:['gl','new'],
@@ -2051,12 +2088,12 @@ const PARKS = [
           fr:"Ouvert le 6 juin 2025 — premier parc de vélo dédié sur la montagne emblématique de Grouse Mountain à Vancouver-Nord. Construit par Gravity Logic."},
     url:'https://www.grousemountain.com/bike-park',
     mapUrl:'https://www.trailforks.com/region/grouse-mountain/',
-    trailNum:13, trailKm:12, trailKmEst:true },
+    trailCount:13, trailKm:12, trailKmEst:true },
 
   { id:11, province:'BC', slug:'red',
     name:{en:'RED Mountain Bike Park', fr:'Parc de vélo de RED Mountain'},
     city:{en:'Rossland, BC (Kootenays)', fr:'Rossland, C.-B. (Kootenays)'},
-    coords:[49.1096,-117.8237], vertM:400, vertFt:1312, trails:'12+',
+    coords:[49.1096,-117.8237], vertM:400, vertFt:1312, trailsLabel:'12+',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Silverlode chairlift', fr:'Télésiège Silverlode'},
     badges:['gl','new'],
@@ -2064,13 +2101,13 @@ const PARKS = [
           fr:'Phase 1 sur 4 du plan directeur de Gravity Logic. Ouverture été 2025. Nouveau terrain prévu chaque année.'},
     url:'https://www.redresort.com/bike-park',
     mapUrl:'https://www.redresort.com/bike-park',
-    trailNum:12, trailKm:10, trailKmEst:true },
+    trailCount:12, trailKm:10, trailKmEst:true },
 
   // ─── ALBERTA ────────────────────────────────────────────────────────
   { id:12, province:'AB', slug:'winsport',
     name:{en:'WinSport Bike Park', fr:'Parc de vélo WinSport'},
     city:{en:'Calgary, AB', fr:'Calgary, AB'},
-    coords:[51.0834,-114.2303], vertM:120, vertFt:394, trails:'15+',
+    coords:[51.0834,-114.2303], vertM:120, vertFt:394, trailsLabel:'15+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:['gl','comm'],
@@ -2078,12 +2115,12 @@ const PARKS = [
           fr:'Ancien Parc olympique du Canada. OBNL communautaire axé sur le développement junior. Conçu par Gravity Logic.'},
     url:'https://winsport.ca/sports/mountain-biking/',
     mapUrl:'https://www.winsport.ca/assets/PDFs/Bike-Park/WinSport-Bike-Park-Map-Centre-2025.pdf',
-    trailNum:15, trailKm:14, trailKmEst:true },
+    trailCount:15, trailKm:14, trailKmEst:true },
 
   { id:13, province:'AB', slug:'nitehawk',
     name:{en:'Nitehawk Adventure Park', fr:"Parc d'aventure Nitehawk"},
     city:{en:'Grande Prairie, AB', fr:'Grande Prairie, AB'},
-    coords:[55.1458,-119.0158], vertM:160, vertFt:525, trails:'15',
+    coords:[55.1458,-119.0158], vertM:160, vertFt:525, trailsLabel:'15',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Platter lift (EasyLoop system)', fr:'Tire-fesse (système EasyLoop)'},
     badges:['surf','comm'],
@@ -2091,13 +2128,13 @@ const PARKS = [
           fr:"Premier parc de vélo en Amérique du Nord à installer le dispositif EasyLoop — un système de traction pour vélos sur tire-fesse. OBNL communautaire. Grande Prairie, pas le Kananaskis."},
     url:'https://gonitehawk.com/bike-park/',
     mapUrl:'https://gonitehawk.com/bike-park/',
-    trailNum:15, trailKm:18, trailKmEst:true },
+    trailCount:15, trailKm:18, trailKmEst:true },
 
   // ─── ONTARIO ────────────────────────────────────────────────────────
   { id:14, province:'ON', slug:'horseshoe',
     name:{en:'Horseshoe Valley Bike Park', fr:'Parc de vélo de Horseshoe Valley'},
     city:{en:'Barrie area, ON (Horseshoe Valley)', fr:'Région de Barrie, ON (Horseshoe Valley)'},
-    coords:[44.5136,-79.8158], vertM:85, vertFt:279, trails:'30+',
+    coords:[44.5136,-79.8158], vertM:85, vertFt:279, trailsLabel:'30+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'Copeland Express chairlift', fr:'Télésiège Copeland Express'},
     badges:['loam'],
@@ -2105,12 +2142,12 @@ const PARKS = [
           fr:"Le plus grand parc de vélo avec remontée en Ontario. Terrain pour tous les niveaux, incluant une bonne progression pour débutants."},
     url:'https://www.horseshoeresort.com/mountain-biking/',
     mapUrl:'https://www.trailforks.com/region/horseshoe-resort/',
-    trailNum:30, trailKm:18, trailKmEst:true },
+    trailCount:30, trailKm:18, trailKmEst:true },
 
   { id:15, province:'ON', slug:'sirsams',
     name:{en:"Sir Sam's Bike Park", fr:"Parc de vélo Sir Sam's"},
     city:{en:'Eagle Lake (Haliburton), ON', fr:'Eagle Lake (Haliburton), ON'},
-    coords:[45.1427,-78.8167], vertM:90, vertFt:295, trails:'12+',
+    coords:[45.1427,-78.8167], vertM:90, vertFt:295, trailsLabel:'12+',
     season:{en:'July – August (weekends only)', fr:'Juillet – août (fins de semaine)'},
     lift:{en:'Magic carpet conveyor (2025 season)', fr:'Tapis roulant (saison 2025)'},
     badges:['lim'],
@@ -2118,13 +2155,13 @@ const PARKS = [
           fr:'Télésiège remplacé par un tapis roulant pour l\'été 2025. Accès par remontée les fins de semaine seulement, juillet–août. Situation susceptible d\'évoluer.'},
     url:'https://sirsams.ca/',
     mapUrl:'https://sirsams.ca/',
-    trailNum:12, trailKm:9, trailKmEst:true },
+    trailCount:12, trailKm:9, trailKmEst:true },
 
   // ─── QUÉBEC ─────────────────────────────────────────────────────────
   { id:16, province:'QC', slug:'msa',
     name:{en:'Mont-Sainte-Anne Bike Park', fr:'Parc de vélo de Mont-Sainte-Anne'},
     city:{en:'Beaupré, QC (near Québec City)', fr:'Beaupré, QC (près de Québec)'},
-    coords:[47.0727,-70.9183], vertM:618, vertFt:2027, trails:'40+',
+    coords:[47.0727,-70.9183], vertM:618, vertFt:2027, trailsLabel:'40+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'Gondola', fr:'Télécabine'},
     badges:['wc','worlds'],
@@ -2134,12 +2171,12 @@ const PARKS = [
           fr:"Site de Coupe du Monde UCI depuis 1991 — la plus ancienne étape du circuit et la première en Amérique du Nord. Championnats du Monde en 1998, 2010 et 2019."},
     url:'https://mont-sainte-anne.com/en/activities/mountain-biking/',
     mapUrl:'https://mont-sainte-anne.com/en/activities/mountain-biking/',
-    trailNum:40, trailKm:55, trailKmEst:true },
+    trailCount:40, trailKm:55, trailKmEst:true },
 
   { id:17, province:'QC', slug:'bromont',
     name:{en:'Bromont Bike Park', fr:'Parc de vélo de Bromont'},
     city:{en:'Bromont, QC (Eastern Townships)', fr:'Bromont, QC (Cantons-de-l\'Est)'},
-    coords:[45.2976,-72.6570], vertM:358, vertFt:1175, trails:'30+',
+    coords:[45.2976,-72.6570], vertM:358, vertFt:1175, trailsLabel:'30+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'4 chairlifts', fr:'4 télésièges'},
     badges:['worlds'],
@@ -2148,12 +2185,12 @@ const PARKS = [
           fr:"Hôte des Championnats du Monde UCI 1992 — les deuxièmes de l'histoire, seulement trois ans après la fondation officielle du sport. Lieu historique."},
     url:'https://www.skibromont.com/en/summer-activities/mountain-biking/',
     mapUrl:'https://www.skibromont.com/en/summer-activities/mountain-biking/',
-    trailNum:30, trailKm:50, trailKmEst:true },
+    trailCount:30, trailKm:50, trailKmEst:true },
 
   { id:18, province:'QC', slug:'massif',
     name:{en:'Le Massif de Charlevoix', fr:'Le Massif de Charlevoix'},
     city:{en:'Petite-Rivière-Saint-François, QC', fr:'Petite-Rivière-Saint-François, QC'},
-    coords:[47.2747,-70.6200], vertM:675, vertFt:2215, trails:'25+',
+    coords:[47.2747,-70.6200], vertM:675, vertFt:2215, trailsLabel:'25+',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Chairlift + gondola', fr:'Télésiège + télécabine'},
     badges:['loam'],
@@ -2161,12 +2198,12 @@ const PARKS = [
           fr:'Surplombe le fleuve Saint-Laurent avec la plus grande dénivellation côtière en Amérique du Nord orientale. Parc de vélo ouvert en 2021.'},
     url:'https://www.lemassif.com/en/bike',
     mapUrl:'https://www.lemassif.com/en/bike',
-    trailNum:25, trailKm:40, trailKmEst:true },
+    trailCount:25, trailKm:40, trailKmEst:true },
 
   { id:19, province:'QC', slug:'campfortune',
     name:{en:'Camp Fortune Bike Park', fr:'Parc de vélo Camp Fortune'},
     city:{en:'Chelsea, QC (Gatineau Park, near Ottawa)', fr:"Chelsea, QC (Parc de la Gatineau, près d'Ottawa)"},
-    coords:[45.5280,-75.8720], vertM:183, vertFt:600, trails:'15+',
+    coords:[45.5280,-75.8720], vertM:183, vertFt:600, trailsLabel:'15+',
     season:{en:'May – October (Wed + weekends)', fr:'Mai – octobre (mer. + fins de semaine)'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:[],
@@ -2174,12 +2211,12 @@ const PARKS = [
           fr:"Situé dans le parc de la Gatineau — le vélo avec remontée le plus proche de la région d'Ottawa/Gatineau."},
     url:'https://campfortune.com/en/biking/',
     mapUrl:'https://www.trailforks.com/region/camp-fortune/',
-    trailNum:15, trailKm:24, trailKmEst:true },
+    trailCount:15, trailKm:24, trailKmEst:true },
 
   { id:20, province:'QC', slug:'montcalm',
     name:{en:'Montcalm Bike Park', fr:'Parc de vélo Montcalm'},
     city:{en:'Rawdon, QC (Lanaudière)', fr:'Rawdon, QC (Lanaudière)'},
-    coords:[46.0658,-73.6902], vertM:126, vertFt:413, trails:'18',
+    coords:[46.0658,-73.6902], vertM:126, vertFt:413, trailsLabel:'18',
     season:{en:'July – October (weekends)', fr:'Juillet – octobre (fins de semaine)'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:[],
@@ -2187,12 +2224,12 @@ const PARKS = [
           fr:'9 sentiers de descente + 9 XC/enduro. Pumptrack et zone habiletés au départ. Fins de semaine à partir de juillet.'},
     url:'https://skimontcalm.com/en/tickets-and-passes/mountain-biking/',
     mapUrl:'https://skimontcalm.com/en/maps/mountain-biking/',
-    trailNum:18, trailKm:14, trailKmEst:true },
+    trailCount:18, trailKm:14, trailKmEst:true },
 
   { id:21, province:'QC', slug:'saintsauveur',
     name:{en:'Sommet Saint-Sauveur Bike Park', fr:'Parc de vélo Sommet Saint-Sauveur'},
     city:{en:'Saint-Sauveur, QC (Versant Avila)', fr:'Saint-Sauveur, QC (Versant Avila)'},
-    coords:[45.8987,-74.1680], vertM:180, vertFt:591, trails:'11',
+    coords:[45.8987,-74.1680], vertM:180, vertFt:591, trailsLabel:'11',
     season:{en:'Summer – Fall', fr:'Été – automne'},
     lift:{en:'High-speed chairlift', fr:'Télésiège à grande vitesse'},
     badges:[],
@@ -2200,12 +2237,12 @@ const PARKS = [
           fr:"Anciennement MSS Bike Park (Mont-Avila). Repris par Sommet Saint-Sauveur en 2024. Env. 40 min au nord de Montréal."},
     url:'https://www.sommetsaintsauveur.com/en/',
     mapUrl:'https://www.trailforks.com/region/sommet-saint-sauveur/',
-    trailNum:11, trailKm:10, trailKmEst:true },
+    trailCount:11, trailKm:10, trailKmEst:true },
 
   { id:22, province:'QC', slug:'mbpark',
     name:{en:'MbPark / Mont Blanc', fr:'MbPark / Mont Blanc'},
     city:{en:'Saint-Faustin-Lac-Carré, QC (Laurentians)', fr:'Saint-Faustin-Lac-Carré, QC (Laurentides)'},
-    coords:[46.0820,-74.4540], vertM:200, vertFt:656, trails:'15+',
+    coords:[46.0820,-74.4540], vertM:200, vertFt:656, trailsLabel:'15+',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:['gl'],
@@ -2213,12 +2250,12 @@ const PARKS = [
           fr:"Conçu et construit par Gravity Logic. Ouvert en 2023 dans les Laurentides, à une heure au nord de Montréal."},
     url:'https://mbpark.ca/',
     mapUrl:'https://www.trailforks.com/region/mbpark/',
-    trailNum:15, trailKm:20, trailKmEst:true },
+    trailCount:15, trailKm:20, trailKmEst:true },
 
   { id:23, province:'QC', slug:'montsutton',
     name:{en:'Mont Sutton', fr:'Mont Sutton'},
     city:{en:'Sutton, QC (Eastern Townships)', fr:"Sutton, QC (Cantons-de-l'Est)"},
-    coords:[45.1042,-72.5581], vertM:568, vertFt:1864, trails:'20+',
+    coords:[45.1042,-72.5581], vertM:568, vertFt:1864, trailsLabel:'20+',
     season:{en:'June – October (daily mid-summer; weekends spring/fall)', fr:'Juin – octobre (quotidien en milieu d\'été ; fins de semaine printemps/automne)'},
     lift:{en:'Chairlift (limited rides, $18 CAD/trip)', fr:'Télésiège (accès limité, 18 $ CA/trajet)'},
     badges:['lim'],
@@ -2226,12 +2263,12 @@ const PARKS = [
           fr:"ADN XC/enduro — le resort indique explicitement ne pas viser le vélo de descente (DH). Télésiège disponible au trajet pour économiser des forces. Pas un parc DH dédié."},
     url:'https://montsutton.com/en/activity/mountain-bike/',
     mapUrl:'https://www.trailforks.com/region/mont-sutton/',
-    trailNum:20, trailKm:30, trailKmEst:true },
+    trailCount:20, trailKm:30, trailKmEst:true },
 
   { id:28, province:'QC', slug:'velomsm',
     name:{en:'Vélo MSM', fr:'Vélo MSM'},
     city:{en:'Lac-Sainte-Marie, QC (near Ottawa)', fr:"Lac-Sainte-Marie, QC (près d'Ottawa)"},
-    coords:[45.9376,-75.8646], vertM:381, vertFt:1250, trails:'45+',
+    coords:[45.9376,-75.8646], vertM:381, vertFt:1250, trailsLabel:'45+',
     season:{en:'May – October', fr:'Mai – octobre'},
     lift:{en:'Chairlift (Mont Ste-Marie ski resort — operating days uncertain)', fr:'Télésiège (station Mont Ste-Marie — horaire incertain)'},
     badges:['loam','lim'],
@@ -2239,13 +2276,13 @@ const PARKS = [
           fr:"Réseau de sentiers géré par des bénévoles au Mont Ste-Marie, à environ une heure d'Ottawa/Gatineau. S'est joint au Loam Pass pour la saison 2026. L'accès par remontée est incertain : les journées de remontée sont gérées par la direction de la station <a href=\"https://montstemarie.com/en/\" target=\"_blank\" rel=\"noopener\">Mont Ste-Marie</a>, et non par le groupe bénévole Vélo MSM qui entretient les sentiers. Confirmez le fonctionnement de la remontée avant votre visite — consultez <a href=\"https://www.montstemarie.com\" target=\"_blank\" rel=\"noopener\">montstemarie.com</a> ou écrivez à <a href=\"mailto:info@montstemarie.com\">info@montstemarie.com</a>."},
     url:'https://www.velomsm.com/en/',
     mapUrl:'https://www.trailforks.com/region/velo-msm/',
-    trailNum:45, trailKm:45, trailKmEst:true },
+    trailCount:45, trailKm:45, trailKmEst:true },
 
   // ─── NEW BRUNSWICK ──────────────────────────────────────────────────
   { id:24, province:'NB', slug:'sugarloaf',
     name:{en:'Parc-Vélo Sugarloaf', fr:'Parc-Vélo Sugarloaf'},
     city:{en:'Campbellton, NB', fr:'Campbellton, N.-B.'},
-    coords:[48.0047,-66.6776], vertM:114, vertFt:374, trails:'15+',
+    coords:[48.0047,-66.6776], vertM:114, vertFt:374, trailsLabel:'15+',
     season:{en:'June – October', fr:'Juin – octobre'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:['gl'],
@@ -2253,12 +2290,12 @@ const PARKS = [
           fr:"Premier parc de vélo avec remontée au Canada atlantique (~2008). Conçu et construit par Gravity Logic dans le parc provincial Sugarloaf."},
     url:'https://parcvelo.ca/',
     mapUrl:'https://www.trailforks.com/region/sugarloaf-provincial-park/',
-    trailNum:15, trailKm:43, trailKmEst:true },
+    trailCount:15, trailKm:43, trailKmEst:true },
 
   { id:25, province:'NB', slug:'poley',
     name:{en:'Poley Mountain Bike Park', fr:'Parc de vélo Poley Mountain'},
     city:{en:'Sussex, NB', fr:'Sussex, N.-B.'},
-    coords:[45.7334,-65.5336], vertM:200, vertFt:656, trails:'15+',
+    coords:[45.7334,-65.5336], vertM:200, vertFt:656, trailsLabel:'15+',
     season:{en:'June – September', fr:'Juin – septembre'},
     lift:{en:'Triple chairlift', fr:'Triple télésiège'},
     badges:['kodiak','comm'],
@@ -2266,13 +2303,13 @@ const PARKS = [
           fr:'OBNL de propriété communautaire. Construit par Kodiak Trail Works. Établi en 2020 env.'},
     url:'https://poleymtn.ca/',
     mapUrl:'https://www.trailforks.com/region/poley-mountain/',
-    trailNum:15, trailKm:20, trailKmEst:true },
+    trailCount:15, trailKm:20, trailKmEst:true },
 
   // ─── NOVA SCOTIA ────────────────────────────────────────────────────
   { id:26, province:'NS', slug:'wentworth',
     name:{en:'Wentworth Bike Park', fr:'Parc de vélo de Wentworth'},
     city:{en:'Wentworth Valley, NS', fr:'Vallée de Wentworth, N.-É.'},
-    coords:[45.6236,-63.5641], vertM:249, vertFt:817, trails:'20+',
+    coords:[45.6236,-63.5641], vertM:249, vertFt:817, trailsLabel:'20+',
     season:{en:'June – October (Fri – Sun + holiday Mon)', fr:'Juin – octobre (ven. – dim. + lun. fériés)'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:['kodiak'],
@@ -2280,13 +2317,13 @@ const PARKS = [
           fr:"Seul parc de vélo avec remontée en Nouvelle-Écosse. Construit par Kodiak Trail Works."},
     url:'https://wentworthvalley.ca/',
     mapUrl:'https://www.trailforks.com/region/wentworth-valley/',
-    trailNum:20, trailKm:22, trailKmEst:true },
+    trailCount:20, trailKm:22, trailKmEst:true },
 
   // ─── YUKON ──────────────────────────────────────────────────────────
   { id:27, province:'YK', slug:'sima',
     name:{en:'Mount Sima Bike Park', fr:'Parc de vélo du mont Sima'},
     city:{en:'Whitehorse, YK', fr:'Whitehorse, YK'},
-    coords:[60.7600,-135.0700], vertM:318, vertFt:1043, trails:'10+',
+    coords:[60.7600,-135.0700], vertM:318, vertFt:1043, trailsLabel:'10+',
     season:{en:'July – August (Wed + alternating Sat)', fr:'Juillet – août (mer. + sam. en alternance)'},
     lift:{en:'Chairlift', fr:'Télésiège'},
     badges:['comm'],
@@ -2294,23 +2331,136 @@ const PARKS = [
           fr:"Le parc de vélo avec remontée le plus au nord du Canada. Horaire très limité — vérifier les jours d'opération avant de planifier une visite."},
     url:'https://mountsima.com/',
     mapUrl:'https://www.trailforks.com/region/mount-sima/',
-    trailNum:10, trailKm:14, trailKmEst:true },
+    trailCount:10, trailKm:14, trailKmEst:true },
 ];
 
-const PROVINCE_ORDER = ['BC','QC','ON','AB','NB','NS','YK'];
+/* ══════════════════════════════════════════════════ PROVINCE REGISTRY
+   Everything the app knows about a province lives in one entry. This used to
+   be four separate objects (PROVINCE_ORDER, PROV_COLORS, PROV_BOUNDS and a
+   provNames block inside each language) scattered across three parts of the
+   file, so adding a province meant four edits and forgetting the colour one
+   failed silently into the fallback.
 
-/* ══════════════════════════════════════════════════ VERT FORMATTER */
-function fmtVert(park) {
-  const m = park.vertM, ft = park.vertFt;
-  const mStr = m.toLocaleString() + '\u202fm';
-  const ftStr = ft.toLocaleString() + '\u202fft';
+   Array order is display order — accordions, the legend and the mountain
+   picker all follow it.
+
+   code    — matches park.province in PARKS.
+   name    — full name, shown in the legend and accordion headers.
+   abbr    — short form for the map zoom button ("C.-B." in French).
+   color   — marker/bar colour. A data encoding, NOT a theme colour: it stays
+             constant across all schemes so green always means BC.
+   bounds  — [[south, west], [north, east]] for the map fitBounds call.
+   zoomBtn — true puts a shortcut button in the map toolbar. Flipping this
+             is now the whole job; the old hand-written buttons needed edits
+             in three places (HTML, translations, and a lookup in zoomMap). */
+const PROVINCES = [
+  { code:'BC', zoomBtn:true,  color:'#4E8B2E', bounds:[[48.3,-139.1],[60.0,-114.0]],
+    name:{en:'British Columbia', fr:'Colombie-Britannique'}, abbr:{en:'BC', fr:'C.-B.'} },
+  { code:'QC', zoomBtn:true,  color:'#C4402A', bounds:[[44.5, -79.5],[55.0, -57.5]],
+    name:{en:'Québec',           fr:'Québec'},              abbr:{en:'QC', fr:'QC'} },
+  { code:'ON', zoomBtn:false, color:'#4A8CAD', bounds:[[42.0, -95.0],[57.0, -74.0]],
+    name:{en:'Ontario',          fr:'Ontario'},             abbr:{en:'ON', fr:'ON'} },
+  { code:'AB', zoomBtn:false, color:'#C49A3E', bounds:[[49.0,-120.0],[60.0,-110.0]],
+    name:{en:'Alberta',          fr:'Alberta'},             abbr:{en:'AB', fr:'AB'} },
+  { code:'NB', zoomBtn:false, color:'#7A5A20', bounds:[[45.0, -67.0],[48.2, -63.5]],
+    name:{en:'New Brunswick',    fr:'Nouveau-Brunswick'},   abbr:{en:'NB', fr:'N.-B.'} },
+  { code:'NS', zoomBtn:false, color:'#3A8A7A', bounds:[[43.4, -66.5],[47.0, -59.6]],
+    name:{en:'Nova Scotia',      fr:'Nouvelle-Écosse'},     abbr:{en:'NS', fr:'N.-É.'} },
+  { code:'YK', zoomBtn:false, color:'#C49A3E', bounds:[[59.0,-141.0],[70.0,-120.0]],
+    name:{en:'Yukon',            fr:'Yukon'},               abbr:{en:'YK', fr:'YK'} }
+];
+
+/* Derived lookups — build these once rather than scanning the array per call. */
+const PROVINCE_ORDER = PROVINCES.map(function(p) { return p.code; });
+const PROVINCE_BY_CODE = PROVINCES.reduce(function(acc, p) { acc[p.code] = p; return acc; }, {});
+
+/* Shown if a park ever carries a province code with no registry entry —
+   a visible "you forgot to add the province" signal rather than a crash. */
+const PROV_COLOR_FALLBACK = '#C49A3E';
+
+function province(code)     { return PROVINCE_BY_CODE[code] || null; }
+function provColor(code)    { var p = province(code); return p ? p.color : PROV_COLOR_FALLBACK; }
+function provBounds(code)   { var p = province(code); return p ? p.bounds : null; }
+function provName(code)     { var p = province(code); return p ? (p.name[lang] || p.name.en) : code; }
+function provAbbr(code)     { var p = province(code); return p ? (p.abbr[lang] || p.abbr.en) : code; }
+
+
+/* ══════════════════════════════════════════════════ DERIVED COUNTS
+   Every park/province total shown in prose is computed from PARKS at render
+   time. These numbers used to be typed by hand in ten places; they were all
+   correct, but adding park #29 would have silently falsified every one of
+   them with no error to catch it. */
+function parkCount()            { return PARKS.length; }
+function parkCountIn(prov)      { return PARKS.filter(function(p) { return p.province === prov; }).length; }
+function parkCountWithBadge(b)  { return PARKS.filter(function(p) { return p.badges.indexOf(b) !== -1; }).length; }
+function provinceCount()        { return PROVINCE_ORDER.filter(function(p) { return parkCountIn(p) > 0; }).length; }
+
+/* Replaces {token} placeholders in a translation string.
+   fill('{n} parks', {n: 28}) → '28 parks' */
+function fill(template, values) {
+  return String(template).replace(/\{(\w+)\}/g, function(match, key) {
+    return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : match;
+  });
+}
+
+/* Small numbers read better spelled out in prose ("six of the 28 parks"),
+   which is also standard style: words below ten, numerals from ten up.
+   Anything outside this range falls back to digits. */
+const NUM_WORDS = {
+  en: ['zero','one','two','three','four','five','six','seven','eight','nine'],
+  fr: ['zéro','un','deux','trois','quatre','cinq','six','sept','huit','neuf']
+};
+function numWord(n) {
+  var words = NUM_WORDS[lang] || NUM_WORDS.en;
+  return (n >= 0 && n < words.length) ? words[n] : String(n);
+}
+
+/* ══════════════════════════════════════════════════ UNIT FORMATTERS
+   The metric/imperial/both branch used to be written out five times, and had
+   already drifted: the map popups used plain spaces while everything else
+   used a narrow no-break space. All surfaces now share these two functions,
+   so a change to spacing or wording lands everywhere at once.
+
+   \u202f = narrow no-break space, keeps "1,508" and "m" from splitting
+            across a line while staying visually tighter than a full space
+   \u2009 = thin space, used around the "/" in "both" mode                */
+const NNBSP = '\u202f';
+const THINSP = '\u2009';
+const KM_TO_MILES = 0.621371;
+
+/* Plain-text vertical drop — for SVG labels, map popups, titles. */
+function formatVert(park) {
+  const mStr  = park.vertM.toLocaleString() + NNBSP + 'm';
+  const ftStr = park.vertFt.toLocaleString() + NNBSP + 'ft';
+  if (units === 'metric')   return mStr;
+  if (units === 'imperial') return ftStr;
+  return mStr + THINSP + '/' + THINSP + ftStr;
+}
+
+/* Same value, wrapped in the spans the park cards style.
+   Note the separator differs from formatVert() on purpose: here the " / " sits
+   in a .vert-sep span whose spacing is controlled by CSS, so it uses plain
+   spaces. formatVert() has no CSS to lean on and uses thin spaces instead. */
+function formatVertHtml(park) {
+  const mStr  = park.vertM.toLocaleString() + NNBSP + 'm';
+  const ftStr = park.vertFt.toLocaleString() + NNBSP + 'ft';
   if (units === 'metric')   return `<span class="vert-m">${mStr}</span>`;
   if (units === 'imperial') return `<span class="vert-ft">${ftStr}</span>`;
   return `<span class="vert-m">${mStr}</span><span class="vert-sep"> / </span><span class="vert-ft">${ftStr}</span>`;
 }
 
+/* Trail distance. `est` prefixes a tilde for parks whose km figure is an
+   estimate rather than a published number (park.trailKmEst). */
+function formatTrailDistance(km, est) {
+  const prefix = est ? '~' : '';
+  const mi = Math.round(km * KM_TO_MILES);
+  if (units === 'metric')   return prefix + km + ' km';
+  if (units === 'imperial') return prefix + mi + ' mi';
+  return prefix + km + ' km' + THINSP + '/' + THINSP + mi + ' mi';
+}
+
 /* ══════════════════════════════════════════════════ BADGE RENDERER */
-function renderBadge(key, small) {
+function renderBadge(key) {
   const tx = T[lang];
   return `<span class="badge badge--${key}">${tx.badges[key]}</span>`;
 }
@@ -2341,11 +2491,11 @@ function renderCard(park) {
   <div class="card-stats">
     <div class="stat">
       <div class="stat-label">${tx.vert}</div>
-      <div class="stat-val">${fmtVert(park)}</div>
+      <div class="stat-val">${formatVertHtml(park)}</div>
     </div>
     <div class="stat">
       <div class="stat-label">${tx.trails}</div>
-      <div class="stat-val">${park.trails}</div>
+      <div class="stat-val">${park.trailsLabel}</div>
     </div>
     <div class="stat">
       <div class="stat-label">${tx.season}</div>
@@ -2380,7 +2530,7 @@ function getFilteredParks() {
 }
 
 /* ══════════════════════════════════════════════════ RENDER ACCORDIONS */
-function renderProvinces() {
+function renderParkAccordions() {
   const tx = T[lang];
   const filtered = getFilteredParks();
   const section = document.getElementById('provinces-section');
@@ -2398,7 +2548,7 @@ function renderProvinces() {
   PROVINCE_ORDER.forEach(pcode => {
     const parks = grouped[pcode];
     if (parks.length === 0) return;
-    const pname = tx.provNames[pcode] || pcode;
+    const pname = provName(pcode);
     const isFirst = pcode === 'BC' && !provFilter && !search;
     html += `
 <details class="province-accordion" ${isFirst ? 'open' : ''}>
@@ -2426,7 +2576,7 @@ function renderProvinces() {
 /* ══════════════════════════════════════════════════ BADGE KEY */
 function renderBadgeKey() {
   const tx = T[lang];
-  const keys = ['new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
+  const keys = BADGE_ORDER;
   let html = '';
   keys.forEach(k => {
     html += `
@@ -2485,7 +2635,7 @@ function renderProvOptions() {
   const cur = provFilter;
   let opts = `<option value="">${tx.allProvs}</option>`;
   PROVINCE_ORDER.forEach(p => {
-    opts += `<option value="${p}" ${cur===p?'selected':''}>${tx.provNames[p] || p}</option>`;
+    opts += `<option value="${p}" ${cur===p?'selected':''}>${provName(p)}</option>`;
   });
   sel.innerHTML = opts;
 }
@@ -2500,6 +2650,32 @@ var CABLE_CAR_ICON = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24
   + '<rect width="16" height="10" x="4" y="12" rx="3"/><path d="M9 12v5"/><path d="M15 12v5"/>'
   + '<path d="M4 17h16"/></svg>';
 
+/* Builds the map toolbar: a Canada-wide button plus one per province flagged
+   zoomBtn:true in PROVINCES. Labels and counts are derived, so a province
+   button can never show a stale count or a name that disagrees with the
+   legend. Preserves whichever button was active across re-renders (the
+   language toggle calls this). */
+function renderZoomButtons() {
+  var wrap = document.getElementById('map-zoom-btns');
+  if (!wrap) return;
+  var tx = T[lang];
+  var activeEl = wrap.querySelector('.map-zoom-btn.active');
+  var active = activeEl ? activeEl.dataset.zoom : 'canada';
+
+  var html = '<button class="map-zoom-btn" data-zoom="canada" onclick="zoomMap(\'canada\')">'
+           + tx.btnCanada + '</button>';
+  PROVINCES.filter(function(p) { return p.zoomBtn; }).forEach(function(p) {
+    html += '<button class="map-zoom-btn" data-zoom="' + p.code + '"'
+         +  ' onclick="zoomMap(\'' + p.code + '\')">'
+         +  provAbbr(p.code) + ' (' + parkCountIn(p.code) + ')</button>';
+  });
+  wrap.innerHTML = html;
+
+  var restore = wrap.querySelector('.map-zoom-btn[data-zoom="' + active + '"]')
+             || wrap.querySelector('.map-zoom-btn');
+  if (restore) restore.classList.add('active');
+}
+
 function applyStaticText() {
   const tx = T[lang];
   const app = document.getElementById('app');
@@ -2511,8 +2687,20 @@ function applyStaticText() {
   document.getElementById('hero-title').innerHTML = lang === 'fr'
     ? `Guide des <em>parcs vélo</em> du Canada`
     : `Canada <em>MTB Parks</em> Guide`;
-  document.getElementById('hero-pill-parks').textContent = tx.pillParks;
-  document.getElementById('hero-pill-provs').textContent = tx.pillProvs;
+  /* Counts are computed from PARKS, never typed by hand.
+     n = total parks, p = provinces/territories with at least one park,
+     bc/qc = per-province totals for the map zoom buttons,
+     glWord = parks designed by Gravity Logic, spelled out for prose. */
+  const counts = {
+    n:  parkCount(),
+    p:  provinceCount(),
+    bc: parkCountIn('BC'),
+    qc: parkCountIn('QC'),
+    glWord: numWord(parkCountWithBadge('gl'))
+  };
+
+  document.getElementById('hero-pill-parks').textContent = fill(tx.pillParks, counts);
+  document.getElementById('hero-pill-provs').textContent = fill(tx.pillProvs, counts);
   document.getElementById('origin-eyebrow').textContent = tx.originEyebrow;
   document.getElementById('origin-title').textContent = tx.originTitle;
   document.getElementById('tl-y1').textContent = tx.tl1;
@@ -2520,16 +2708,15 @@ function applyStaticText() {
   document.getElementById('tl-y2').textContent = tx.tl2;
   document.getElementById('tl-l2').textContent = tx.tl2l;
   document.getElementById('tl-y3').textContent = tx.tl3;
-  document.getElementById('tl-l3').textContent = tx.tl3l;
-  document.getElementById('origin-text').innerHTML = tx.originText;
+  document.getElementById('tl-l3').textContent = fill(tx.tl3l, counts);
+  document.getElementById('origin-text').innerHTML = fill(tx.originText, counts);
   document.getElementById('search-input').placeholder = tx.searchPH;
   document.getElementById('bk-label').textContent = tx.bkLabel;
   document.getElementById('mv-label').textContent = tx.mvLabel;
-  document.getElementById('btn-canada').textContent = tx.btnCanada;
-  document.getElementById('btn-bc').textContent = tx.btnBC;
-  document.getElementById('btn-qc').textContent = tx.btnQC;
+  renderZoomButtons();
   document.getElementById('map-note').innerHTML = CABLE_CAR_ICON + tx.mapNote;
   document.getElementById('footer-note').innerHTML = tx.footerNote;
+  localizeThemeDots();
 
   // units dropdown labels
   const us = document.getElementById('units-toggle');
@@ -2544,7 +2731,7 @@ function renderAll() {
   renderHeroMountains();
   renderProvOptions();
   renderBadgeKey();
-  renderProvinces();
+  renderParkAccordions();
   renderProvLegend();
   updateMapPopups();
   if (mapView === 'stats') renderStats();
@@ -2590,7 +2777,7 @@ function toggleView(view) {
 }
 
 /* ══════════════════════════════════════════════════ STATS WIDGET */
-function setSort(key) {
+function setStatsSort(key) {
   statsSort = key;
   if (key !== 'badge') statsBadge = null; // clear badge filter when switching away
   renderStats();
@@ -2598,6 +2785,75 @@ function setSort(key) {
 function setStatsBadge(key) {
   statsBadge = (statsBadge === key) ? null : key; // toggle
   renderStats();
+}
+
+/* ══════════════════════════════════════════════════ METRIC REGISTRY
+   The three graphs (stats bars, mountain skyline, hero skyline) each used to
+   inline their own "pull a number off a park, find the max, turn it into a
+   ratio" logic. That meant a fourth graph — or plotting a new field like
+   annual visitors or lift count — was a fourth copy of the same code.
+
+   A metric is just: how to read the number, how to label it, and where its
+   translated name lives. Adding one is an entry here; graphs then accept it
+   as a parameter rather than hardcoding vertM.
+
+   get    — the raw comparable number (used for sorting and bar scaling)
+   format — the display string, routed through the shared unit formatters
+   label  — translated axis/sort label for the current language            */
+const METRICS = {
+  vert: {
+    get:    function(p) { return p.vertM; },
+    format: function(p) { return formatVert(p); },
+    label:  function(tx) { return tx.sortVert; }
+  },
+  trails: {
+    get:    function(p) { return p.trailKm; },
+    format: function(p) { return formatTrailDistance(p.trailKm, p.trailKmEst); },
+    label:  function(tx) { return tx.sortTrails; }
+  }
+};
+const DEFAULT_METRIC = 'vert';
+
+/* Which metric each skyline plots. Both are vertical drop today; changing
+   either to 'trails' (or any future METRICS key) is now a one-word edit
+   rather than a rewrite of the render function. */
+const HERO_METRIC = 'vert';
+const MOUNTAIN_METRIC = 'vert';
+
+/* Resolve a metric key to its definition. Falls back to vertical drop —
+   which is also what the 'badge' sort mode relies on, since badge is a
+   filter rather than a metric of its own. */
+function metricFor(key) {
+  return METRICS[key] || METRICS[DEFAULT_METRIC];
+}
+
+/* Largest value of `metric` across `parks`. Returns 1 for an empty list so
+   callers can divide by it without guarding against 0. */
+function maxOf(parks, metric) {
+  if (!parks.length) return 1;
+  var max = Math.max.apply(null, parks.map(metric.get));
+  return max > 0 ? max : 1;
+}
+
+/* Copy of `parks` sorted largest-first by `metric`. Non-mutating: the source
+   arrays (PARKS, mountainSelected) keep their own meaningful order. */
+function sortByMetric(parks, metric) {
+  return parks.slice().sort(function(a, b) { return metric.get(b) - metric.get(a); });
+}
+
+/* Proportional size for one bar/peak.
+   `minSize` is a visual floor, not a data adjustment: without it, Sir Sam's
+   (90 m) next to Whistler (1,508 m) would render ~6% of full height and be
+   effectively invisible/unclickable. Everything above the floor stays
+   strictly proportional. */
+function scaleToSize(value, max, maxSize, minSize) {
+  return Math.max(minSize, (value / max) * maxSize);
+}
+
+/* Parks ordered west → east by longitude — the order both skylines use so
+   BC lands leftmost and the Maritimes rightmost, matching the map. */
+function sortWestToEast(parks) {
+  return parks.slice().sort(function(a, b) { return a.coords[1] - b.coords[1]; });
 }
 
 function renderStats() {
@@ -2613,42 +2869,27 @@ function renderStats() {
     });
   }
 
-  /* sort: badge mode always sorts by vert */
-  var sorted = filtered.slice().sort(function(a, b) {
-    return statsSort === 'trails' ? b.trailKm - a.trailKm : b.vertM - a.vertM;
-  });
-  var maxVal = sorted.length ? Math.max.apply(null, sorted.map(function(p) {
-    return statsSort === 'trails' ? p.trailKm : p.vertM;
-  })) : 1;
-
-  /* format display value honouring units toggle */
-  function fmtVal(p) {
-    var est = p.trailKmEst ? '~' : '';
-    if (statsSort === 'trails') {
-      var km = p.trailKm, mi = Math.round(km * 0.621371);
-      if (units === 'metric')   return est + km + ' km';
-      if (units === 'imperial') return est + mi + ' mi';
-      return est + km + ' km\u2009/\u2009' + mi + ' mi';
-    }
-    /* vertical */
-    if (units === 'metric')   return p.vertM.toLocaleString() + '\u202fm';
-    if (units === 'imperial') return p.vertFt.toLocaleString() + '\u202fft';
-    return p.vertM.toLocaleString() + '\u202fm\u2009/\u2009' + p.vertFt.toLocaleString() + '\u202fft';
-  }
+  /* Active metric drives sorting, bar scaling and value labels alike.
+     'badge' is a filter, not a metric, so metricFor() falls back to vert. */
+  var metric = metricFor(statsSort);
+  var sorted = sortByMetric(filtered, metric);
+  var maxVal = maxOf(sorted, metric);
 
   /* ── Sort dropdown ── */
   var ctrlHtml = '<div class="stats-controls">'
     + '<label class="stats-ctrl-label" for="stats-sort-sel">' + tx.statsSort + '</label>'
-    + '<select id="stats-sort-sel" class="stats-sort-select" onchange="setSort(this.value)">'
-    + '<option value="vert"'   + (statsSort==='vert'   ?' selected':'') + '>' + tx.sortVert   + '</option>'
-    + '<option value="trails"' + (statsSort==='trails' ?' selected':'') + '>' + tx.sortTrails + '</option>'
-    + '<option value="badge"'  + (statsSort==='badge'  ?' selected':'') + '>' + tx.sortBadge  + '</option>'
+    + '<select id="stats-sort-sel" class="stats-sort-select" onchange="setStatsSort(this.value)">'
+    + Object.keys(METRICS).map(function(key) {
+        return '<option value="' + key + '"' + (statsSort === key ? ' selected' : '') + '>'
+             + metricFor(key).label(tx) + '</option>';
+      }).join('')
+    + '<option value="badge"' + (statsSort==='badge' ?' selected':'') + '>' + tx.sortBadge + '</option>'
     + '</select>'
     + '</div>';
 
   /* ── Badge filter row (only when badge sort selected) ── */
   if (statsSort === 'badge') {
-    var badgeKeys = ['new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
+    var badgeKeys = BADGE_ORDER;
     ctrlHtml += '<div class="stats-badge-row">';
     badgeKeys.forEach(function(k) {
       var sel = statsBadge === k;
@@ -2670,9 +2911,10 @@ function renderStats() {
   /* ── Bars ── */
   var barsHtml = '<div class="stats-bars">';
   sorted.forEach(function(park) {
-    var val   = statsSort === 'trails' ? park.trailKm : park.vertM;
-    var pct   = maxVal > 0 ? (val / maxVal * 100).toFixed(1) : 0;
-    var color = PROV_COLORS[park.province] || '#C49A3E';
+    /* percentage of the widest bar; 0.5% floor keeps the smallest park
+       visible as a sliver rather than collapsing to nothing */
+    var pct   = scaleToSize(metric.get(park), maxVal, 100, 0.5).toFixed(1);
+    var color = provColor(park.province);
     var name  = park.name[lang] || park.name.en;
     barsHtml += '<div class="stat-row">'
       + '<div class="stat-row-label">'
@@ -2682,7 +2924,7 @@ function renderStats() {
       + '<div class="stat-row-bar-track">'
       + '<div class="stat-row-bar" style="width:' + pct + '%;background:' + color + '"></div>'
       + '</div>'
-      + '<div class="stat-row-val">' + fmtVal(park) + '</div>'
+      + '<div class="stat-row-val">' + metric.format(park) + '</div>'
       + '</div>';
   });
   barsHtml += '</div>';
@@ -2706,18 +2948,28 @@ function hexToRgba(hex, alpha) {
 function renderHeroMountains() {
   var el = document.getElementById('hero-mountains');
   if (!el || !PARKS.length) return;
-  var parks = PARKS.slice().sort(function(a, b) { return a.coords[1] - b.coords[1]; });
-  var H = 100, step = 40, hw = step * 0.95;
-  var W = parks.length * step;
-  var maxVert = Math.max.apply(null, parks.map(function(p) { return p.vertM; }));
+  var parks  = sortWestToEast(PARKS);
+  var metric = metricFor(HERO_METRIC);
+
+  /* SVG user units, not pixels — the viewBox is stretched to fit the hero by
+     preserveAspectRatio="none", so these only set relative proportions.
+       H         canvas height
+       STEP      horizontal spacing between peak centres
+       halfWidth 0.95 of a half-step, so neighbouring bases nearly touch
+       HEADROOM  units reserved at the top so the tallest peak isn't clipped
+       MIN_H     visual floor (see scaleToSize) */
+  var H = 100, STEP = 40, HEADROOM = 4, MIN_H = 10;
+  var halfWidth = STEP * 0.95;
+  var W = parks.length * STEP;
+  var maxVal = maxOf(parks, metric);
   var svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" '
           + 'xmlns="http://www.w3.org/2000/svg">';
   parks.forEach(function(park, i) {
-    var color = PROV_COLORS[park.province] || '#C49A3E';
-    var h  = Math.max(10, (park.vertM / maxVert) * (H - 4));
-    var cx = i * step + step / 2;
+    var color = provColor(park.province);
+    var h  = scaleToSize(metric.get(park), maxVal, H - HEADROOM, MIN_H);
+    var cx = i * STEP + STEP / 2;
     svg += '<polygon points="'
-        + (cx - hw) + ',' + H + ' ' + cx + ',' + (H - h) + ' ' + (cx + hw) + ',' + H
+        + (cx - halfWidth) + ',' + H + ' ' + cx + ',' + (H - h) + ' ' + (cx + halfWidth) + ',' + H
         + '" fill="' + hexToRgba(color, 0.20) + '"'
         + ' stroke="' + hexToRgba(color, 0.42) + '" stroke-width="1"'
         + ' vector-effect="non-scaling-stroke"/>';
@@ -2746,14 +2998,6 @@ function pickRandomMountains() {
   }
   remaining.slice(0, 5).forEach(function(p) { mountainSelected.push(p.id); });
   renderMountain();
-}
-
-/* vertical-drop label, honouring the metric/imperial/both units toggle
-   (mirrors the vertical branch of fmtVal() in renderStats) */
-function mountainVertLabel(park) {
-  if (units === 'metric')   return park.vertM.toLocaleString() + '\u202fm';
-  if (units === 'imperial') return park.vertFt.toLocaleString() + '\u202fft';
-  return park.vertM.toLocaleString() + '\u202fm\u2009/\u2009' + park.vertFt.toLocaleString() + '\u202fft';
 }
 
 function renderMountain() {
@@ -2785,17 +3029,19 @@ function renderMountain() {
     /* true to the map: sort west \u2192 east by actual longitude, so BC
        lands leftmost and Quebec/the Maritimes land rightmost regardless
        of the order parks were clicked in */
-    selectedParks.sort(function(a, b) { return a.coords[1] - b.coords[1]; });
-    var maxVert = Math.max.apply(null, selectedParks.map(function(p) { return p.vertM; }));
-    var maxHeightPx = 190;
+    selectedParks = sortWestToEast(selectedParks);
+    var metric = metricFor(MOUNTAIN_METRIC);
+    var maxVal = maxOf(selectedParks, metric);
+    var MAX_PEAK_PX = 190;   // tallest peak height; tuned to the widget's box
+    var MIN_PEAK_PX = 14;    // visual floor so small parks stay clickable
     skylineHtml = '<div class="mountain-skyline" title="' + tx.mountainClickHint + '">';
     selectedParks.forEach(function(park) {
-      var color   = PROV_COLORS[park.province] || '#C49A3E';
-      var heightPx = Math.max(14, Math.round((park.vertM / maxVert) * maxHeightPx));
+      var color   = provColor(park.province);
+      var heightPx = Math.round(scaleToSize(metric.get(park), maxVal, MAX_PEAK_PX, MIN_PEAK_PX));
       var name = park.name[lang] || park.name.en;
       skylineHtml += '<div class="mountain-peak" style="--pc-fill:' + hexToRgba(color, 0.32) + ';--pc-line:' + color + '"'
         + ' onclick="toggleMountainPark(' + park.id + ')" title="' + name + ' \u2014 ' + tx.mountainClickHint + '">'
-        + '<span class="mountain-value">' + mountainVertLabel(park) + '</span>'
+        + '<span class="mountain-value">' + metric.format(park) + '</span>'
         + '<div class="mountain-shape" style="height:' + heightPx + 'px"></div>'
         + '<span class="mountain-tick" title="' + name + '">' + name + '</span>'
         + '</div>';
@@ -2808,16 +3054,16 @@ function renderMountain() {
   PROVINCE_ORDER.forEach(function(prov) {
     var group = PARKS.filter(function(p) { return p.province === prov; });
     if (!group.length) return;
-    pickerHtml += '<div class="mountain-group-label">' + (tx.provNames[prov] || prov) + '</div>';
+    pickerHtml += '<div class="mountain-group-label">' + provName(prov) + '</div>';
     pickerHtml += '<div class="mountain-chips">';
     group.forEach(function(park) {
-      var color = PROV_COLORS[park.province] || '#C49A3E';
+      var color = provColor(park.province);
       var sel   = mountainSelected.indexOf(park.id) !== -1;
       var name  = park.name[lang] || park.name.en;
       pickerHtml += '<button class="mountain-chip' + (sel ? ' selected' : '') + '"'
         + ' style="--pc-fill:' + hexToRgba(color, 0.32) + ';--pc-line:' + color + '"'
         + ' onclick="toggleMountainPark(' + park.id + ')">'
-        + name + ' \u00b7 ' + mountainVertLabel(park)
+        + name + ' \u00b7 ' + metricFor(MOUNTAIN_METRIC).format(park)
         + '</button>';
     });
     pickerHtml += '</div>';
@@ -2838,21 +3084,9 @@ function toggleMapSection() {
   btn.textContent = expanded ? '−' : '+';
   btn.setAttribute('aria-expanded', String(expanded));
   if (expanded && mapInstance) {
+    /* Leaflet caches container size; after un-hiding the panel it must be
+       told to re-measure. 100ms lets the CSS reflow settle first. */
     setTimeout(function() { mapInstance.invalidateSize(); }, 100);
-  }
-}
-
-function applyMobileDefaults() {
-  var mobile = window.innerWidth < 768;
-  /* Origin story: closed on mobile, open on desktop */
-  var od = document.getElementById('origin-details');
-  if (od && !mobile) od.setAttribute('open', '');
-  /* Map section: collapsed on mobile */
-  if (mobile) {
-    var body = document.getElementById('map-body');
-    var btn  = document.getElementById('map-collapse-btn');
-    if (body) body.hidden = true;
-    if (btn)  { btn.textContent = '+'; btn.setAttribute('aria-expanded', 'false'); }
   }
 }
 
@@ -2864,8 +3098,8 @@ function renderProvLegend() {
   var tx = T[lang];
   var html = '';
   PROVINCE_ORDER.forEach(function(p) {
-    var color = PROV_COLORS[p] || '#C49A3E';
-    var full  = tx.provNames[p] || p;
+    var color = provColor(p);
+    var full  = provName(p);
     html += '<span class="prov-legend-item" title="' + full + '">'
       + '<span class="prov-legend-dot" style="background:' + color + '"></span>'
       + full
@@ -2875,20 +3109,6 @@ function renderProvLegend() {
 }
 
 /* ══════════════════════════════════════════════════ MAP */
-const PROV_BOUNDS = {
-  BC:   [[48.3, -139.1], [60.0, -114.0]],
-  AB:   [[49.0, -120.0], [60.0, -110.0]],
-  ON:   [[42.0, -95.0],  [57.0, -74.0]],
-  QC:   [[44.5, -79.5],  [55.0, -57.5]],
-  NB:   [[45.0, -67.0],  [48.0, -63.5]],
-  NS:   [[43.4, -66.5],  [47.0, -59.6]],
-  YK:   [[59.0, -141.0], [70.0, -120.0]],
-};
-
-const PROV_COLORS = {
-  BC:'#4E8B2E', AB:'#C49A3E', ON:'#4A8CAD', QC:'#C4402A',
-  NB:'#7A5A20', NS:'#3A8A7A', YK:'#C49A3E'
-};
 
 /* ── Basemap handling ─────────────────────────────────────────
    NOTE: the previous tile URL used "dark_matter_nolabels", which is
@@ -2906,8 +3126,13 @@ let tileLayerRef = null;
 let tileErrorCount = 0;
 let usingFallbackTiles = false;
 
+/* Light vs dark tiles is now a property of the theme entry, not a hardcoded
+   id check — so a second light scheme automatically gets light tiles.
+   No data-theme attribute means the :root default (Boreal) is active. */
 function basemapForTheme() {
-  return (document.body.dataset.theme === 'alpine') ? BASEMAPS.light : BASEMAPS.dark;
+  var id = document.body.dataset.theme || BOREAL_THEME;
+  var t  = getTheme(id);
+  return BASEMAPS[(t && t.basemap) === 'light' ? 'light' : 'dark'];
 }
 
 function addBasemap(url, subs, attrib) {
@@ -2916,6 +3141,9 @@ function addBasemap(url, subs, attrib) {
   tileLayerRef.on('tileerror', function() {
     tileErrorCount++;
     // If CARTO can't be reached at all, drop to standard OSM tiles once
+    /* A handful of failed tiles is normal (edge of coverage, transient
+       network). Five-plus means CARTO itself is unreachable, so swap the
+       whole basemap to OpenStreetMap rather than show a blank map. */
     if (tileErrorCount > 5 && !usingFallbackTiles) {
       usingFallbackTiles = true;
       console.warn('CARTO tiles unreachable — falling back to OpenStreetMap tiles.');
@@ -2934,7 +3162,7 @@ function updateBasemapForTheme() {
 }
 
 function initMap() {
-  mapInstance = L.map('park-map', { zoomControl: true }).setView([56.0, -96.0], 4);
+  mapInstance = L.map('park-map', { zoomControl: true }).setView(MAP_HOME.center, MAP_HOME.zoom);
 
   addBasemap(basemapForTheme(), 'abcd',
     '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>');
@@ -2946,11 +3174,14 @@ function initMap() {
         iconSize: [32, 32], iconAnchor: [16, 16], className: ''
       });
     },
+    /* px radius within which markers merge into a cluster bubble. Leaflet's
+       default is 80, which over-merged the tightly packed Québec parks;
+       50 keeps them individually clickable at province zoom. */
     maxClusterRadius: 50
   });
 
   PARKS.forEach(park => {
-    const color = PROV_COLORS[park.province] || '#C49A3E';
+    const color = provColor(park.province);
     const icon = L.divIcon({
       html: `<div class="park-dot" style="background:${color};box-shadow:0 0 0 1.5px ${color}66,0 1px 4px rgba(0,0,0,0.5);"></div>`,
       iconSize: [12, 12], iconAnchor: [6, 6], popupAnchor: [0, -10], className: ''
@@ -2972,10 +3203,7 @@ function updateMapPopups() {
     const nm = park.name[lang] || park.name.en;
     const cy = park.city[lang] || park.city.en;
     const tx = T[lang];
-    let vertLine = '';
-    if (units === 'metric')   vertLine = `${park.vertM.toLocaleString()} m`;
-    else if (units === 'imperial') vertLine = `${park.vertFt.toLocaleString()} ft`;
-    else vertLine = `${park.vertM.toLocaleString()} m / ${park.vertFt.toLocaleString()} ft`;
+    const vertLine = formatVert(park);
 
     const badges = park.badges.map(b => renderBadge(b)).join(' ');
     m.bindPopup(`
@@ -2984,30 +3212,41 @@ function updateMapPopups() {
         <div style="font-size:11px;color:var(--text-dim);margin-bottom:6px;">${cy}</div>
         <div style="font-size:12px;color:var(--gold);font-weight:600;margin-bottom:4px;">${tx.vert}: ${vertLine}</div>
         ${badges ? `<div style="display:flex;flex-wrap:wrap;gap:3px;">${badges}</div>` : ''}
-      </div>`, { maxWidth: 240 });
+      </div>`, { maxWidth: 240 });   /* px — keeps popups inside the map on phones */
   });
 }
 
+/* Canada-wide default view. Named so zoomMap() and the "home" button agree. */
+const MAP_HOME = { center: [56.0, -96.0], zoom: 4 };
+
+/* Buttons are matched by data-zoom rather than a hand-maintained
+   {BC:'btn-bc'} lookup, so adding or removing one is purely a registry
+   change — no id table to keep in sync. */
 function zoomMap(target) {
   if (!mapInstance) return;
   document.querySelectorAll('.map-zoom-btn').forEach(b => b.classList.remove('active'));
+  var bounds = provBounds(target);
   if (target === 'canada') {
-    mapInstance.setView([56.0, -96.0], 4);
-    document.getElementById('btn-canada').classList.add('active');
-  } else if (PROV_BOUNDS[target]) {
-    mapInstance.fitBounds(PROV_BOUNDS[target], { padding: [30, 30] });
-    const btnId = {BC:'btn-bc', QC:'btn-qc'}[target];
-    var btnEl = btnId && document.getElementById(btnId);
-    if (btnEl) btnEl.classList.add('active');
+    mapInstance.setView(MAP_HOME.center, MAP_HOME.zoom);
+  } else if (bounds) {
+    /* 30px inset so markers on the edge aren't clipped by the map frame */
+    mapInstance.fitBounds(bounds, { padding: [30, 30] });
+  } else {
+    return;                                     // unknown target — leave the map alone
   }
+  var btn = document.querySelector('.map-zoom-btn[data-zoom="' + target + '"]');
+  if (btn) btn.classList.add('active');
 }
 
 function onProvClick(pcode) {
-  // small delay so the details element opens first
+  /* Deferred one tick past the <details> toggle: fitBounds measures the map
+     container, and measuring mid-expand gives the pre-open height. */
   setTimeout(() => {
     const parks = PARKS.filter(p => p.province === pcode);
     if (parks.length && mapInstance) {
       const bounds = L.latLngBounds(parks.map(p => p.coords));
+      /* Roomier inset than the zoom buttons use — a single province fills
+         less of the frame, so extra padding avoids an over-tight zoom. */
       mapInstance.fitBounds(bounds, { padding: [60, 60] });
     }
   }, 100);
@@ -3028,12 +3267,12 @@ document.getElementById('units-toggle').addEventListener('change', e => {
 
 document.getElementById('search-input').addEventListener('input', e => {
   search = e.target.value;
-  renderProvinces();
+  renderParkAccordions();
 });
 
 document.getElementById('prov-filter').addEventListener('change', e => {
   provFilter = e.target.value;
-  renderProvinces();
+  renderParkAccordions();
 });
 
 /* ══════════════════════════════════════════════════ INIT */
@@ -3064,31 +3303,63 @@ function syncUrlParams() {
   } catch (e) { /* history API unavailable (e.g. some file:// contexts) — skip */ }
 }
 
-/* ══════════════════════════════════════════════════ COLOR SCHEMES */
-const THEME_IDS = ['boreal', 'granite', 'maple', 'alpine'];
+/* ══════════════════════════════════════════════════ COLOR SCHEMES
+   All scheme data lives in the THEMES registry near the top of this script.
+   Everything below is derived from it. */
 const THEME_STORAGE_KEY = 'pmr-ca-parks-theme';
 const DEFAULT_THEME = 'alpine';   // Alpine is the default palette
+const BOREAL_THEME  = 'boreal';   // the :root palette — set by *removing* data-theme
+
+function getTheme(id) {
+  return THEMES.find(function(t) { return t.id === id; }) || null;
+}
+
+/* Paint the swatch buttons from THEMES. Called once at startup; the click
+   handler is delegated to the container so re-rendering can never orphan it. */
+function renderThemeDots() {
+  var wrap = document.getElementById('theme-dots');
+  if (!wrap) return;
+  wrap.innerHTML = THEMES.map(function(t) {
+    return '<button class="theme-dot" data-theme-id="' + t.id + '"'
+      + ' style="--dot-a:' + t.swatch[0] + ';--dot-b:' + t.swatch[1] + ';"'
+      + ' aria-label="' + t.label.en + ' theme · Thème ' + t.label.fr.toLowerCase() + '"'
+      + ' title="' + t.label[lang] + '"></button>';
+  }).join('');
+}
+
+/* Refresh just the tooltips when the language toggles — cheaper than a
+   re-render and leaves the .active class untouched. */
+function localizeThemeDots() {
+  document.querySelectorAll('.theme-dot').forEach(function(d) {
+    var t = getTheme(d.dataset.themeId);
+    if (t) d.title = t.label[lang];
+  });
+}
 
 function setTheme(id) {
-  if (THEME_IDS.indexOf(id) === -1) id = DEFAULT_THEME;
-  if (id === 'boreal') {
+  if (!getTheme(id)) id = DEFAULT_THEME;
+  if (id === BOREAL_THEME) {
     delete document.body.dataset.theme;          // default palette lives in :root
   } else {
     document.body.dataset.theme = id;
   }
-  document.querySelectorAll('.theme-dot').forEach(d =>
-    d.classList.toggle('active', d.dataset.themeId === id));
+  document.querySelectorAll('.theme-dot').forEach(function(d) {
+    d.classList.toggle('active', d.dataset.themeId === id);
+  });
   try {
     localStorage.setItem(THEME_STORAGE_KEY, id);
   } catch (e) { /* storage blocked (private mode / some iframes) — theme won't persist, everything else works */ }
   updateBasemapForTheme();                        // no-op until the map exists
 }
 
-document.querySelectorAll('.theme-dot').forEach(d => {
-  d.addEventListener('click', () => setTheme(d.dataset.themeId));
+// Delegated: survives any future re-render of the dot container
+document.getElementById('theme-dots').addEventListener('click', function(e) {
+  var dot = e.target.closest('.theme-dot');
+  if (dot) setTheme(dot.dataset.themeId);
 });
 
 // Restore saved theme before the map initializes so it starts on the right basemap
+renderThemeDots();
 let savedTheme = DEFAULT_THEME;
 try { savedTheme = localStorage.getItem(THEME_STORAGE_KEY) || DEFAULT_THEME; } catch (e) {}
 setTheme(savedTheme);

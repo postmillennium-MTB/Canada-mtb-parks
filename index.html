@@ -771,6 +771,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --red-maple:    #C44030;
   --amber:        #B07828;
 
+  --badge-soon-bg:   #241A3C; --badge-soon-fg:   #A888E8; --badge-soon-bd:   #4A3878;
   --badge-new-bg:    #1A3C0A; --badge-new-fg:    #7ED44A; --badge-new-bd:    #3A7018;
   --badge-wc-bg:     #3C2606; --badge-wc-fg:     #F0B840; --badge-wc-bd:     #7A4E10;
   --badge-worlds-bg: #2E1A04; --badge-worlds-fg: #E8A428; --badge-worlds-bd: #6A3C08;
@@ -1200,6 +1201,7 @@ details summary::-webkit-details-marker { display: none; }
   letter-spacing: 0.05em; text-transform: uppercase;
   white-space: nowrap; border-width: 1px; border-style: solid;
 }
+.badge--soon   { background: var(--badge-soon-bg);   color: var(--badge-soon-fg);   border-color: var(--badge-soon-bd); }
 .badge--new    { background: var(--badge-new-bg);    color: var(--badge-new-fg);    border-color: var(--badge-new-bd); }
 .badge--wc     { background: var(--badge-wc-bg);     color: var(--badge-wc-fg);     border-color: var(--badge-wc-bd); }
 .badge--worlds { background: var(--badge-worlds-bg); color: var(--badge-worlds-fg); border-color: var(--badge-worlds-bd); }
@@ -1668,7 +1670,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
       <div class="tl-node">
         <div class="tl-year" id="tl-y3">2025</div>
         <div class="tl-dot"></div>
-        <div class="tl-label" id="tl-l3">28 parks across Canada</div>
+        <div class="tl-label" id="tl-l3">29 parks across Canada</div>
       </div>
     </div>
     <p class="origin-text" id="origin-text">
@@ -1744,7 +1746,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 <!-- FOOTER -->
 <footer class="footer">
   <p class="footer-note" id="footer-note">
-    Data current as of July 2026 · Trail counts, vert, and season dates are approximate and subject to change.
+    Data current as of August 2026 · Trail counts, vert, and season dates are approximate and subject to change.
     Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.
     <br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.
   </p>
@@ -1803,7 +1805,7 @@ const THEMES = [
    The canonical badge list and its display order. Used by both the Badge Key
    panel and the Stats filter pills — previously this array was written out
    twice, so adding a badge to one and not the other left it unfilterable. */
-const BADGE_ORDER = ['new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
+const BADGE_ORDER = ['soon','new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
 
 /* ══════════════════════════════════════════════════ TRANSLATIONS */
 const T = {
@@ -1838,10 +1840,11 @@ const T = {
     mapTitle: 'Map',
     btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces with no lift-served parks:</strong> Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.`,
-    footerNote: `Data current as of July 2026 · Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
+    footerNote: `Data current as of August 2026 · Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
     noResults: 'No parks match your filters.',
     noteLabel: 'Note',
     badges: {
+      soon:   '🚧 Opening 2027',
       new:    '⚡ New 2025',
       wc:     '🏆 UCI World Cup',
       worlds: '🌍 UCI Worlds',
@@ -1853,6 +1856,7 @@ const T = {
       loam:   '🌱 Loam Pass',
     },
     badgeDesc: {
+      soon:   'Announced, not yet open — construction underway, targeting a 2027 opening',
       new:    'Opened or debuted in 2025',
       wc:     'Has hosted UCI Downhill World Cup rounds',
       worlds: 'Has hosted the UCI Mountain Bike World Championships',
@@ -1900,10 +1904,11 @@ const T = {
     mapTitle: 'Carte',
     btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces sans parc avec remontée :</strong> Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique. La concentration des infrastructures se trouve principalement en Colombie-Britannique et dans le corridor skiable des Laurentides au Québec.`,
-    footerNote: `Données à jour de juillet 2026 · Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
+    footerNote: `Données à jour d'août 2026 · Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becks Timbers</a>, Trailforks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
     noResults: 'Aucun parc ne correspond à vos filtres.',
     noteLabel: 'Note',
     badges: {
+      soon:   '🚧 Ouverture 2027',
       new:    '⚡ Nouveau 2025',
       wc:     '🏆 Coupe du Monde UCI',
       worlds: '🌍 Championnats du Monde UCI',
@@ -1915,6 +1920,7 @@ const T = {
       loam:   '🌱 Loam Pass',
     },
     badgeDesc: {
+      soon:   'Annoncé, pas encore ouvert — construction en cours, ouverture ciblée pour 2027',
       new:    'Ouvert ou inauguré en 2025',
       wc:     "A accueilli des épreuves de Coupe du Monde UCI de descente",
       worlds: "A accueilli les Championnats du Monde UCI de vélo de montagne",
@@ -2102,6 +2108,19 @@ const PARKS = [
     url:'https://www.redresort.com/bike-park',
     mapUrl:'https://www.redresort.com/bike-park',
     trailCount:12, trailKm:10, trailKmEst:true },
+
+  { id:29, province:'BC', slug:'cypress',
+    name:{en:'Cypress Mountain Bike Park', fr:'Parc de vélo de montagne de Cypress Mountain'},
+    city:{en:'West Vancouver, BC', fr:'Vancouver-Ouest, C.-B.'},
+    coords:[49.3956,-123.2033], vertM:356, vertFt:1168, trailsLabel:'TBD',
+    season:{en:'Opens summer 2027', fr:'Ouverture prévue été 2027'},
+    lift:{en:'Eagle Express & Raven Ridge chairlifts', fr:'Télésièges Eagle Express et Raven Ridge'},
+    badges:['gl','soon'],
+    note:{en:'Announced, not yet open. Cypress ran a lift-served bike park from 2005 until operations paused ahead of the 2010 Olympics; BC Parks has now approved a rebuild under the resort’s existing Controlled Recreation Area. Gravity Logic is designing and building the new trail network on Black Mountain, with construction underway through Nov 2026 toward a summer 2027 target opening. Vertical drop shown is the rise of Raven Ridge, the taller of the two lifts serving the park — final trail count and total trail distance are not yet published.',
+          fr:"Annoncé, pas encore ouvert. Cypress a exploité un parc de vélo avec remontée de 2005 jusqu'à une pause avant les Jeux olympiques de 2010; BC Parks a maintenant approuvé une reconstruction dans la zone récréative contrôlée existante de la station. Gravity Logic conçoit et construit le nouveau réseau de sentiers sur Black Mountain, avec des travaux en cours jusqu'en novembre 2026 en vue d'une ouverture ciblée à l'été 2027. Le dénivelé indiqué correspond à celui du télésiège Raven Ridge, le plus élevé des deux remontées desservant le parc — le nombre final de sentiers et la distance totale ne sont pas encore publiés."},
+    url:'https://www.cypressmountain.com/bikepark',
+    mapUrl:'https://www.trailforks.com/region/cypress-mountain/',
+    trailCount:0, trailKm:0, trailKmEst:true },
 
   // ─── ALBERTA ────────────────────────────────────────────────────────
   { id:12, province:'AB', slug:'winsport',

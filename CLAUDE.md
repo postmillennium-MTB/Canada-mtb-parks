@@ -13,7 +13,7 @@ pattern for anything that repeats, mobile-first, iframe-safe.
 
 Jon (repo owner) has no coding background and edits through GitHub's web UI,
 not git. That means:
-- Deliver complete files, not diffs/patches — he pastes whole files.
+- Deliver complete files, not diffs/patches.
 - Never invent park data. A gap ("trail count unknown") is honest; a guessed
   number isn't. If you can't verify something, say so and leave it out or
   flag it, don't fill it in.
@@ -48,7 +48,7 @@ own initiative, check for both directions:
 
 **New parks (opened or announced).**
 - Sources: the resort's own site/press release, Trailforks region pages,
-  Pinkbike/Bike Magazine/Freehub news coverage, local news for the region,
+  Pinkbike/Bike Magazine/Freehub/ https://www.singletracks.com news coverage, local news for the region,
   NSAA (National Ski Areas Association) reporting for US-adjacent context,
   and Jon's own industry contacts (he's written primary-source-sourced
   corrections before — see `git log` for "Correct Bluewood entry..." on the

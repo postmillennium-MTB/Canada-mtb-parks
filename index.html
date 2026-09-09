@@ -3133,58 +3133,80 @@ function renderProvLegend() {
    NOTE: the previous tile URL used "dark_matter_nolabels", which is
    not a real CARTO style path (the style is *named* Dark Matter but
    the URL path is "dark_nolabels") — every tile 404'd, hence the
-   permanently blank map. Valid raster paths: dark_all, dark_nolabels,
-   light_all, light_nolabels, rastertiles/voyager.
-   {r} = retina (@2x) tiles, handled natively by Leaflet.           */
-const BASEMAPS = {
-  dark:  'https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png',
-  light: 'https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png'
-};
-const OSM_FALLBACK = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+   permanently blank map. That got fixed, but CARTO has since started
+   gating its once-free raster basemaps behind an account API key —
+   an unauthenticated request now comes back 200 OK with "API KEY
+   REQUIRED" baked into the tile image itself, so the old tileerror-
+   based fallback below never fired (no error, just an unusable tile).
+   Replaced CARTO outright with OpenStreetMap's standard tile server,
+   which is free with no key and no account. It only ships one (light)
+   cartography, so the dark themes get there via a CSS filter on the
+   tile pane (DARK_MAP_FILTER) instead of a second tile URL. Esri's
+   keyless World Street Map tiles are the last-resort fallback if OSM
+   itself is ever unreachable — a different host, so it's real
+   redundancy rather than another single point of failure. */
+const OSM_TILES  = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+const OSM_ATTRIB = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+const ESRI_FALLBACK_TILES  = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}';
+const ESRI_FALLBACK_ATTRIB = '&copy; <a href="https://www.esri.com">Esri</a> and contributors';
+
+/* Turns OSM's light-only cartography into a dark map for the dark theme
+   swatches. Tuned by eye: invert+hue-rotate flips light-to-dark while
+   pulling hues back toward natural; brightness/contrast/saturate pull
+   the result back from "photo negative" toward a muted slate map. */
+const DARK_MAP_FILTER = 'invert(1) hue-rotate(180deg) brightness(0.92) contrast(0.88) saturate(0.65)';
+
 let tileLayerRef = null;
 let tileErrorCount = 0;
 let usingFallbackTiles = false;
 
-/* Light vs dark tiles is now a property of the theme entry, not a hardcoded
-   id check — so a second light scheme automatically gets light tiles.
-   No data-theme attribute means the :root default (Boreal) is active. */
-function basemapForTheme() {
+/* Whether the active theme wants the dark-map filter — a property of the
+   theme entry, not a hardcoded id check, so a second light scheme
+   automatically gets the plain (light) map. No data-theme attribute
+   means the :root default (Boreal) is active. */
+function mapWantsDarkFilter() {
   var id = document.body.dataset.theme || BOREAL_THEME;
   var t  = getTheme(id);
-  return BASEMAPS[(t && t.basemap) === 'light' ? 'light' : 'dark'];
+  return (t && t.basemap) !== 'light';
+}
+
+/* Applied to Leaflet's tile pane only, so markers/popups/controls stacked
+   above it are never touched by the filter. */
+function applyMapFilter() {
+  var pane = mapInstance && mapInstance.getPane('tilePane');
+  if (pane) pane.style.filter = mapWantsDarkFilter() ? DARK_MAP_FILTER : 'none';
 }
 
 function addBasemap(url, subs, attrib) {
   if (tileLayerRef) { mapInstance.removeLayer(tileLayerRef); }
-  tileLayerRef = L.tileLayer(url, { attribution: attrib, maxZoom: 18, subdomains: subs });
+  var opts = { attribution: attrib, maxZoom: 18 };
+  if (subs) opts.subdomains = subs;
+  tileLayerRef = L.tileLayer(url, opts);
   tileLayerRef.on('tileerror', function() {
     tileErrorCount++;
-    // If CARTO can't be reached at all, drop to standard OSM tiles once
     /* A handful of failed tiles is normal (edge of coverage, transient
-       network). Five-plus means CARTO itself is unreachable, so swap the
-       whole basemap to OpenStreetMap rather than show a blank map. */
+       network). Five-plus means OSM itself is unreachable, so swap the
+       whole basemap to Esri rather than show a blank map. */
     if (tileErrorCount > 5 && !usingFallbackTiles) {
       usingFallbackTiles = true;
-      console.warn('CARTO tiles unreachable — falling back to OpenStreetMap tiles.');
-      addBasemap(OSM_FALLBACK, 'abc',
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors');
+      console.warn('OpenStreetMap tiles unreachable — falling back to Esri tiles.');
+      addBasemap(ESRI_FALLBACK_TILES, null, ESRI_FALLBACK_ATTRIB);
     }
   });
   tileLayerRef.addTo(mapInstance);
+  applyMapFilter();
 }
 
+/* The tile URL no longer changes with theme (OSM serves both), so a theme
+   switch just re-applies the CSS filter — no re-fetching tiles. */
 function updateBasemapForTheme() {
-  if (!mapInstance || usingFallbackTiles) return;
-  tileErrorCount = 0;
-  addBasemap(basemapForTheme(), 'abcd',
-    '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>');
+  applyMapFilter();
 }
 
 function initMap() {
   mapInstance = L.map('park-map', { zoomControl: true }).setView(MAP_HOME.center, MAP_HOME.zoom);
 
-  addBasemap(basemapForTheme(), 'abcd',
-    '&copy; <a href="https://www.openstreetmap.org">OpenStreetMap</a>, &copy; <a href="https://carto.com">CARTO</a>');
+  addBasemap(OSM_TILES, 'abc', OSM_ATTRIB);
 
   markerCluster = L.markerClusterGroup({
     iconCreateFunction: function(cluster) {

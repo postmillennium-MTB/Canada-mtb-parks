@@ -167,3 +167,29 @@ off-season, which is already handled by each park's `season` field).
   Not currently relevant (CARTO is gone), but if a raster tile provider
   is ever reintroduced, verify the literal URL path against that
   provider's docs rather than the display name of the style.
+- **This repo still runs on tiles (OSM + Esri fallback) — the sibling USA
+  repo does not anymore.** USA replaced its raster basemap outright with
+  real vector state-boundary polygons baked into the file (see its
+  CLAUDE.md), which permanently ends this whole class of bug rather than
+  swapping to a different tile host that will eventually squeeze its free
+  tier too, or get rate-limited (OSM's own usage policy already says its
+  tile server isn't meant for embedded production use at real traffic —
+  the current fix here is a reprieve, not a permanent one). The reason
+  Canada didn't get the same fix in the same session: doing it right needs
+  *real* WGS84 province/territory boundary geometry Leaflet can project
+  the normal way (matching how it already projects every park marker) —
+  not a pre-projected decorative image. The obvious npm candidate,
+  `@svg-maps/canada`, is exactly that: a static illustration in an unknown,
+  undocumented projection, fine for a flat picture but not safely
+  reverse-engineerable into real coordinates without guessing. A search of
+  npm and PyPI (the only registries directly reachable from a standard
+  sandboxed session, no general internet fetch) turned up nothing
+  bundling genuine Canada admin-1 boundary data — `us-atlas` (used for the
+  USA fix) has no Canadian counterpart. Two ways to unblock this:
+  1. Jon downloads Natural Earth's `ne_50m_admin_1_states_provinces` (or
+     Statistics Canada's own boundary files) himself and hands the file
+     over — either converts in minutes once the raw geometry exists.
+  2. A future session with broader network access fetches it directly.
+  Don't reach for `@svg-maps/canada` as a shortcut in the meantime; a
+  province boundary that's subtly wrong everywhere is worse than the
+  current tile dependency, not better.

@@ -784,7 +784,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
 
   --text:         #F2ECDD;
   --text-dim:     #ADAD9A;
-  --text-muted:   #83837A;
+  --text-muted:   #92928A;   /* was #83837A (4.2:1); now 4.6:1+ on every Boreal surface */
 
   /* previously hardcoded — extracted so themes can override them */
   --bg-topbar:    #0D130B;
@@ -827,7 +827,7 @@ body[data-theme="granite"] {
   --bg-hover-accent: #16242E;
   --text:         #DFE6EC;
   --text-dim:     #8A97A3;
-  --text-muted:   #566068;
+  --text-muted:   #808D97;   /* was #566068 (2.5:1); 4.6:1+ on Granite cards, still dimmer than --text-dim */
   --map-ring:       rgba(16,21,26,0.9);
   --map-cluster-fg: #10151A;
 }
@@ -850,7 +850,7 @@ body[data-theme="maple"] {
   --bg-hover-accent: #2A1812;
   --text:         #F6ECE1;
   --text-dim:     #BCAB9C;
-  --text-muted:   #8B7C72;
+  --text-muted:   #9A8B81;   /* was #8B7C72 (4.2:1); now 5.2:1+ on Maple cards */
   --map-ring:       rgba(26,18,16,0.9);
   --map-cluster-fg: #1A1210;
 }
@@ -875,7 +875,7 @@ body[data-theme="alpine"] {
   --green-dim:    #6FA352;
   --text:         #26301F;
   --text-dim:     #5C6454;
-  --text-muted:   #8A8F80;
+  --text-muted:   #656A5C;   /* was #8A8F80 (2.8–3.0:1); now 4.4:1+ on every Alpine surface */
   --map-ring:       rgba(255,255,255,0.95);
   --map-cluster-fg: #FFFFFF;
 }
@@ -1231,7 +1231,7 @@ details summary::-webkit-details-marker { display: none; }
 .province-summary:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 .prov-left { display: flex; align-items: center; gap: 0.75rem; }
 .prov-code {
-  background: var(--border-lit); color: var(--text-dim);
+  background: var(--border-lit); color: var(--text);   /* was --text-dim: 3.0:1 on Alpine and Granite */
   border-radius: var(--r-sm); padding: 2px 7px;
   font-family: var(--font-d); font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
 }
@@ -1240,10 +1240,13 @@ details summary::-webkit-details-marker { display: none; }
 }
 .prov-right { display: flex; align-items: center; gap: 0.75rem; }
 .prov-count {
-  background: var(--green-dim); color: var(--badge-gl-fg);
+  background: var(--green-dim); color: #8EE0A8;   /* was --badge-gl-fg (3.8:1 on the dark themes' pill) */
   border-radius: 20px; padding: 2px 10px;
   font-family: var(--font-d); font-size: 0.75rem; font-weight: 700;
 }
+/* Alpine's pill background (--green-dim) is a mid-green, so the dark-theme
+   light-green text fell to 1.4:1. Dark text on it measures 5.1:1. */
+body[data-theme="alpine"] .prov-count { color: #1A2A10; }
 .prov-chevron { color: var(--text-muted); font-size: 0.7rem; transition: transform 0.2s; }
 details[open] .prov-chevron { transform: rotate(180deg); }
 
@@ -1605,6 +1608,35 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .mountain-chip:hover { border-color: var(--gold-dim); color: var(--text); }
 .mountain-chip.selected {
   background: var(--pc-fill); border-color: var(--pc-line); color: var(--pc-line); font-weight: 600;
+}
+
+/* ═══════════════════════════════════════════════ TAP TARGETS
+   Everyone gets a 24px floor (WCAG 2.5.8). Touch screens (pointer: coarse)
+   get 44px on in-page links/buttons and 40px in the 48px top bar, so the
+   desktop look stays compact. The theme dots are the exception: four 44px
+   dots won't fit a phone top bar, so they grow to 24px wide (the WCAG AA
+   minimum) with a 44px-tall hit area (vertical room is free; horizontal
+   neighbours are not). */
+.card-link, .card-link--map { min-height: 24px; }
+
+@media (pointer: coarse) {
+  .card-link, .card-link--map {
+    min-height: 44px; padding-left: 10px; padding-right: 10px;
+    justify-content: center;
+  }
+  .theme-dots { gap: 2px; }
+  .theme-dot {
+    width: 24px; height: 24px; position: relative;
+  }
+  .theme-dot::after { content: ''; position: absolute; inset: -10px -1px; }
+  .lang-btn, .units-select, .pmr-link { min-height: 40px; }
+  /* trims ~25px so the larger dots still fit a 360px-wide top bar */
+  .topbar-right { gap: 0.25rem; }
+  .theme-dots { margin-right: 0; }
+  .lang-btn { padding-left: 9px; padding-right: 9px; }
+  .pmr-link { padding-left: 8px; padding-right: 8px; }
+  .units-select { padding: 4px 22px 4px 8px; background-position: right 6px center; }
+  .search-input, .prov-filter, .badge-key-toggle, .mountain-view-btn { min-height: 44px; }
 }
 
 </style>

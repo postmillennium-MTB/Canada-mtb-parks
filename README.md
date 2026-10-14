@@ -33,7 +33,7 @@ It is fully bilingual (English/French), supports Metric / Imperial / Both unit d
 - Trail Map and Learn More buttons on every park card
 - Badge system with 11 badge types (see Badge Key) and a collapsible bilingual key
 - Province filter and search
-- Four colour schemes — Boreal, Granite, Maple (dark) and Alpine (light, the default) — with a theme switcher that remembers your choice
+- Four colour schemes, each named for a Father of Confederation — Sir John A. Macdonald (light, the default), Sir George-Étienne Cartier (blue), George Brown (brown) and Thomas D'Arcy McGee (green) — with a theme switcher that remembers your choice
 
 ### Opening the widget
 
@@ -110,8 +110,17 @@ The badge list and its order live in one place (`BADGE_ORDER` in `index.html`); 
 
 - **Colour schemes** are solved numerically, not by eye, for the "would this survive being printed or saved as a PDF?" standard: main text ≥ 11.5:1, secondary ≥ 9:1, muted ≥ 7:1, accent-as-text ≥ 7:1. Province colours each hold ≥ 3:1 on all four themes.
 - **Print / Save as PDF** uses a built-in light palette for every theme, with the page texture hidden. There is deliberately no print button.
-- **Page texture** is two faded layers from the PMR texture catalogue: `crowe-1882-12657` (adapted from US Design Patent 12,657, Eugene A. Crowe, 1882; the patent has long expired) and `us-d268339` (US Design Patent 268,339). Alpine uses the pattern as designed in the texture studio; the dark themes ink it in their own accent at lower strength. The credit line in the footer is required.
+- **Page texture** is two faded layers from the PMR texture catalogue, and each scheme has its own pairing: Macdonald uses `crowe-1882-12657` + `us-d268339`; Cartier `us-d268339` + `crowe-1882-12657` (teal inks); Brown `crowe-1884-14685` + `crowe-1882-13102` (amber inks); McGee `us-d268339` + `crowe-1882-13102` (green and purple inks, vertical fades). The Crowe patents (1882–1884) are adapted and long expired; `us-d268339` is US Design Patent 268,339. The dark schemes run their textures at low strength to protect text contrast. The credit line in the footer is required.
 - `low-pile-carpet.css` is an unused, reusable procedural texture kit for small accents (cards, plates). It is not wired into the page.
+
+### Colour scheme names
+
+The four colour schemes are named for Fathers of Confederation. The active name shows beside the colour dots in the top bar on wide screens, and as a tooltip everywhere.
+
+- **Sir John A. Macdonald** (light, the default): the primary architect of Confederation and the first Prime Minister of Canada, who led the movement to unite the British North American colonies into a single dominion.
+- **Sir George-Étienne Cartier** (blue): a key joint-premier from Canada East (Quebec) who strongly promoted federalism and worked to ensure the protection of French-Canadian rights, language and civil law within the new union.
+- **George Brown** (brown): a prominent journalist (founder of *The Globe* newspaper) and politician who built a crucial political coalition to help break a legislative deadlock and advance the framework for a federal system.
+- **Thomas D'Arcy McGee** (green): a Father of Confederation, orator and journalist who passionately championed a unified, multi-ethnic Canadian nationality stretching from sea to sea.
 
 ### Credits
 
@@ -189,6 +198,15 @@ Sites officiels des parcs et stations ; Trailforks ; liste officielle des client
 ### Apparence
 
 Les thèmes sont calculés pour rester lisibles à l'impression ou en PDF (texte principal ≥ 11,5:1). Une palette claire intégrée s'applique à l'impression ; il n'y a volontairement aucun bouton d'impression. Le motif de fond combine deux couches du catalogue PMR : `crowe-1882-12657` (adapté du brevet américain de dessin no 12 657, Eugene A. Crowe, 1882 ; brevet expiré depuis longtemps) et `us-d268339` (brevet américain de dessin no 268 339).
+
+### Noms des thèmes de couleur
+
+Les quatre thèmes portent le nom de Pères de la Confédération. Le nom actif s'affiche à côté des pastilles de couleur dans la barre du haut sur grand écran, et en info-bulle partout.
+
+- **Sir John A. Macdonald** (clair, par défaut) : principal architecte de la Confédération et premier premier ministre du Canada, qui a mené le mouvement visant à unir les colonies de l'Amérique du Nord britannique en un seul dominion.
+- **Sir George-Étienne Cartier** (bleu) : co-premier ministre du Canada-Est (Québec) qui a fermement défendu le fédéralisme et veillé à protéger les droits, la langue et le droit civil des Canadiens français au sein de la nouvelle union.
+- **George Brown** (brun) : journaliste et politicien de premier plan (fondateur du journal *The Globe*), qui a bâti une coalition politique décisive pour sortir de l'impasse législative et faire avancer le cadre d'un système fédéral.
+- **Thomas D'Arcy McGee** (vert) : Père de la Confédération, orateur et journaliste, ardent défenseur d'une nationalité canadienne unie et multiethnique, d'un océan à l'autre.
 
 ### Crédits
 

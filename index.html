@@ -840,9 +840,9 @@ body[data-theme="granite"] {
   --map-ring:       rgba(16,21,26,0.9);
   --map-cluster-fg: #10151A;
   --tex-ink:        #148779;
-  --tex-opacity:    0.22;
+  --tex-opacity:    0.10;
   --tex-2-ink:      #004d65;
-  --tex-2-opacity:  0.085;
+  --tex-2-opacity:  0.04;
   --tex-m1: var(--tex-mask-2); --tex-m2: var(--tex-mask);
   --tex-dir: to right; --tex-dir-2: to left;
   --tex-size: 128px; --tex-size-2: 84px;
@@ -871,9 +871,9 @@ body[data-theme="maple"] {
   --map-ring:       rgba(26,18,16,0.9);
   --map-cluster-fg: #1A1210;
   --tex-ink:        #785700;
-  --tex-opacity:    0.22;
+  --tex-opacity:    0.10;
   --tex-2-ink:      #a77b00;
-  --tex-2-opacity:  0.085;
+  --tex-2-opacity:  0.04;
   --tex-m1: var(--tex-mask-3); --tex-m2: var(--tex-mask-4);
   --tex-dir: to right; --tex-dir-2: to left;
   --tex-size: 128px; --tex-size-2: 84px;
@@ -883,9 +883,9 @@ body[data-theme="maple"] {
 /* BOREAL (default, no data-theme) texture */
 body:not([data-theme]) {
   --tex-ink:        #38571a;
-  --tex-opacity:    0.22;
+  --tex-opacity:    0.10;
   --tex-2-ink:      #450e59;
-  --tex-2-opacity:  0.13;
+  --tex-2-opacity:  0.06;
   --tex-m1: var(--tex-mask-2); --tex-m2: var(--tex-mask-4);
   --tex-dir: to bottom; --tex-dir-2: to top;
   --tex-size: 92px; --tex-size-2: 84px;
@@ -936,6 +936,8 @@ body { transition: background 0.25s ease, color 0.25s ease; }
   border-color: var(--gold);
   box-shadow: 0 0 0 2px var(--bg-topbar), 0 0 0 3.5px var(--gold);
 }
+.theme-name { font-family: var(--font-d); font-size: 0.72rem; font-weight: 600; letter-spacing: 0.02em; color: var(--text-dim); white-space: nowrap; }
+@media (max-width: 1000px) { .theme-name { display: none; } }  /* dots + tooltip only on narrow bars */
 .theme-dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
 
 .pmr-link {
@@ -1562,8 +1564,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .view-tab:focus-visible { outline: 2px solid var(--gold); outline-offset: -2px; }
 /* Lucide icons on the Map/Stats/Mountain tabs — stroke="currentColor" so
    they inherit the tab's own color (muted → gold on hover/active), and
-   therefore automatically follow whichever theme (Boreal/Granite/Maple/
-   Alpine) is active without any extra JS. */
+   therefore automatically follow whichever theme (McGee/Cartier/Brown/
+   Macdonald) is active without any extra JS. */
 .view-tab-icon {
   width: 16px; height: 16px;
   vertical-align: -3px; margin-right: 6px;
@@ -1838,6 +1840,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   <div class="topbar-right">
     <!-- swatch buttons are rendered from the THEMES registry by renderThemeDots() -->
     <div class="theme-dots" id="theme-dots" role="group" aria-label="Color scheme / Palette de couleurs"></div>
+    <span class="theme-name" id="theme-name" aria-live="polite"></span>
     <select class="units-select" id="units-toggle" aria-label="Units">
       <option value="metric">Metric</option>
       <option value="imperial">Imperial</option>
@@ -2016,10 +2019,10 @@ let mapMarkers = {};
              code asked `theme === 'alpine' ? light : dark`, so any second
              light theme would silently have loaded dark map tiles. */
 const THEMES = [
-  { id:'boreal',  label:{en:'Boreal',  fr:'Boréal'},  swatch:['#111810','#C49A3E'], basemap:'dark'  },
-  { id:'granite', label:{en:'Granite', fr:'Granit'},  swatch:['#14181C','#6FB3D6'], basemap:'dark'  },
-  { id:'maple',   label:{en:'Maple',   fr:'Érable'},  swatch:['#1A1210','#D4693F'], basemap:'dark'  },
-  { id:'alpine',  label:{en:'Alpine',  fr:'Alpin'},   swatch:['#EFEDE6','#8A6A1E'], basemap:'light' }
+  { id:'boreal',  label:{en:'Thomas D\'Arcy McGee',  fr:'Thomas D\'Arcy McGee'},  swatch:['#111810','#C49A3E'], basemap:'dark'  },
+  { id:'granite', label:{en:'Sir George-Étienne Cartier', fr:'Sir George-Étienne Cartier'},  swatch:['#14181C','#6FB3D6'], basemap:'dark'  },
+  { id:'maple',   label:{en:'George Brown',   fr:'George Brown'},  swatch:['#1A1210','#D4693F'], basemap:'dark'  },
+  { id:'alpine',  label:{en:'Sir John A. Macdonald',  fr:'Sir John A. Macdonald'},   swatch:['#EFEDE6','#8A6A1E'], basemap:'light' }
 ];
 
 /* ══════════════════════════════════════════════════ BADGE ORDER
@@ -3831,7 +3834,7 @@ function renderThemeDots() {
   wrap.innerHTML = THEMES.map(function(t) {
     return '<button class="theme-dot" data-theme-id="' + t.id + '"'
       + ' style="--dot-a:' + t.swatch[0] + ';--dot-b:' + t.swatch[1] + ';"'
-      + ' aria-label="' + t.label.en + ' theme · Thème ' + t.label.fr.toLowerCase() + '"'
+      + ' aria-label="' + t.label.en + ' theme · Thème ' + t.label.fr + '"'
       + ' title="' + t.label[lang] + '"></button>';
   }).join('');
 }
@@ -3843,6 +3846,13 @@ function localizeThemeDots() {
     var t = getTheme(d.dataset.themeId);
     if (t) d.title = t.label[lang];
   });
+  showThemeName();
+}
+
+function showThemeName() {
+  var el = document.getElementById('theme-name');
+  var t = getTheme(document.body.dataset.theme || BOREAL_THEME);
+  if (el && t) el.textContent = t.label[lang];
 }
 
 function setTheme(id) {
@@ -3858,6 +3868,7 @@ function setTheme(id) {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, id);
   } catch (e) { /* storage blocked (private mode / some iframes) — theme won't persist, everything else works */ }
+  showThemeName();
   updateBasemapForTheme();                        // no-op until the map exists
 }
 

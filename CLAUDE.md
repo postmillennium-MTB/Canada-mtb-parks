@@ -206,14 +206,23 @@ off-season, which is already handled by each park's `season` field).
   labels, hover/tap only (dense). Hover or keyboard focus floats the name over the
   peak; on touch, first tap shows it and a second tap removes the peak. A peak
   that was not on the previous render plays a one-off shimmer (`pk-fresh`).
-- **Page texture = the "Crowe carpet, 1884" mask** from the PMR texture catalogue
-  (`postmillennium-MTB/pmr-website` → `textures/`, pattern `crowe-1884-14685`).
-  `.texture` layer is the first child of `<body>`; retint a theme by changing only
-  its `--tex-ink` / `--tex-opacity`. Catalogue rules apply: one large layer per
-  page, `position:absolute` (never fixed — Pinkbike embeds clip it), 4–7% ink.
-  The chart backdrop reuses the same mask. The credit line in the footer is
-  required — keep it. Do not describe this pattern as adapted: it is the
-  genuine patent drawing.
+- **Page texture = two layers from the PMR texture catalogue**
+  (`postmillennium-MTB/pmr-website` → `textures/`), designed in the texture studio:
+  layer 1 `crowe-1882-12657` (adapted from US Design Patent 12,657, Eugene A.
+  Crowe, 1882) at 140px, strongest at the right edge; layer 2 `us-d268339` (US
+  Design Patent 268,339, line art) at 64px, strongest at the left edge. The two
+  fades hand off to each other so they never sit at full strength together.
+  `.texture` and `.texture-2` are the first children of `<body>`; retint a theme by
+  changing only its `--tex-ink` / `--tex-opacity` / `--tex-2-opacity`. Alpine uses
+  the studio values exactly (`#624D2B`, .235 / .28); the dark themes ink with their
+  own `--gold-dim` at .14 / .18 so muted text stays ≥ 6.8:1 over the inked pixels
+  (Alpine's muted text is 4.7–5.0:1 at the most heavily inked pixels — that is the
+  studio design, accepted). Catalogue rules apply: `position:absolute` (never fixed
+  — Pinkbike embeds clip it). The chart backdrop reuses `--tex-mask` at 520px with a
+  scoped, quieter `--tex-opacity` set in the `.pk-stage` hook. Patterns are described
+  as "adapted" where the catalogue says so; us-d268339's inventor/date are
+  unverified, so it is cited by number only. The credit line (EN/FR
+  `textureCredit`) is required — keep it.
 - `low-pile-carpet.css` (repo root of the Canada repo) is an unused, reusable
   procedural texture kit for small accents (cards, plates). Not wired into the
   page.

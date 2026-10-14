@@ -33,7 +33,7 @@ It is fully bilingual (English/French), supports Metric / Imperial / Both unit d
 - Trail Map and Learn More buttons on every park card
 - Badge system with 11 badge types (see Badge Key) and a collapsible bilingual key
 - Province filter and search
-- Four colour schemes — Boreal, Granite, Maple (dark) and Alpine (light, the default) — with a theme switcher that remembers your choice
+- Four colour schemes — Boreal (dark forest) and three light schemes — Granite (glacier blue), Maple (autumn cream) and Alpine (snowfield stone) — with a theme switcher that remembers your choice
 
 ### Opening the widget
 

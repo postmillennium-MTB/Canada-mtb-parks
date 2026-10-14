@@ -753,19 +753,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
 <style>
 /* ═══════════════════════════════════════════════════════════ TOKENS */
 :root {
-  --bg:           #111810;
-  --bg-card:      #1C2318;
-  --bg-raised:    #232C1E;
-  --bg-hover:     #2A3524;
-  --bg-origin:    #132010;
-  --bg-strip:     #191F15;
+  --bg:           #0C130A;
+  --bg-card:      #1C2718;
+  --bg-raised:    #253221;
+  --bg-hover:     #2C3B27;
+  --bg-origin:    #0F190D;
+  --bg-strip:     #162011;
 
-  --border:       #44553B;
-  --border-lit:   #5F7A4F;
+  --border:       #55703F;
+  --border-lit:   #86A670;
 
-  --gold:         #D1B16A;
+  --gold:         #EFCF86;
   --gold-dim:     #8D6D2A;
-  --green:        #7CC754;
+  --green:        #9BE070;
   --green-dim:    #325A1E;
   --blue-pale:    #4A8CAD;
   --red-maple:    #C44030;
@@ -783,19 +783,19 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --badge-closed-bg: #2A1414; --badge-closed-fg: #F0A9A0; --badge-closed-bd: #B04A3E;
   --badge-loam-bg: #1E2E04; --badge-loam-fg: #A8D848; --badge-loam-bd: #597E17;
 
-  --text:         #F7F3E9;
-  --text-dim:     #D9D9D0;
-  --text-muted:   #B5B5B0;   /* was #83837A (4.2:1); now 4.6:1+ on every Boreal surface */
+  --text:         #FFFCF2;
+  --text-dim:     #EAECE0;
+  --text-muted:   #D0D6C6;   /* ≥8:1 on every Boreal surface */
 
   /* previously hardcoded — extracted so themes can override them */
-  --bg-topbar:    #0D130B;
-  --border-accent:#203A18;
-  --gold-lit:     #E7C981;
-  --bg-hover-accent: #182E10;
+  --bg-topbar:    #080D07;
+  --border-accent:#2A4A1E;
+  --gold-lit:     #F7DEA4;
+  --bg-hover-accent: #1B3213;
 
   /* map chrome */
-  --map-ring:       rgba(20,24,16,0.9);
-  --map-cluster-fg: #111810;
+  --map-ring:       rgba(12,19,10,0.9);
+  --map-cluster-fg: #0C130A;
 
   --font-d:       'Outfit', sans-serif;
   --font-b:       'Inter', sans-serif;
@@ -818,62 +818,66 @@ svg.leaflet-image-layer.leaflet-interactive path {
    Each theme only overrides surface/accent/text vars — badge colors
    and province marker colors are data encodings and stay constant. */
 
-/* GRANITE — North Shore slate + glacier blue */
+/* GRANITE — glacier ice: pale blue-white surfaces, deep navy text, steel-blue accent */
 body[data-theme="granite"] {
-  --bg:           #14181C;
-  --bg-card:      #1D2329;
-  --bg-raised:    #242C34;
-  --bg-hover:     #2B3540;
-  --bg-origin:    #131A21;
-  --bg-strip:     #191F26;
-  --bg-topbar:    #0F1317;
-  --border:       #455363;
-  --border-lit:   #61768B;
-  --border-accent:#22333F;
-  --gold:         #85BFDC;
-  --gold-dim:     #457A99;
-  --gold-lit:     #A8D7ED;
-  --bg-hover-accent: #16242E;
-  --text:         #F5F7F9;
-  --text-dim:     #D8DCE0;
-  --text-muted:   #B0B8BE;   /* was #566068 (2.5:1); 4.6:1+ on Granite cards, still dimmer than --text-dim */
-  --map-ring:       rgba(16,21,26,0.9);
-  --map-cluster-fg: #10151A;
-  --tex-ink:        #148779;
-  --tex-opacity:    0.22;
-  --tex-2-ink:      #004d65;
-  --tex-2-opacity:  0.085;
+  --bg:           #E4ECF3;
+  --bg-card:      #F1F5F9;
+  --bg-raised:    #FFFFFF;
+  --bg-hover:     #D3E0EB;
+  --bg-origin:    #DDE7F0;
+  --bg-strip:     #DFE9F1;
+  --bg-topbar:    #F8FAFC;
+  --border:       #8FA6B8;
+  --border-lit:   #5F7C94;
+  --border-accent:#BFD2E1;
+  --gold:         #0A4270;
+  --gold-dim:     #4D7FA6;
+  --gold-lit:     #08365C;
+  --bg-hover-accent: #D0E1EE;
+  --green:        #11492D;
+  --green-dim:    #5FA38A;
+  --text:         #0E1B26;
+  --text-dim:     #1D2C39;
+  --text-muted:   #2F4150;
+  --map-ring:       rgba(255,255,255,0.95);
+  --map-cluster-fg: #FFFFFF;
+  --tex-ink:        #2F6F8F;
+  --tex-opacity:    0.13;
+  --tex-2-ink:      #3D5A73;
+  --tex-2-opacity:  0.07;
   --tex-m1: var(--tex-mask-2); --tex-m2: var(--tex-mask);
   --tex-dir: to right; --tex-dir-2: to left;
   --tex-size: 128px; --tex-size-2: 84px;
   --tex-stop: 5%; --tex-end: 0; --tex-end-2: 0;
 }
 
-/* MAPLE — fall ember, Laurentian red-brown */
+/* MAPLE — autumn birch: warm cream surfaces, dark brown text, maple-red accent */
 body[data-theme="maple"] {
-  --bg:           #1A1210;
-  --bg-card:      #241A16;
-  --bg-raised:    #2C201B;
-  --bg-hover:     #362822;
-  --bg-origin:    #201310;
-  --bg-strip:     #201713;
-  --bg-topbar:    #140D0B;
-  --border:       #634737;
-  --border-lit:   #8B644F;
-  --border-accent:#3A2418;
-  --gold:         #F4996D;
-  --gold-dim:     #AA542F;
-  --gold-lit:     #F1B699;
-  --bg-hover-accent: #2A1812;
-  --text:         #F6ECE1;
-  --text-dim:     #D7CDC4;
-  --text-muted:   #B6ABA4;   /* was #8B7C72 (4.2:1); now 5.2:1+ on Maple cards */
-  --map-ring:       rgba(26,18,16,0.9);
-  --map-cluster-fg: #1A1210;
-  --tex-ink:        #785700;
-  --tex-opacity:    0.22;
-  --tex-2-ink:      #a77b00;
-  --tex-2-opacity:  0.085;
+  --bg:           #F4E8DB;
+  --bg-card:      #FBF3EA;
+  --bg-raised:    #FFFFFF;
+  --bg-hover:     #EBDAC8;
+  --bg-origin:    #EFDFCF;
+  --bg-strip:     #F0E2D3;
+  --bg-topbar:    #FDF8F2;
+  --border:       #C9AC93;
+  --border-lit:   #9C7A60;
+  --border-accent:#E3C9B0;
+  --gold:         #7E2409;
+  --gold-dim:     #B8573A;
+  --gold-lit:     #651B05;
+  --bg-hover-accent: #F0D9C5;
+  --green:        #214810;
+  --green-dim:    #7BA362;
+  --text:         #2A160D;
+  --text-dim:     #3C2417;
+  --text-muted:   #4E3226;
+  --map-ring:       rgba(255,255,255,0.95);
+  --map-cluster-fg: #FFFFFF;
+  --tex-ink:        #A4552F;
+  --tex-opacity:    0.13;
+  --tex-2-ink:      #7A5A2B;
+  --tex-2-opacity:  0.08;
   --tex-m1: var(--tex-mask-3); --tex-m2: var(--tex-mask-4);
   --tex-dir: to right; --tex-dir-2: to left;
   --tex-size: 128px; --tex-size-2: 84px;
@@ -894,30 +898,30 @@ body:not([data-theme]) {
 
 /* ALPINE — above-treeline snowfield, deep pine text, bronze accent */
 body[data-theme="alpine"] {
-  --bg:           #EFEDE6;
-  --bg-card:      #F7F5EF;
+  --bg:           #F4F2EA;
+  --bg-card:      #FBFAF5;
   --bg-raised:    #FFFFFF;
-  --bg-hover:     #E6E2D6;
-  --bg-origin:    #E9E9DF;
-  --bg-strip:     #E7E4DA;
-  --bg-topbar:    #FBFAF6;
-  --border:       #B1A88E;
-  --border-lit:   #93876A;
+  --bg-hover:     #E9E5D8;
+  --bg-origin:    #EDEDE2;
+  --bg-strip:     #EBE8DD;
+  --bg-topbar:    #FDFCF9;
+  --border:       #AFA487;
+  --border-lit:   #8A7D5C;
   --border-accent:#CFD6C4;
-  --gold:         #5B4614;
+  --gold:         #684006;
   --gold-dim:     #A2843B;
-  --gold-lit:     #4F3D10;
+  --gold-lit:     #543304;
   --bg-hover-accent: #E4E8D8;
-  --green:        #295217;
+  --green:        #24501A;
   --green-dim:    #6FA352;
-  --text:         #20291A;
-  --text-dim:     #353A31;
-  --text-muted:   #474A41;   /* was #8A8F80 (2.8–3.0:1); now 4.4:1+ on every Alpine surface */
+  --text:         #1B2616;
+  --text-dim:     #2F3A29;
+  --text-muted:   #444A3D;
   --map-ring:       rgba(255,255,255,0.95);
   --map-cluster-fg: #FFFFFF;
   --tex-ink:        #624D2B;   /* from the texture studio, as designed */
-  --tex-opacity:    0.235;
-  --tex-2-opacity:  0.28;
+  --tex-opacity:    0.17;      /* studio value is .235; eased so the paper reads brighter */
+  --tex-2-opacity:  0.2;
 }
 
 body { transition: background 0.25s ease, color 0.25s ease; }
@@ -1663,7 +1667,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   --pk-accent: var(--gold); --pk-card: var(--bg-raised);
   --pk-font-d: var(--font-d); --pk-font-b: var(--font-b); --pk-radius: var(--r-lg);
   background-color: var(--bg-card); margin-bottom: 1.4rem;
-  --tex-opacity: 0.065;   /* the chart backdrop reuses the page mask, but much quieter than the page floor */
+  --tex-opacity: 0.045;   /* the chart backdrop reuses the page mask, but much quieter than the page floor */
 }
 .pk-peak {
   --pk-fill:       color-mix(in srgb, var(--pk-c) 30%, transparent);
@@ -2016,10 +2020,10 @@ let mapMarkers = {};
              code asked `theme === 'alpine' ? light : dark`, so any second
              light theme would silently have loaded dark map tiles. */
 const THEMES = [
-  { id:'boreal',  label:{en:'Boreal',  fr:'Boréal'},  swatch:['#111810','#C49A3E'], basemap:'dark'  },
-  { id:'granite', label:{en:'Granite', fr:'Granit'},  swatch:['#14181C','#6FB3D6'], basemap:'dark'  },
-  { id:'maple',   label:{en:'Maple',   fr:'Érable'},  swatch:['#1A1210','#D4693F'], basemap:'dark'  },
-  { id:'alpine',  label:{en:'Alpine',  fr:'Alpin'},   swatch:['#EFEDE6','#8A6A1E'], basemap:'light' }
+  { id:'boreal',  label:{en:'Boreal',  fr:'Boréal'},  swatch:['#1C2718','#EFCF86'], basemap:'dark'  },
+  { id:'granite', label:{en:'Granite', fr:'Granit'},  swatch:['#E4ECF3','#0A4270'], basemap:'light' },
+  { id:'maple',   label:{en:'Maple',   fr:'Érable'},  swatch:['#F4E8DB','#7E2409'], basemap:'light' },
+  { id:'alpine',  label:{en:'Alpine',  fr:'Alpin'},   swatch:['#F4F2EA','#684006'], basemap:'light' }
 ];
 
 /* ══════════════════════════════════════════════════ BADGE ORDER

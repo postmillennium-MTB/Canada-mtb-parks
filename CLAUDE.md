@@ -84,7 +84,8 @@ not git. That means:
   `closed` is the status badge (see Maintenance below); a closed park's card also
   gets `.is-closed` (dashed outline — never dimmed text).
 - `const THEMES` — 4 color schemes, each tagged `basemap: 'light'|'dark'`.
-  `alpine` is the light one and the default.
+  `boreal` (dark) is the `:root` default; `granite`, `maple` and `alpine` are light
+  (the dark ones were lifted/replaced in Oct 2026 because they read too dark and flat).
 - Basemap/tile logic — search `OSM_TILES` — see Gotchas below before
   touching this.
 
@@ -213,10 +214,11 @@ off-season, which is already handled by each park's `season` field).
   fades hand off to each other so they never sit at full strength together.
   `.texture` and `.texture-2` are the first children of `<body>`; retint a theme by
   changing only its `--tex-ink` / `--tex-opacity` / `--tex-2-opacity`. Alpine uses
-  the studio values exactly (`#624D2B`, .235 / .28); the dark themes ink with their
-  own `--gold-dim` at .14 / .18 so muted text stays ≥ 6.8:1 over the inked pixels
-  (Alpine's muted text is 4.7–5.0:1 at the most heavily inked pixels — that is the
-  studio design, accepted). Catalogue rules apply: `position:absolute` (never fixed
+  the studio ink (`#624D2B`) but eased to .17 / .20 so the paper reads brighter; Granite and
+  Maple are light and ink with their own tinted browns/blues at ~.13 / .08; Boreal inks with its
+  own tinted ink (see its `body:not([data-theme])` block). Text tokens are solved against the
+  flat surfaces; the texture sits under them at low opacity (re-measure over inked pixels
+  if you raise it). Catalogue rules apply: `position:absolute` (never fixed
   — Pinkbike embeds clip it). The chart backdrop reuses `--tex-mask` at 520px with a
   scoped, quieter `--tex-opacity` set in the `.pk-stage` hook. Patterns are described
   as "adapted" where the catalogue says so; us-d268339's inventor/date are

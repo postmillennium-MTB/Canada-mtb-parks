@@ -78,10 +78,11 @@ not git. That means:
   estimate), `season`, `lift`, `badges`, `note`, `url`, `mapUrl`. Every
   text field with `{en, fr}` needs both languages filled in — a French
   visitor should never see English fallback text on a Canadian park.
-- `const BADGE_ORDER` — the fixed badge vocabulary: `soon, new, wc, worlds,
-  gl, kodiak, comm, surf, lim, loam`. Meanings are in `badgeDesc` inside the
-  `T` translations object (both `en` and `fr` copies — keep them in sync).
-  There is **no `closed` badge yet** — see Maintenance below.
+- `const BADGE_ORDER` — the fixed badge vocabulary: `closed, soon, new, wc,
+  worlds, gl, kodiak, comm, surf, lim, loam`. Meanings are in `badgeDesc` inside
+  the `T` translations object (both `en` and `fr` copies — keep them in sync).
+  `closed` is the status badge (see Maintenance below); a closed park's card also
+  gets `.is-closed` (dashed outline — never dimmed text).
 - `const THEMES` — 4 color schemes, each tagged `basemap: 'light'|'dark'`.
   `alpine` is the light one and the default.
 - Basemap/tile logic — search `OSM_TILES` — see Gotchas below before
@@ -124,16 +125,14 @@ own initiative, check for both directions:
 wildfire/flood, or ownership-transition reasons — not just normal
 off-season, which is already handled by each park's `season` field).
 **Permanent closures** (resort shut the bike operation down for good).
-- Canada's data schema has no `status` field or `closed` badge today — the
-  sibling USA repo already solved this (search its `CLAUDE.md` / its
-  `data-status="closed"` rows for the exact pattern: a dimmed row style, a
-  "Closed" tag, and a note explaining why + expected reopening if any).
-  The first time a Canadian park needs this, mirror that pattern here:
-  add a `closed` entry to `BADGE_ORDER` + `badgeDesc` (both languages), a
-  corresponding CSS treatment, and say so in the `note`. That touches
-  rendering logic in a few places, not just the data block — **ask Jon
-  before building it out**, but do flag the closure to him immediately
-  either way rather than sitting on it.
+- Canada has no `status` field; closures use the `closed` badge (built
+  October 2026 for Sir Sam's, mirroring the USA guide's `data-status="closed"`
+  rows). To close a park: put `'closed'` in its `badges`, set `season` to say
+  "Closed for 20XX · …", and write the `note` (EN and FR) stating why and what
+  the operator has said about reopening — say plainly when it is uncertain.
+  The `badge--closed` colours are the `--badge-closed-*` tokens; the badge key
+  and the Stats badge filter pick it up from `BADGE_ORDER`. Flag any new
+  closure to Jon right away.
 - Keep closed parks in the list rather than deleting them — this guide has
   historical/reference value (see how README changelog entries treat past
   corrections), and Whistler-era history matters to this audience. A

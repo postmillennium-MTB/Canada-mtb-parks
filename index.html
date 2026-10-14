@@ -780,6 +780,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
   --badge-comm-bg: #0A2E2A; --badge-comm-fg: #57CCC1; --badge-comm-bd: #237E76;
   --badge-surf-bg: #2E1E04; --badge-surf-fg: #E0A665; --badge-surf-bd: #985D1A;
   --badge-lim-bg: #2E1004; --badge-lim-fg: #E09977; --badge-lim-bd: #A54A1C;
+  --badge-closed-bg: #2A1414; --badge-closed-fg: #F0A9A0; --badge-closed-bd: #B04A3E;
   --badge-loam-bg: #1E2E04; --badge-loam-fg: #A8D848; --badge-loam-bd: #597E17;
 
   --text:         #F7F3E9;
@@ -1259,6 +1260,7 @@ details summary::-webkit-details-marker { display: none; }
 .badge--comm   { background: var(--badge-comm-bg);   color: var(--badge-comm-fg);   border-color: var(--badge-comm-bd); }
 .badge--surf   { background: var(--badge-surf-bg);   color: var(--badge-surf-fg);   border-color: var(--badge-surf-bd); }
 .badge--lim    { background: var(--badge-lim-bg);    color: var(--badge-lim-fg);    border-color: var(--badge-lim-bd); }
+.badge--closed { background: var(--badge-closed-bg); color: var(--badge-closed-fg); border-color: var(--badge-closed-bd); }
 .badge--loam   { background: var(--badge-loam-bg);   color: var(--badge-loam-fg);   border-color: var(--badge-loam-bd); }
 
 /* ═══════════════════════════════════════════════════════════ ACCORDIONS */
@@ -1318,6 +1320,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   transition: border-color 0.15s, transform 0.15s;
 }
 .park-card:hover { border-color: var(--border-lit); transform: translateY(-1px); }
+/* Closed parks stay in the guide as reference. Cue is a dashed outline (survives grayscale and print), never dimmed text. */
+.park-card.is-closed { border-style: dashed; border-color: var(--border-lit); }
 .card-name {
   font-family: var(--font-d); font-weight: 700; font-size: 0.97rem;
   color: var(--text); line-height: 1.25;
@@ -1989,7 +1993,7 @@ const THEMES = [
    The canonical badge list and its display order. Used by both the Badge Key
    panel and the Stats filter pills — previously this array was written out
    twice, so adding a badge to one and not the other left it unfilterable. */
-const BADGE_ORDER = ['soon','new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
+const BADGE_ORDER = ['closed','soon','new','wc','worlds','gl','kodiak','comm','surf','lim','loam'];
 
 /* ══════════════════════════════════════════════════ TRANSLATIONS */
 const T = {
@@ -2028,6 +2032,7 @@ const T = {
     noResults: 'No parks match your filters.',
     noteLabel: 'Note',
     badges: {
+      closed: '🚫 Closed',
       soon:   '🚧 Opening 2027',
       new:    '⚡ New 2025',
       wc:     '🏆 UCI World Cup',
@@ -2040,6 +2045,7 @@ const T = {
       loam:   '🌱 Loam Pass',
     },
     badgeDesc: {
+      closed: 'Not operating this season — closed temporarily or for good; see the park note for the reason and any reopening plan',
       soon:   'Announced, not yet open — construction underway, targeting a 2027 opening',
       new:    'Opened or debuted in 2025',
       wc:     'Has hosted UCI Downhill World Cup rounds',
@@ -2095,6 +2101,7 @@ const T = {
     noResults: 'Aucun parc ne correspond à vos filtres.',
     noteLabel: 'Note',
     badges: {
+      closed: '🚫 Fermé',
       soon:   '🚧 Ouverture 2027',
       new:    '⚡ Nouveau 2025',
       wc:     '🏆 Coupe du Monde UCI',
@@ -2107,6 +2114,7 @@ const T = {
       loam:   '🌱 Loam Pass',
     },
     badgeDesc: {
+      closed: "N'exploite pas cette saison — fermé temporairement ou définitivement ; voir la note du parc pour la raison et tout projet de réouverture",
       soon:   'Annoncé, pas encore ouvert — construction en cours, ouverture ciblée pour 2027',
       new:    'Ouvert ou inauguré en 2025',
       wc:     "A accueilli des épreuves de Coupe du Monde UCI de descente",
@@ -2357,13 +2365,13 @@ const PARKS = [
     name:{en:"Sir Sam's Bike Park", fr:"Parc de vélo Sir Sam's"},
     city:{en:'Eagle Lake (Haliburton), ON', fr:'Eagle Lake (Haliburton), ON'},
     coords:[45.1427,-78.8167], vertM:90, vertFt:295, trailsLabel:'12+',
-    season:{en:'July – August (weekends only)', fr:'Juillet – août (fins de semaine)'},
+    season:{en:'Closed for 2026 · 2027 uncertain', fr:'Fermé en 2026 · 2027 incertain'},
     lift:{en:'New quad chairlift under construction (2026)', fr:'Nouveau télésiège quadruple en construction (2026)'},
-    badges:['lim'],
-    note:{en:'Mountain bike trails and camps are closed for the entire 2026 season — Sir Sam\'s suspended MTB operations to make way for a new quad chairlift being built on the hill this summer. Resuming for 2027 will be assessed once construction wraps. Figures above (90 m / 295 ft, 2025-season conveyor-lift setup) reflect the last season the park operated and will need reconfirming once it reopens.',
-          fr:"Les sentiers de vélo de montagne et les camps sont fermés pour toute la saison 2026 — Sir Sam's a suspendu les opérations de vélo de montagne pour faire place à un nouveau télésiège quadruple en construction sur la montagne cet été. La reprise en 2027 sera évaluée une fois les travaux terminés. Les chiffres ci-dessus (90 m / 295 pi, configuration du tapis roulant de la saison 2025) reflètent la dernière saison d'exploitation du parc et devront être reconfirmés à sa réouverture."},
-    url:'https://sirsams.ca/',
-    mapUrl:'https://sirsams.ca/',
+    badges:['closed'],
+    note:{en:"The 2026 mountain bike season was cancelled: Sir Sam's closed its trails and skipped its camps while a new quad chairlift is built on the hill. The resort says only that it will assess resuming mountain bike operations for 2027, so whether riding returns next season is uncertain. Figures above (90 m / 295 ft, 2025-season conveyor-lift setup) reflect the last season the park operated and will need reconfirming if it reopens.",
+          fr:"La saison de vélo de montagne 2026 a été annulée : Sir Sam's a fermé ses sentiers et annulé ses camps pendant la construction d'un nouveau télésiège quadruple sur la montagne. Le centre indique seulement qu'il évaluera la reprise des opérations de vélo de montagne pour 2027 ; un retour la saison prochaine est donc incertain. Les chiffres ci-dessus (90 m / 295 pi, configuration du tapis roulant de la saison 2025) reflètent la dernière saison d'exploitation et devront être reconfirmés en cas de réouverture."},
+    url:'https://www.sirsams.ca/explore/mountain-biking',
+    mapUrl:'https://www.sirsams.ca/explore/mountain-biking',
     trailCount:12, trailKm:9, trailKmEst:true },
 
   // ─── QUÉBEC ─────────────────────────────────────────────────────────
@@ -2692,7 +2700,7 @@ function renderCard(park) {
     : '';
 
   return `
-<div class="park-card" id="card-${park.slug}" data-province="${park.province}">
+<div class="park-card${park.badges.indexOf('closed') !== -1 ? ' is-closed' : ''}" id="card-${park.slug}" data-province="${park.province}">
   <div>
     <div class="card-name">${nm}</div>
     <div class="card-city">${cy}</div>

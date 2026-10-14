@@ -31,7 +31,7 @@ It is fully bilingual (English/French), supports Metric / Imperial / Both unit d
   - hover or keyboard focus floats the park name over its peak; on touch, first tap shows the name and a second tap removes the peak
   - a newly added peak shimmers once
 - Trail Map and Learn More buttons on every park card
-- Badge system with 10 badge types (see Badge Key) and a collapsible bilingual key
+- Badge system with 11 badge types (see Badge Key) and a collapsible bilingual key
 - Province filter and search
 - Four colour schemes — Boreal, Granite, Maple (dark) and Alpine (light, the default) — with a theme switcher that remembers your choice
 
@@ -43,13 +43,13 @@ For GitHub Pages, enable Pages on the repository; the file is already named `ind
 
 ### 29 parks by province / territory
 
-28 are open; 1 (Cypress Mountain) is announced.
+27 operated in 2026, Sir Sam's was closed for the season, and 1 (Cypress Mountain) is announced.
 
 | Province / Territory | # | Parks |
 |---|---|---|
 | British Columbia | 12 | Whistler, Revelstoke, Kicking Horse, Fernie, Mount Washington, Sun Peaks, SilverStar, Big White, Panorama, Grouse Mountain, RED Mountain, Cypress Mountain (opening 2027) |
 | Québec | 9 | Mont-Sainte-Anne, Bromont, Le Massif de Charlevoix, Camp Fortune, Montcalm, Sommet Saint-Sauveur, MbPark / Mont Blanc, Mont Sutton, Vélo MSM |
-| Ontario | 2 | Horseshoe Valley, Sir Sam's (no MTB operation in 2026) |
+| Ontario | 2 | Horseshoe Valley, Sir Sam's (closed 2026; 2027 uncertain) |
 | Alberta | 2 | WinSport, Nitehawk Adventure Park |
 | New Brunswick | 2 | Parc-Vélo Sugarloaf, Poley Mountain |
 | Nova Scotia | 1 | Wentworth |
@@ -61,6 +61,7 @@ Manitoba, Saskatchewan, Prince Edward Island, Newfoundland & Labrador, the North
 
 | Badge | English | Français |
 |---|---|---|
+| Closed | Not operating this season — closed temporarily or for good; see the park note for the reason and any reopening plan | N'exploite pas cette saison — fermé temporairement ou définitivement ; voir la note du parc pour la raison et tout projet de réouverture |
 | Opening 2027 | Announced, not yet open — construction underway, targeting a 2027 opening | Annoncé, pas encore ouvert — construction en cours, ouverture ciblée pour 2027 |
 | New 2025 | Opened or debuted in 2025 | Ouvert ou inauguré en 2025 |
 | UCI World Cup | Has hosted UCI Downhill World Cup rounds | A accueilli des épreuves de Coupe du Monde UCI de descente |
@@ -92,7 +93,7 @@ The badge list and its order live in one place (`BADGE_ORDER` in `index.html`); 
 - Season dates, hours and lift availability change annually. Verify with each park before a visit.
 - Grouse Mountain and RED Mountain opened in 2025 (Phase 1); counts and distances will grow. RED Mountain is Phase 1 of a four-phase Gravity Logic master plan.
 - **Cypress Mountain** is announced but not open; construction is underway toward a summer 2027 target. The vertical shown (279 m / 915 ft) is the trail's published top-to-bottom descent, not the 356 m / 1,168 ft rise of the Raven Ridge chairlift. Trail count and distance haven't been published.
-- **Sir Sam's** (ON) has no mountain-bike operation in 2026 while a new quad chairlift is built; 2027 will be assessed afterwards. Its figures reflect the last season it operated. The guide has no `closed` badge yet (see `CLAUDE.md`); the closure is stated in the park's note.
+- **Sir Sam's** (ON) carries the *Closed* badge: the 2026 mountain bike season was cancelled (trails closed, camps not held) while a new quad chairlift is built. The resort says only that it will assess resuming operations for 2027, so next season is uncertain. Its figures reflect the last season it operated (2025). Source: sirsams.ca/explore/mountain-biking.
 - **Mont Sutton** carries *Limited Uplift*: the resort positions its network as XC/enduro, not downhill, and chairlift access is per ride.
 - **Vélo MSM** is a volunteer-run trail network; lift days are run by Mont Ste-Marie resort management, so confirm lift operation before visiting.
 - Calabogie Peaks (ON) was a lift-served DH park but discontinued bike uplift in the mid-2000s and is excluded.
@@ -123,6 +124,7 @@ Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map imager
 - Oct 2026 — Mountain tab rebuilt: legible labels at any park count, hover/tap name, one-time shimmer for new peaks
 - Oct 2026 — Colour schemes revised for print/PDF-level contrast; print palette added
 - Oct 2026 — Two-layer page texture from the PMR catalogue; footer wording unified with the USA guide
+- Oct 2026 — `closed` badge added (Sir Sam's: 2026 season cancelled for a new quad chairlift, 2027 uncertain)
 - Oct 2026 — README converted from README.docx to README.md and brought up to date (park count by province, tiles, Cypress and Sir Sam's status)
 
 ---
@@ -146,7 +148,7 @@ Il est entièrement bilingue (anglais/français), prend en charge l'affichage de
 - Vue **Stats** : classer les parcs par dénivelé ou distance de sentiers, ou filtrer par badge
 - Vue **Montagne** : choisir des parcs et comparer leur dénivelé sous forme de sommets (noms au survol ou au toucher, brève animation pour un sommet ajouté)
 - Boutons Carte des sentiers et En savoir plus sur chaque fiche
-- Système de 10 badges avec légende rétractable bilingue
+- Système de 11 badges avec légende rétractable bilingue
 - Filtre par province et barre de recherche
 - Quatre thèmes de couleurs — Boréal, Granit, Érable (sombres) et Alpin (clair, par défaut) — le choix est mémorisé
 
@@ -156,7 +158,7 @@ Ouvrez `index.html` dans un navigateur moderne. Aucun serveur, processus de cons
 
 ### 29 parcs par province / territoire
 
-Voir le tableau de la section anglaise — 28 parcs sont ouverts et 1 (Cypress Mountain) est annoncé. Les noms de parcs sont identiques en anglais et en français pour la plupart des parcs québécois. Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique confirmé.
+Voir le tableau de la section anglaise — 27 parcs ont été exploités en 2026, Sir Sam's était fermé pour la saison et 1 (Cypress Mountain) est annoncé. Les noms de parcs sont identiques en anglais et en français pour la plupart des parcs québécois. Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique confirmé.
 
 ### Légende des badges
 
@@ -173,7 +175,7 @@ Sites officiels des parcs et stations ; Trailforks ; liste officielle des client
 - Les dates de saison, heures et disponibilité des remontées changent chaque année. Vérifiez auprès de chaque parc avant de planifier une visite.
 - Grouse Mountain et RED Mountain ont ouvert en 2025 (phase 1). RED Mountain est la phase 1 d'un plan directeur en quatre phases de Gravity Logic.
 - **Cypress Mountain** est annoncé mais pas encore ouvert ; ouverture ciblée pour l'été 2027. Le dénivelé indiqué (279 m / 915 pi) est la descente totale publiée du sentier, et non le dénivelé de 356 m / 1 168 pi du télésiège Raven Ridge.
-- **Sir Sam's** (Ontario) n'exploite pas de vélo de montagne en 2026 pendant la construction d'un nouveau télésiège quadruple ; 2027 sera évalué ensuite.
+- **Sir Sam's** (Ontario) porte le badge Fermé : la saison de vélo de montagne 2026 a été annulée pendant la construction d'un nouveau télésiège quadruple. Le centre indique seulement qu'il évaluera la reprise pour 2027 ; la saison prochaine est incertaine.
 - **Mont Sutton** porte le badge Remontée limitée : le centre positionne son réseau comme XC/enduro, non descente.
 - **Vélo MSM** est un réseau géré par des bénévoles ; les jours de remontée sont assurés par la direction de Mont Ste-Marie — confirmez avant de vous déplacer.
 - Calabogie Peaks (Ontario) a cessé le transport de vélos au milieu des années 2000 et est exclu.

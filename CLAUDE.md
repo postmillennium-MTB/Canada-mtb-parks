@@ -218,3 +218,23 @@ off-season, which is already handled by each park's `season` field).
   procedural texture kit for small accents (cards, plates). Not wired into the
   page.
 
+## Color schemes and contrast ("would this survive being printed?")
+
+Standard for every theme, solved numerically against that theme's real surfaces
+(not by eye) — keep it when retinting or adding a theme:
+- `--text` ≥ 11.5:1, `--text-dim` ≥ 9:1, `--text-muted` ≥ 7:1, accent-as-text
+  (`--gold`, `--green`) ≥ 7:1 on every page/card surface. `--border-lit` (control
+  outlines) ≥ 3:1, `--border` (card outlines) ≥ 2:1.
+- Text never sits directly on a hue-only fill: province chips use `--text` with the
+  province hue in the fill and border; pills use a dark fill with near-white text.
+- Province colours are data encodings but must each hold ≥ 3:1 on all four themes
+  (mid-luminance window), and each province has its own hue. AB and YK used to be
+  the same colour; YK is now violet.
+- No dimming text with `opacity` or translucent white — use a solid token.
+- `@media print` (search `PRINT / SAVE-AS-PDF PALETTE`) forces the solved Alpine
+  palette for every theme, because browsers drop dark backgrounds when printing and
+  light text on white vanishes. No print button exists by design; the block only
+  acts when someone prints or saves to PDF.
+- Audit method: load each theme in a browser, walk every visible text node, composite
+  its colour over the effective background, compare to 4.5 (3 for large text) and 7.
+  Status at last run: Canada, all 4 themes + print: every item ≥ 7:1.

@@ -1551,6 +1551,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   margin-bottom: 1rem;
 }
 .view-tabs { display: flex; gap: 0; }
+.top-tabs { margin-top: 0.9rem; margin-bottom: 0; }   /* tab row sits under Badge Key / Mountain View; clicking one scrolls to the map section */
+.map-section .map-header { justify-content: flex-end; }
 .view-tab {
   background: transparent; border: none;
   border-bottom: 3px solid transparent;
@@ -1932,6 +1934,13 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   <div class="badge-key-content" id="badge-key-content" hidden>
     <!-- rendered by JS -->
   </div>
+  <div class="top-tabs map-header">
+    <div class="view-tabs">
+      <button class="view-tab active" id="tab-map" onclick="showView('map')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>Map</button>
+      <button class="view-tab" id="tab-stats" onclick="showView('stats')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11h8"/><path d="M7 16h3"/><path d="M7 6h12"/></svg>Stats</button>
+      <button class="view-tab" id="tab-mountain" onclick="showView('mountain')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/></svg>Mountain</button>
+    </div>
+  </div>
 </div>
 
 <!-- PROVINCE ACCORDIONS -->
@@ -1942,11 +1951,6 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 <!-- MAP -->
 <section class="map-section">
   <div class="map-header">
-    <div class="view-tabs">
-      <button class="view-tab active" id="tab-map" onclick="toggleView('map')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14.106 5.553a2 2 0 0 0 1.788 0l3.659-1.83A1 1 0 0 1 21 4.619v12.764a1 1 0 0 1-.553.894l-4.553 2.277a2 2 0 0 1-1.788 0l-4.212-2.106a2 2 0 0 0-1.788 0l-3.659 1.83A1 1 0 0 1 3 19.381V6.618a1 1 0 0 1 .553-.894l4.553-2.277a2 2 0 0 1 1.788 0z"/><path d="M15 5.764v15"/><path d="M9 3.236v15"/></svg>Map</button>
-      <button class="view-tab" id="tab-stats" onclick="toggleView('stats')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v16a2 2 0 0 0 2 2h16"/><path d="M7 11h8"/><path d="M7 16h3"/><path d="M7 6h12"/></svg>Stats</button>
-      <button class="view-tab" id="tab-mountain" onclick="toggleView('mountain')"><svg class="view-tab-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/><path d="M4.14 15.08c2.62-1.57 5.24-1.43 7.86.42 2.74 1.94 5.49 2 8.23.19"/></svg>Mountain</button>
-    </div>
     <div class="map-right-controls">
       <!-- buttons rendered from PROVINCES (zoomBtn:true) by renderZoomButtons() -->
       <div class="map-zoom-btns" id="map-zoom-btns"></div>
@@ -2394,7 +2398,7 @@ const PARKS = [
     note:{en:"Ontario's largest active lift-access bike park. Terrain for all levels including strong beginner progression.",
           fr:"Le plus grand parc de vélo avec remontée en Ontario. Terrain pour tous les niveaux, incluant une bonne progression pour débutants."},
     url:'https://www.horseshoeresort.com/mountain-biking/',
-    mapUrl:'https://www.trailforks.com/region/horseshoe-resort/',
+    mapUrl:'https://www.trailforks.com/region/horseshoe-valley-bike-park-4664/',
     trailCount:30, trailKm:18, trailKmEst:true },
 
   { id:15, province:'ON', slug:'sirsams',
@@ -2876,6 +2880,12 @@ function badgeKeyJump(k) {
 }
 
 /* "Mountain View" button → jump to the Mountain tab */
+/* Top-of-page Map / Stats / Mountain tabs: reveal the map section, scroll to it, switch view */
+function showView(view) {
+  revealMapSection();
+  toggleView(view);
+}
+
 function goToMountainView() {
   revealMapSection();
   toggleView('mountain');

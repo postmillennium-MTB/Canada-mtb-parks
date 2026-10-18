@@ -1400,6 +1400,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .card-link:focus-visible { outline: 2px solid var(--gold); border-radius: 3px; }
 
 /* ═══════════════════════════════════════════════════════════ NO RESULTS */
+.search-status { font-size: 0.8rem; color: var(--text-dim); margin: 0.4rem 0 0; min-height: 1.1em; }
+.search-status:empty { min-height: 0; margin: 0; }
 .no-results {
   text-align: center; padding: 2.5rem 1rem;
   color: var(--text-muted); font-size: 0.9rem;
@@ -1912,12 +1914,13 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   <div class="controls-row">
     <div class="search-wrap">
       <span class="search-icon" aria-hidden="true">🔍</span>
-      <input type="search" class="search-input" id="search-input" placeholder="Search parks…" autocomplete="off">
+      <input type="search" class="search-input" id="search-input" placeholder="Search parks…" autocomplete="off" autocapitalize="off" spellcheck="false" enterkeyhint="search">
     </div>
     <select class="province-select" id="prov-filter">
       <option value="">All Provinces</option>
     </select>
   </div>
+  <div class="search-status" id="search-status" role="status" aria-live="polite"></div>
 
   <!-- BADGE KEY / MOUNTAIN VIEW -->
   <div class="key-split">
@@ -2070,6 +2073,9 @@ const T = {
     mapNote: `<strong>Provinces with no lift-served parks:</strong> Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.`,
     footerNote: `Last update: October 2026. Base list sourced from <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — Becky Timbers' website. Loam Pass status subject to change. Always verify hours and season status directly with each park before visiting.<br><br>Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br><br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
     noResults: 'No parks match your filters.',
+    searchCount: '{n} parks',
+    searchCountOne: '1 park',
+    searchClose: 'No exact match for “{q}” — showing close matches.',
     noteLabel: 'Note',
     badges: {
       closed: '🚫 Closed',
@@ -2139,6 +2145,9 @@ const T = {
     mapNote: `<strong>Provinces sans parc avec remontée :</strong> Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique. La concentration des infrastructures se trouve principalement en Colombie-Britannique et dans le corridor skiable des Laurentides au Québec.`,
     footerNote: `Dernière mise à jour : octobre 2026. Liste de base tirée de <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — le site de Becky Timbers. Le statut du Loam Pass peut changer. Vérifiez toujours les heures et l'état de la saison directement auprès de chaque parc avant votre visite.<br><br>Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br><br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
     noResults: 'Aucun parc ne correspond à vos filtres.',
+    searchCount: '{n} parcs',
+    searchCountOne: '1 parc',
+    searchClose: 'Aucune correspondance exacte pour « {q} » — résultats approchants.',
     noteLabel: 'Note',
     badges: {
       closed: '🚫 Fermé',
@@ -2716,6 +2725,19 @@ function formatTrailDistance(km, est) {
   return prefix + km + ' km' + THINSP + '/' + THINSP + mi + ' mi';
 }
 
+/* Card "Trails" value. Almost every trailsLabel is a plain count ('15+'), but a
+   park that only publishes network length (Sun Peaks: '89+ km') is converted
+   with the units selector like every other distance. */
+function formatTrailsLabel(label) {
+  const m = /^~?(\d+)(\+?)\s*km$/i.exec(String(label).trim());
+  if (!m) return label;
+  const km = +m[1], plus = m[2];
+  const mi = Math.round(km * KM_TO_MILES);
+  if (units === 'metric')   return km + plus + ' km';
+  if (units === 'imperial') return mi + plus + ' mi';
+  return km + plus + ' km' + THINSP + '/' + THINSP + mi + plus + ' mi';
+}
+
 /* ══════════════════════════════════════════════════ BADGE RENDERER */
 function renderBadge(key) {
   const tx = T[lang];
@@ -2752,7 +2774,7 @@ function renderCard(park) {
     </div>
     <div class="stat">
       <div class="stat-label">${tx.trails}</div>
-      <div class="stat-val">${park.trailsLabel}</div>
+      <div class="stat-val">${formatTrailsLabel(park.trailsLabel)}</div>
     </div>
     <div class="stat">
       <div class="stat-label">${tx.season}</div>
@@ -2774,16 +2796,57 @@ function renderCard(park) {
 }
 
 /* ══════════════════════════════════════════════════ FILTER PARKS */
-function getFilteredParks() {
-  const q = search.toLowerCase().trim();
-  return PARKS.filter(p => {
-    if (provFilter && p.province !== provFilter) return false;
-    if (q) {
-      const nm = (p.name.en + ' ' + p.name.fr + ' ' + p.city.en + ' ' + p.city.fr).toLowerCase();
-      if (!nm.includes(q)) return false;
+/* Search is forgiving by design: case- and accent-insensitive ("quebec" finds
+   Québec), every typed word must match (AND), and words match anywhere in the
+   park's name, city, province (code or name, EN or FR) or lift. If nothing
+   matches exactly, one-letter typos are tolerated ("son" -> Sun Peaks) and the
+   results are flagged as close matches. */
+function normText(str) {
+  return String(str).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
+}
+function searchHaystack(p) {
+  const pv = province(p.province);
+  return normText([
+    p.name.en, p.name.fr, p.city.en, p.city.fr, p.province,
+    pv ? pv.name.en + ' ' + pv.name.fr : '',
+    p.lift.en, p.lift.fr
+  ].join(' '));
+}
+/* Edit distance, capped: returns > max as soon as it can't be within max. */
+function editDist(a, b, max) {
+  if (Math.abs(a.length - b.length) > max) return max + 1;
+  let prev = [];
+  for (let j = 0; j <= b.length; j++) prev[j] = j;
+  for (let i = 1; i <= a.length; i++) {
+    const cur = [i];
+    let rowMin = i;
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < rowMin) rowMin = cur[j];
     }
-    return true;
-  });
+    if (rowMin > max) return max + 1;
+    prev = cur;
+  }
+  return prev[b.length];
+}
+function fuzzyTokenMatch(tok, hay) {
+  if (tok.length < 3) return false;
+  const max = tok.length >= 7 ? 2 : 1;
+  /* Same first letter and whole-word comparison keep short queries from
+     matching half the list. */
+  return hay.split(/[^a-z0-9]+/).some(w => w[0] === tok[0] && w.length >= 3 && editDist(tok, w, max) <= max);
+}
+let searchFuzzy = false;
+function getFilteredParks() {
+  const toks = normText(search).split(/\s+/).filter(Boolean);
+  const byProv = PARKS.filter(p => !provFilter || p.province === provFilter);
+  searchFuzzy = false;
+  if (!toks.length) return byProv;
+  const exact = byProv.filter(p => { const h = searchHaystack(p); return toks.every(t => h.includes(t)); });
+  if (exact.length) return exact;
+  const close = byProv.filter(p => { const h = searchHaystack(p); return toks.every(t => h.includes(t) || fuzzyTokenMatch(t, h)); });
+  searchFuzzy = close.length > 0;
+  return close;
 }
 
 /* ══════════════════════════════════════════════════ RENDER ACCORDIONS */
@@ -2791,6 +2854,13 @@ function renderParkAccordions() {
   const tx = T[lang];
   const filtered = getFilteredParks();
   const section = document.getElementById('provinces-section');
+  const status = document.getElementById('search-status');
+  if (status) {
+    const q = search.trim();
+    status.textContent = !q ? '' :
+      !filtered.length ? '' :
+      (searchFuzzy ? tx.searchClose.replace('{q}', q) + ' ' : '') + (filtered.length === 1 ? tx.searchCountOne : tx.searchCount.replace('{n}', filtered.length));
+  }
 
   if (filtered.length === 0) {
     section.innerHTML = `<div class="no-results">${tx.noResults}</div>`;
@@ -2806,7 +2876,8 @@ function renderParkAccordions() {
     const parks = grouped[pcode];
     if (parks.length === 0) return;
     const pname = provName(pcode);
-    const isFirst = pcode === 'BC' && !provFilter && !search;
+    const filtering = !!(provFilter || search.trim());
+    const isFirst = filtering || pcode === 'BC';
     html += `
 <details class="province-accordion" ${isFirst ? 'open' : ''}>
   <summary class="province-summary" onclick="onProvClick('${pcode}')">
@@ -3787,10 +3858,10 @@ document.getElementById('units-toggle').addEventListener('change', e => {
   syncUrlParams();
 });
 
-document.getElementById('search-input').addEventListener('input', e => {
+['input', 'search'].forEach(ev => document.getElementById('search-input').addEventListener(ev, e => {
   search = e.target.value;
   renderParkAccordions();
-});
+}));
 
 document.getElementById('prov-filter').addEventListener('change', e => {
   provFilter = e.target.value;

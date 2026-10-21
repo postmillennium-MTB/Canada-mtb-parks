@@ -246,3 +246,7 @@ Standard for every theme, solved numerically against that theme's real surfaces
 - Audit method: load each theme in a browser, walk every visible text node, composite
   its colour over the effective background, compare to 4.5 (3 for large text) and 7.
   Status at last run: Canada, all 4 themes + print: every item ≥ 7:1.
+
+## License and notice (do not remove)
+
+This repo is licensed under PolyForm Noncommercial 1.0.0 (`LICENSE`). Every edit and rebuild must keep: the `Required Notice:` line at the top of `LICENSE`; the (c) / SPDX comment right after the doctype of each HTML page; and the visible `.pmr-license` footer on each page. Do not remove, reword or hide them. New pages get the same footer. Third-party material keeps its own license: never relicense it, and keep its notices. Jon holds the copyright and decides any license change.

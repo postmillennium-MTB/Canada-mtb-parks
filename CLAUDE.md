@@ -193,6 +193,26 @@ off-season, which is already handled by each park's `season` field).
   province boundary that's subtly wrong everywhere is worse than the
   current tile dependency, not better.
 
+## Road-trip mode (Map tab; shared engine with the USA guide)
+
+- Search `MAP DATA — Canadian highway network` (`CA_ROADS`) and `ROAD TRIP`. The engine
+  (`rtBuildGraph`, `rtSnap`, `rtSnapTrip`, `rtParksNear`, ...) is a **twin copy** of the USA
+  guide's, byte-for-byte: fix it in one, make the same change in the other. Only `rtClass`
+  (road costs: ferries ×2 here, US routes ×1.2 there) and the `trip*` UI are per-guide.
+- Data: Natural Earth 1:10m roads, every Canadian class plus ferries (Vancouver Island is
+  unreachable without them). `tools/build-road-network.py ... 0.01 4 250 CAN` rebuilds it
+  exactly; the same script, with defaults for USA, lives in the USA repo. No routing API, same
+  reasoning as the tile gotcha above.
+- Text is `T.en.trip` / `T.fr.trip`; both must stay complete. Distances follow `units`
+  (corridor presets are round numbers in each system, see `TRIP_CORRIDORS`).
+  `toggleView` hides the bar on Stats/Mountain (`tripSyncView`); `renderAll` re-labels it
+  (`tripRenderText`).
+- **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
+  The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
+  fix is one combined US+CA network with both park lists. That needs a decision on how the two
+  separate files share data, so ask Jon first.
+- Open idea, not scheduled: a separate Routes tab (see the USA repo README). Ask first.
+
 ## Mountain chart and page texture (shared with the USA guide)
 
 - **Mountain tab = `renderPeakChart`** (search `PEAK CHART`; styles are the

@@ -25,6 +25,7 @@ It is fully bilingual (English/French), supports Metric / Imperial / Both unit d
 - French/English toggle: UI strings, park notes and badge labels all switch
 - Metric / Imperial / Both unit toggle (both figures are stored, never converted, so published numbers aren't distorted by rounding)
 - Interactive Leaflet map with province-coloured markers and clustering
+- **Road-trip mode** on the map: press *Plan a road trip*, draw your route with a finger or mouse, and it snaps to real highways (ferries included, so Vancouver Island works). Parks within a chosen distance are numbered in travel order with their km marker and how far off the route they sit; tick up to 9 as stops and open the trip in Google Maps. A loop drawn back to its start is planned as a round trip. Follows the language and units toggles.
 - **Stats** view: rank all parks by vertical drop or trail distance, or filter by badge
 - **Mountain** view: pick parks and see their vertical drop as a skyline of peaks
   - label style adapts to how many peaks are shown (names under each peak, rotated names, or hover/tap only)
@@ -100,9 +101,10 @@ The badge list and its order live in one place (`BADGE_ORDER` in `index.html`); 
 
 ### Technical notes
 
-- Single HTML file (about 440 KB including the embedded libraries); no build step, bundler or package manager
+- Single HTML file (about 650 KB including the embedded libraries and highway data); no build step, bundler or package manager
 - Leaflet 1.9.4 and Leaflet.MarkerCluster 1.5.3 embedded inline
 - **Map tiles:** OpenStreetMap's standard tile server (no key needed), with Esri's keyless World Street Map as a fallback if OSM is unreachable. Dark themes darken the tiles with a CSS filter. *(The map previously used CARTO tiles, which now require an API key and return an "API KEY REQUIRED" image with HTTP 200.)* OSM's usage policy discourages embedded production use at scale, so a bundled vector basemap (as the USA guide now has) is the long-term fix — it needs real province boundary geometry. See `CLAUDE.md`.
+- **Road-trip highways:** `CA_ROADS`, every Canadian road class plus ferries from Natural Earth's public-domain 1:10m roads (~74,000 km in ~28 KB), baked into the file. `tools/build-road-network.py ne_10m_roads out.json 0.01 4 250 CAN` rebuilds it exactly (the USA guide uses the same script). No routing server. Routing never crosses into the US yet; cross-border trips are a known next step.
 - Iframe-safe and mobile-first; designed to embed on postmillenniumrenaissance.com and in Pinkbike articles
 - No analytics and no data collection; the only external requests are map tiles and Google Fonts
 
@@ -126,10 +128,11 @@ The four colour schemes are named for Fathers of Confederation. The active name 
 
 Developed for Post Millennium Renaissance for trail advocacy and community planning. Trail data and builder attributions were researched from publicly available sources.
 
-Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map imagery © OpenStreetMap contributors (Esri fallback). Background patterns from US Design Patent Nos. 12,657 and 268,339.
+Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map imagery © OpenStreetMap contributors (Esri fallback). Road-trip highways from Natural Earth (public domain). Background patterns from US Design Patent Nos. 12,657 and 268,339.
 
 ### Changelog
 
+- Nov 2026 — Road-trip mode on the Map tab (draw a route, snap to highways and ferries, parks listed in travel order, Google Maps export); bilingual, follows units. Colours checked in all four schemes and print.
 - Oct 2026 — Mountain tab rebuilt: legible labels at any park count, hover/tap name, one-time shimmer for new peaks
 - Oct 2026 — Colour schemes revised for print/PDF-level contrast; print palette added
 - Oct 2026 — Two-layer page texture from the PMR catalogue; footer wording unified with the USA guide
@@ -154,6 +157,7 @@ Il est entièrement bilingue (anglais/français), prend en charge l'affichage de
 - Bascule français/anglais — interface, descriptions et libellés de badges
 - Bascule d'unités métrique / impérial / les deux
 - Carte Leaflet interactive avec marqueurs colorés par province et regroupement automatique
+- **Mode virée** sur la carte : appuyez sur *Planifier une virée*, tracez votre trajet au doigt ou à la souris, et il s'aligne sur les routes réelles (traversiers compris, donc l'île de Vancouver fonctionne). Les parcs à la distance choisie sont numérotés dans l'ordre du trajet, avec leur repère kilométrique et leur distance du trajet ; cochez jusqu'à 9 arrêts et ouvrez la virée dans Google Maps. Suit les bascules de langue et d'unités.
 - Vue **Stats** : classer les parcs par dénivelé ou distance de sentiers, ou filtrer par badge
 - Vue **Montagne** : choisir des parcs et comparer leur dénivelé sous forme de sommets (noms au survol ou au toucher, brève animation pour un sommet ajouté)
 - Boutons Carte des sentiers et En savoir plus sur chaque fiche
@@ -191,8 +195,9 @@ Sites officiels des parcs et stations ; Trailforks ; liste officielle des client
 
 ### Notes techniques
 
-- Fichier HTML unique (environ 440 Ko avec les bibliothèques intégrées) ; aucun processus de construction
+- Fichier HTML unique (environ 650 Ko avec les bibliothèques et les données routières intégrées) ; aucun processus de construction
 - **Tuiles de la carte :** serveur de tuiles standard d'OpenStreetMap (sans clé), avec Esri en secours ; les thèmes sombres assombrissent les tuiles par un filtre CSS. (CARTO exige désormais une clé d'API.)
+- **Routes des virées :** `CA_ROADS`, routes et traversiers canadiens tirés des routes 1:10m de Natural Earth (domaine public), intégrés au fichier ; aucun serveur d'itinéraires. Les itinéraires ne passent pas encore par les États-Unis.
 - Aucune analytique ni collecte de données ; seules requêtes externes : tuiles de carte et Google Fonts
 
 ### Apparence
@@ -210,7 +215,7 @@ Les quatre thèmes portent le nom de Pères de la Confédération. Le nom actif 
 
 ### Crédits
 
-Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Imagerie cartographique © contributeurs OpenStreetMap (secours Esri).
+Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Imagerie cartographique © contributeurs OpenStreetMap (secours Esri). Routes des virées : Natural Earth (domaine public).
 
 ## License
 

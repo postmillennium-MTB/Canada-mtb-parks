@@ -1586,6 +1586,98 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .map-zoom-btn:hover, .map-zoom-btn.active { background: var(--bg-hover); color: var(--text); border-color: var(--border-lit); }
 .map-zoom-btn:focus-visible { outline: 2px solid var(--gold); }
 
+/* ═══════════════════════════════════════════════════════════ ROAD TRIP (MAP TAB)
+   Route = solid --gold on a --bg casing (the casing keeps it clear of the OSM tile colours);
+   sketch = dashed --text; corridor = faint --gold band; highways = 1px --border-lit. Each is
+   told apart by line style or weight as well as colour. Trip pins are numbered rounded squares
+   (the normal pins are dots); closed parks get a dashed outline, never dimmed text. */
+.trip-bar { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin: 0 0 0.6rem; }
+.trip-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  background: var(--bg-raised); border: 1px solid var(--border-lit); border-radius: var(--r-sm);
+  padding: 6px 13px; min-height: 36px;
+  font-family: var(--font-d); font-size: 0.8rem; font-weight: 600; color: var(--text);
+  cursor: pointer; text-decoration: none; transition: background 0.15s, border-color 0.15s;
+}
+.trip-btn:hover { background: var(--bg-hover); border-color: var(--gold-dim); text-decoration: none; }
+.trip-btn:focus-visible, .trip-name:focus-visible, .trip-corr select:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.trip-btn[aria-pressed="true"] { background: var(--gold); border-color: var(--gold); color: var(--bg); }
+.trip-btn[hidden] { display: none; }
+.trip-btn svg { width: 16px; height: 16px; flex: 0 0 auto; }
+.trip-corr { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; font-size: 0.78rem; color: var(--text-dim); }
+.trip-corr select {
+  background: var(--bg-raised); color: var(--text); border: 1px solid var(--border-lit);
+  border-radius: var(--r-sm); padding: 5px 8px; min-height: 34px; font-family: var(--font-b); font-size: 0.78rem;
+}
+.trip-hint { flex-basis: 100%; font-size: 0.8rem; color: var(--text-dim); line-height: 1.45; margin: 0; }
+.trip-hint:empty { display: none; }
+.trip-off-tab { display: none !important; }
+#park-map.trip-drawing, #park-map.trip-drawing .leaflet-interactive { cursor: crosshair; }
+#park-map.trip-drawing { touch-action: none; }
+.trip-net { stroke: var(--border-lit); stroke-opacity: 0.9; fill: none; }
+.trip-sketch { stroke: var(--text); stroke-dasharray: 6 6; fill: none; }
+.trip-band { stroke: var(--gold); stroke-opacity: 0.18; fill: none; }
+.trip-route-casing { stroke: var(--bg); fill: none; }
+.trip-route { stroke: var(--gold); fill: none; }
+.trip-pin {
+  min-width: 22px; height: 22px; padding: 0 3px; box-sizing: border-box; border-radius: 5px;
+  background: var(--gold); color: var(--bg); border: 2px solid var(--bg);
+  font-family: var(--font-d); font-size: 0.78rem; font-weight: 700; line-height: 18px; text-align: center;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.trip-pin.is-closed { background: var(--bg); color: var(--text); border: 2px dashed var(--gold); }
+.trip-end {
+  display: inline-block; white-space: nowrap; background: var(--text); color: var(--bg); border: 1px solid var(--bg);
+  border-radius: 4px; padding: 1px 6px; font-family: var(--font-d); font-size: 0.66rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+}
+.leaflet-tooltip.trip-tip {
+  background: var(--bg-raised); color: var(--text); border: 1px solid var(--border-lit);
+  font-family: var(--font-b); font-size: 0.75rem; font-weight: 600; box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+.trip-results {
+  margin-top: 0.75rem; padding: 0.8rem 1rem;
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r);
+}
+.trip-results[hidden] { display: none; }
+.trip-sum { font-size: 0.85rem; color: var(--text); line-height: 1.5; }
+.trip-sum strong { color: var(--gold); }
+.trip-empty { font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem; }
+.trip-list { list-style: none; margin: 0.6rem 0 0; padding: 0; display: flex; flex-direction: column; }
+.trip-item {
+  display: grid; grid-template-columns: 28px 1fr auto auto; gap: 4px 10px; align-items: center;
+  padding: 6px 4px; border-top: 1px solid var(--border);
+}
+.trip-item.is-closed { border-left: 2px dashed var(--badge-closed-bd); padding-left: 6px; }
+.trip-num {
+  width: 24px; height: 24px; border-radius: 5px; background: var(--gold); color: var(--bg);
+  font-family: var(--font-d); font-size: 0.8rem; font-weight: 700; line-height: 24px; text-align: center;
+}
+.trip-num.is-closed { background: transparent; color: var(--text); border: 2px dashed var(--gold); line-height: 20px; box-sizing: border-box; }
+.trip-main { min-width: 0; }
+.trip-name {
+  background: none; border: 0; padding: 0; color: var(--text); cursor: pointer; text-align: left;
+  font-family: var(--font-d); font-size: 0.86rem; font-weight: 600; border-bottom: 1px dotted var(--text-dim);
+}
+.trip-name:hover { color: var(--gold); border-color: var(--gold); }
+.trip-main .badge { margin-left: 4px; vertical-align: 1px; }
+.trip-loc { display: block; font-size: 0.72rem; color: var(--text-dim); margin-top: 1px; }
+.trip-dist { display: flex; flex-direction: column; align-items: flex-end; text-align: right; }
+.trip-mile { font-size: 0.78rem; color: var(--text); font-weight: 700; white-space: nowrap; }
+.trip-off { font-size: 0.72rem; color: var(--text-dim); white-space: nowrap; }
+.trip-stop { display: inline-flex; align-items: center; gap: 5px; font-size: 0.74rem; color: var(--text-dim); cursor: pointer; min-height: 32px; padding-left: 4px; }
+.trip-stop input { width: 16px; height: 16px; accent-color: var(--gold); cursor: pointer; }
+.trip-stop input:disabled { cursor: not-allowed; }
+.trip-stop-na { justify-content: center; min-width: 52px; }
+.trip-actions { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; margin-top: 0.75rem; }
+.trip-stopcount { font-size: 0.75rem; color: var(--text-dim); }
+.trip-fine { font-size: 0.72rem; color: var(--text-muted); line-height: 1.5; margin-top: 0.6rem; }
+@media (max-width: 600px) {
+  .trip-item { grid-template-columns: 28px 1fr auto; }
+  .trip-dist { grid-column: 2; grid-row: 2; flex-direction: row; gap: 10px; align-items: baseline; }
+  .trip-stop { grid-column: 3; grid-row: 1 / span 2; }
+}
+
 /* ════════════════════════════════════ MAP BUTTON ON CARD */
 .card-footer { margin-top: auto; display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
 .card-link--map {
@@ -1968,7 +2060,16 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   </div>
   <div id="map-body">
   <div class="prov-legend" id="prov-legend"></div>
+  <div class="trip-bar" id="trip-bar">
+    <button type="button" class="trip-btn" id="trip-draw-btn" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route" aria-hidden="true" focusable="false"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span class="trip-btn-label">Plan a road trip</span></button>
+    <label class="trip-corr"><span id="trip-corr-pre">Parks within</span>
+      <select id="trip-corr"><option value="auto" selected>Auto distance</option><option value="0">15 km</option><option value="1">40 km</option><option value="2">80 km</option><option value="3">150 km</option><option value="4">250 km</option></select>
+      <span id="trip-corr-post">of the route</span></label>
+    <button type="button" class="trip-btn" id="trip-clear-btn" hidden><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span id="trip-clear-label">Clear trip</span></button>
+    <p class="trip-hint" id="trip-hint" aria-live="polite"></p>
+  </div>
   <div class="map-wrap" id="map-wrap"><div id="park-map"></div></div>
+  <div class="trip-results" id="trip-results" hidden aria-live="polite"></div>
   <div class="stats-widget" id="stats-widget" hidden></div>
   <div class="mountain-widget" id="mountain-widget" hidden></div>
   <div class="map-note" id="map-note">
@@ -1985,6 +2086,7 @@ details[open] .prov-chevron { transform: rotate(180deg); }
     Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br><br>
     Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.
   </p>
+  <p class="footer-note texture-credit" id="roads-credit"></p>
   <p class="footer-note texture-credit" id="texture-credit">Background patterns: adapted from US Design Patent No. 12,657 (Eugene A. Crowe, 1882; the patent has long expired), and US Design Patent No. 268,339.</p>
 </footer>
 
@@ -2117,6 +2219,46 @@ const T = {
     mountainRemoveTap: 'Tap again to remove',
     mountainAria: 'Vertical drop of the selected parks, ordered west to east',
     textureCredit: 'Background patterns: adapted from US Design Patent No. 12,657 (Eugene A. Crowe, 1882; the patent has long expired), and US Design Patent No. 268,339.',
+    /* road-trip mode (Map tab) */
+    trip: {
+      plan: "Plan a road trip",
+      cancel: "Cancel drawing",
+      redraw: "Draw a new trip",
+      clear: "Clear trip",
+      within1: "Parks within",
+      within2: "of the route",
+      auto: "Auto distance",
+      hintDraw: "Drag one line across the map from start to finish (the thin lines are the highways it can use). Let go and it snaps to the nearest highways. Esc cancels.",
+      cancelled: "Drawing cancelled.",
+      tooShort: "That line is too short. Press and drag from where the trip starts to where it ends.",
+      noRoute: "No highway route matched that line. Start and finish on land in Canada, then try again.",
+      loadFail: "The highway data could not be loaded, so road trips are unavailable right now.",
+      byRoad: "{d} by road",
+      via: "via",
+      parkOne: "{n} park",
+      parkMany: "{n} parks",
+      within: "within {d} of the route",
+      closedOne: "({n} closed)",
+      closedMany: "({n} closed)",
+      empty: "No lift-served parks within {d} of this route. Try a wider distance above, or draw the line closer to the mountains.",
+      mile: "Mile",
+      mileShort: "mi",
+      onRoute: "on the route",
+      offRoute: "{d} off route",
+      stop: "Stop",
+      gmaps: "Open in Google Maps",
+      stopsOne: "{n} stop added",
+      stopsMany: "{n} stops added",
+      tickHint: "Tick “Stop” on any park to add it",
+      max: "(max {n})",
+      start: "Start",
+      finish: "Finish",
+      startFinish: "Start / Finish",
+      hwy: "Hwy",
+      ferry: "ferry",
+      fine: "Road distances are measured on a simplified highway map (Natural Earth), so treat them as roughly ±10% and check real directions before you go. The km / Mile figure is how far along the route the park sits; “off route” is the straight-line distance from the highway to the park pin, not the drive. Routes use Canadian highways and ferries only and never cross into the US. Only Canadian parks are listed.",
+      credit: "Road-trip highways: <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> 1:10m roads (public domain), simplified."
+    },
   },
   fr: {
     topbrand: 'Parcs vélo Canada',
@@ -2189,6 +2331,46 @@ const T = {
     mountainRemoveTap: 'Touchez à nouveau pour retirer',
     mountainAria: 'Dénivelé des parcs sélectionnés, d\u2019ouest en est',
     textureCredit: 'Motifs de fond : adaptés du brevet américain de dessin no 12 657 (Eugene A. Crowe, 1882 ; le brevet est expiré depuis longtemps) et du brevet américain de dessin no 268 339.',
+    /* road-trip mode (Map tab) */
+    trip: {
+      plan: "Planifier une virée",
+      cancel: "Annuler le tracé",
+      redraw: "Tracer une nouvelle virée",
+      clear: "Effacer la virée",
+      within1: "Parcs à moins de",
+      within2: "du trajet",
+      auto: "Distance auto",
+      hintDraw: "Glissez un seul trait sur la carte, du départ à l’arrivée (les traits fins sont les routes utilisables). Relâchez : le tracé s’aligne sur les routes les plus proches. Échap pour annuler.",
+      cancelled: "Tracé annulé.",
+      tooShort: "Ce trait est trop court. Appuyez et glissez du point de départ jusqu’à l’arrivée.",
+      noRoute: "Aucun itinéraire routier ne correspond à ce trait. Commencez et terminez sur la terre ferme au Canada, puis réessayez.",
+      loadFail: "Les données routières n’ont pas pu être chargées : les virées sont indisponibles pour le moment.",
+      byRoad: "{d} par la route",
+      via: "via",
+      parkOne: "{n} parc",
+      parkMany: "{n} parcs",
+      within: "à moins de {d} du trajet",
+      closedOne: "({n} fermé)",
+      closedMany: "({n} fermés)",
+      empty: "Aucun parc desservi par remontée à moins de {d} de ce trajet. Essayez une distance plus grande ci-dessus, ou tracez plus près des montagnes.",
+      mile: "Mille",
+      mileShort: "mi",
+      onRoute: "sur le trajet",
+      offRoute: "à {d} du trajet",
+      stop: "Arrêt",
+      gmaps: "Ouvrir dans Google Maps",
+      stopsOne: "{n} arrêt ajouté",
+      stopsMany: "{n} arrêts ajoutés",
+      tickHint: "Cochez « Arrêt » sur un parc pour l’ajouter",
+      max: "(max. {n})",
+      start: "Départ",
+      finish: "Arrivée",
+      startFinish: "Départ / arrivée",
+      hwy: "route",
+      ferry: "traversier",
+      fine: "Les distances routières sont mesurées sur une carte routière simplifiée (Natural Earth) : comptez environ ±10 % et vérifiez l’itinéraire réel avant de partir. Le repère km / Mille indique où le parc se situe le long du trajet ; « à … du trajet » est la distance à vol d’oiseau entre la route et l’épingle du parc, pas le trajet en voiture. Les itinéraires n’utilisent que les routes et traversiers canadiens et ne passent jamais par les États-Unis. Seuls les parcs canadiens sont listés.",
+      credit: "Routes des virées : routes 1:10m de <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> (domaine public), simplifiées."
+    },
   }
 };
 
@@ -3077,6 +3259,7 @@ function renderAll() {
   updateMapPopups();
   if (mapView === 'stats') renderStats();
   if (mapView === 'mountain') renderMountain();
+  if (typeof tripRenderText === 'function') tripRenderText();   // road-trip labels follow lang + units
 }
 
 
@@ -3115,6 +3298,7 @@ function toggleView(view) {
     zoomBtns.style.display = 'none';
     renderMountain();
   }
+  if (typeof tripSyncView === 'function') tripSyncView(view);   // road-trip bar is Map-tab only
 }
 
 /* ══════════════════════════════════════════════════ STATS WIDGET */
@@ -3850,6 +4034,610 @@ function onProvClick(pcode) {
     }
   }, 100);
 }
+
+/* ══════════════════════════════════════════════════ MAP DATA — Canadian highway network
+   Every road class plus ferries from Natural Earth's 1:10m roads (public domain,
+   naturalearthdata.com), noded into a routable graph, simplified to ~1 km and rounded to
+   0.004 deg (~400 m): ~74,000 km of road in ~28 KB. Built by tools/build-road-network.py
+   with "0.01 4 250 CAN" (the same script as the USA guide; those arguments reproduce this
+   exact string). Baked in so road trips need no routing server, just as the USA guide's
+   US_ROADS does. Format: "q" = units per degree; "edges" = space-separated edges, each the
+   polyline-encoded name index followed by polyline-encoded lat/lng deltas. */
+const CA_ROADS = {"q":250,"names":["","1","3","Ferry","6","11","373","21","7","97","12","99","5","417","2","A-20","52","39","18","75","68","71","17","510","430","361","230","10","70","80","320","360","370","480","4","105","19","132","198","299","195","8","104","108","102","101","103","A-30","185","A-73","173","A-55","112","161","143","A-10","133","A-15","401","115","26","60","117","A-40","50","148","A-5","172","138","385","169","170","175","155","167","111","109","113","69","129","584","66","631","144","16A","16","9","13","29","43","64","88","35","63","280","290","1A","2A","55","391","106","83","93","33","754","750","49","32","28","36","41","5A","23","95","3A","40","24","37","27","20","14","330","340","410","210","460","19A","97C","45","22","A-440","72","65","A-640","61","400","407","QEW","190","416","114","LAP","406","404","402","403","91","97A","216","201","DVP","GE","15","44","59","17A","62","85","405","107","162","118","116","122","147","A-50","A-740","A-25","A-13"],"edges":"?ck]db`AZC ?c_]lez@c@t@KMa@Gg@i@YCOJGd@_@RQdBcAnFm@jFILm@JWPSf@k@lCOLi@HiC~@}B`@g@VcAfC[X]?wAtAq@\\w@jAy@`@Sn@g@|@gAr@s@Xa@dA[b@Wz@UD[IUH[j@_@TWd@u@d@M`@SjB@`CMZ[PAbASxAqAxEQdAUxCwAxHa@nAyB`C[t@GlAYb@g@N_@zAmAPIh@ORKOAu@GGcAiFyA{D{@iGoCgM A{vWzvy@NyDFI Cs}Vhby@Fs@PODa@]w@c@QG_@JOb@AJKCu@Ji@Au@MGe@FKq@e@KAKMIBe@ CebWhgz@Pe@XSVmABw@TSJa@TGRs@{@{AmBDc@g@ EobXzzZnAaBNa@?U A_|VltY@nBUPMr@o@~@ ?ubXlf[Sc@Jq@Oc@MuBJu@\\MDe@ Ck}Szpe@D~AEp@ Ck}Slue@Fh@GH[@GJGzBv@jF C_}Svbf@^bDKTBdAGf@F\\`@p@DnC_@|@ GgwTtpf@UTCVMNk@LcAf@iA\\_@p@e@d@Qj@c@r@KAQNo@xBOTYN]?k@Mc@kAYJo@?G^q@?[sAWSWNSMI@m@d@ I}|Vzaj@g@Jm@]s@y@YPOAMMGJQEqAeBMe@YuEDy@Is@LoB KejYlwn@Ue@c@Mg@y@OIW?KPGb@w@vAUr@k@H@v@Mj@[PCj@MBWOeAx@A~@PnACz@ MgcXvht@mIOkBRGO_E@[bAW@UVgADAWSG ?ua\\|_t@Dd@RLTM?s@`@c@CiFPoABeBRoAHaBCwFh@aCDyJ^kAXX^dAf@PNTLAH{@CwCTsCb@}CV}@`@g@|@q@Nw@LUrA}@Xs@OcAH[LMLu@r@a@`@Ct@VzAx@r@IhB?ZR`AB\\SZ_@Z_Bt@q@j@Gb@Rf@FfA[xAB~@G Oc_]lez@PrCDZLJVfBErAVnDr@jDf@nAl@d@h@`BpA`Al@hBXJVCjAiA^OV@\\ZJARU`A_DLEJc@d@Zl@?ZLp@r@d@HlBrAr@Bf@a@L?RNNEHUp@Id@g@ Q{rWbgz@SO_@GoAZi@YSJ S}xWxfz@N{@Ks@Pg@?gAHIGo@|@mC S{oWjjz@i@h@wAX[l@OFCNSDUR UwvWnoz@GV`@lA^@Pb@z@t@HlB^l@@dBJ\\DFPAZLNZTJJr@LX`AN\\C\\OJJRC^FLXT?j@Rf@IRDHN A{rWbgz@HJbAJPnA A{oWjjz@j@BVOb@It@c@l@MNJVK|@CJFJIFVRIt@HPM AmbWfhz@FI?S WwmWv}y@d@f@@PRVb@KvA~@l@?R`@@f@PNZ@@TXPBN\\HHL YufUtkc@pAbCD^P^@X YicUrrc@B|BKjB_@fB AwaUbi_@Nv@J|APd@DbBGn@o@tC@\\Vh@YGi@@g@MKIQu@i@?YIWH [ylU~p_@Df@^f@Jb@ ]eyUpva@VdA ]mxUvxa@`@pBhAzBpA`BRn@^Nj@`A _@u~Vveq@p@cANkA Wa|`@x}_AZtAEV@rCf@lCNRLpBNd@^P^`BJrAZXP?`A{A\\OJYDq@`@WN]Di@|@qARCb@gANIZcB@gBDWNQFHNIR~Ap@Th@KHB|BhE|@Uz@g@HB^vCDrAMtAk@|BD^VTH^H[RTXlBXj@v@zKJn@`@fAREJH`@~@LJ\\Gv@Fh@Uh@^VtAPNJ~@LBLM`@Nf@n@r@bFJPNFh@]JRL\\FlARNNZ@jAZ@PzANNPbAz@l@LRJBj@MHDHZJDZYRE\\x@^B^QBgALOx@~@`@BRd@rAVNIVgAXUL?XXTp@lAxA^Lh@QVHJTPrA a@auYrko@FvB\\v@ChAPn@k@nBNfDZpACtAQh@FxBF`@n@dBPlA c@i`Wb}p@\\tET|@ AalWrao@P`F^hEMrBLpD ?i~Wjzo@x@?j@Id@TZ_@|@IR[VHj@G AalWrao@GaBB}@z@mHMuB [yeWvxo@H{Mc@iDWqHg@_EGmB]uA e@yjWhmn@b@C e@uiWdmn@`@Ef@WJBx@^f@r@v@l@nB[r@a@HF g@c{Wd}n@DRExDMVa@CQF?fAHf@]NQd@?HVZDf@XZDVM|F_@p@MbB ?w~Wt_o@D}EU{AGyIlAIdAHlEATJjAD`CGnA~@ IqvVr{j@K|BQ|ANbBOnA@vEi@vBPxAMnAJ`BOtKXpCI~@n@tC A}gWx_m@GZ AehWt`m@MvAJlA AghWzem@F^G`G i@}gWx_m@XMLy@LSb@?ZSXCH`@LKFk@N@TVLBFAVm@ZMp@Ev@Hb@I`BD@I Su|V`sm@IRG|BUj@Cr@sAhEOlAUr@_@^Q@uAIo@Q IixVdem@Ga@@_BDi@ZoA@cB IkwVdzl@NiAByBFSGO ?klW~ec@THR\\JdAh@T k@}|Vzaj@HoAK]DEPBLe@PiCToAHICSb@oCA][SGm@`@WFOWeBN_@Hq@MQh@cBLu@@sAOyBDwBb@o@@g@NQDU m@kbXr{ZCW m@obXzzZa@q@Km@c@iAm@SYWKcAHiA ?kaXfcZGL]L_@fAl@lALr@?hAS~@LtBf@nAb@b@ o@o_X`vZHKP?X`@jB|@|@~@f@z@J@RMP@LNTtAf@h@\\RbBf@hAp@j@Rl@^LXd@Nf@b@PABI^Sb@aAPs@`@ORWb@INQBQ q@qlVddZRr@MR?N\\\\TD s@mwVp|XVH`@Mb@Ff@dBAn@XvEJf@hAx@ u@_bVtxXn@FB^VIHDH`@JEJ]JCHHEf@d@Ub@@d@l@Hv@V`@SdAXn@ATQ`@SR]CqAoAm@P_@_@Yq@{@w@ w@cnV`{X\\F`@j@p@Hl@z@^?^b@^CV[b@ALSTN y@kdV~cYq@Cq@_@s@?c@WUc@eAw@Kk@EmAMK {@_aWbrYe@iA?m@c@kCd@oBp@mAZCNFH|@\\|@`@h@TFXf@XHNdAXb@ }@}|VdaZN\\f@TVGv@H`BWl@UbBZd@Eh@d@~@Z _Ai|VnjZN^XVHl@Rd@CjANt@BfC aA_uVnm[XgFb@s@hBNpAWX]TNXEJHr@CXOZA AkaW``[\\X Am`Wz`[TG Aw_Wr`[R?Xf@f@Tf@dDRAd@b@Np@RXhAv@ AscWdqZr@tA\\nA?r@k@p@t@p@Bj@Nn@?r@J^ OsgUbh]XLNCVUp@X\\D\\Sp@ORJl@@?PN^D`AJHP~@@jA^`@Zz@?ZK^Zf@OtA^xARfB cAmoUjl\\PHv@nApAjCFFTCRFRz@FrBH`ALb@_@~@ eAwpUjr\\JJd@rACZ eAioUfv\\v@vANv@bAhAfAXHV gAkhUr~\\o@TqAHq@XQq@y@y@[AQ[y@k@Qa@ ?etUty\\h@CCe@DMf@Y^Cf@W ?wpUjr\\k@BOEm@aAe@IYYa@Og@Ja@_@]Fc@p@AV`@hADpA\\@Pj@~@l@rAj@ [oiUj~^BM_@aA [oiUj~^K^u@tAc@`@QbADTr@d@Lb@c@`BF`A_@lAH\\GF Ia~Ud~^nAaDv@{@`@w@f@i@nD}B^A^d@ CghU|w_@{@cBKGW@ cAghU|w_@Vl@@n@Lh@ iAg`Wf`_@IgA\\}Gd@oAXaBfB}CLH@Ta@jB?x@LKNi@ kA_zV`o^Gp@L|@ClAJb@G\\WTM`@NjAc@b@Cx@UDQXw@Ko@n@ iAk~Vvm_@UcAGuAKk@AqBOwB iAk~Vvm_@FlB`AfDdAhG mAipVtd_@e@BY`@_A\\]f@e@X_Dg@IBWz@GjAs@v@ iA_zV`o^`@c@Ji@RQRe@PCFr@n@q@Jb@b@d@\\fDHJd@F^b@?`ATB^jA\\fCm@dCK|@a@r@ oA{yVv~_@j@O`@wA`AC^RFL ?mvVbi`@Mw@MUEs@kAiE iActVl|_@UZ]~A?t@PnBI|@]t@ iAipVtd_@B`@Z`@H\\DpAARKPBl@Hj@Xh@Pz@ iAmmVnq_@RnBUr@c@j@a@Je@d@o@CUDMTSbA IufVh`_@Ul@oAd@STUrAE|@e@pB?~@NbAAT Im~Uz}^i@_BwAwBm@o@m@CWHY_@MIO@a@NOPHtAWDCVZxAd@n@XpALD qAufVh`_@h@OfAeAf@St@Av@\\ sAkhUr~\\Gn@b@hAFrBK`A qAa~Ud~^Vp@xAnB uAozUfc_@FHMRIbAb@vDErAc@pBG`ABl@Yv@AdBRr@?TGNg@Z]x@Kp@ iAmvVbi`@d@lA|@~AXbBb@r@lAtC k@clVpp_@DpA`@`Ap@fCn@TPb@j@APFf@x@d@pAPFN\\b@^TdA [k~Uva`@a@dAQF GyhUfs]c@l@OxA@LPT?f@R`AQr@[ZEP?h@a@~BBXIr@LZLtA [kjUz{^Wa@g@Su@y@YaA]c@@q@ qAozUfc_@rA`@JJjAvFt@hAxAd@lAOXDHHF`@ ?k~Uva`@X?\\Oz@Fp@KpAF`@y@LCXF^U\\GjAV [gkUrt_@EJ [mkU~t_@El@]fAOnC[n@aAX wA_dU~{]nA?`AdAd@PP\\t@D\\Z wAa{Tv`^Zh@ yA{~Tho^WiB?]Va@f@W?s@Xy@rAwB AoiUj~^~@tB~@x@f@x@p@\\\\nA yAczTn~^k@yAQ_Ae@y@g@mBOoABsA {AqwT~k^d@@J^RPF^RTZLp@HxAlA qAgoTnr^QRcCxAk@|AAVi@f@Cd@O\\yAn@ {AgoTnr^HAJH|@bBRx@HtAPz@LPl@Xf@d@@HAXc@l@Wn@kAjAG`@J`@ETcCNg@W_@EaA]eBiC ?mmVnq_@h@] yA}wTjb_@Gg@e@}@WU }AsnUrpb@Ph@@x@I|@tAj@~@`AHRz@Z }AmgUrzb@b@G _B_`Vdd`@cAxAW~@K~@a@Tm@zAGv@{@|A@bAQrBSdA]bAQP ]ojVz}`@LAjA|@dAfA|@nAh@nA`B`Bb@n@`@x@TjAR\\f@fDT\\ aBeyUpva@|@e@j@D^[Na@TS cBusU~ra@XMT_@^SH[VGTW^kAl@Ud@G^Y iAwyUzva@N^Dd@ iAayU`ya@t@xDBb@Mz@d@`AD`AX^f@TFf@^jANRLB eB}rUhmb@Zg@ gBusU~ra@jAdAj@bBRZv@^^Al@X iBooUhgb@Vw@Dc@E] iBwnUncb@DQ iBqnU|bb@Z[h@iAVyA?_@N_@ kBsnUrpb@\\i@r@gB iAarU`lb@NNNd@lAzA gBckU|za@^@ gBcjU~za@VNZn@v@Xb@`@JPNx@ gBwdUfab@Th@ eBadUpbb@]V eB_eUhcb@eAh@_@x@yAvBIZW^ eBadUpbb@BdBXM ]alU`lb@mBwC ]alU`lb@L`@fAtAVl@hAbH mBccUheb@LTMb@N\\KtCQnAMvCSn@FdBKN oBk~Txtb@u@?Al@GL]Pu@@]v@YB qBueUh{b@dAPp@]tBE sB_|S|tf@d@rAn@dAbBpD\\jA sBguStag@\\bAb@j@A|ARt@CvCGPWF sBwsSjog@QBEH sB{~Tfoc@I_AM[k@o@Ce@o@}A sB{~Tfoc@TnCfArCx@`A yA{rUzwe@c@aBa@]WEk@H[_@QBYQa@GKLUhAUJ{@Ji@n@q@EMDOTQBoCA S{rTnre@t@Qj@[|A[ uBkoTjke@kAmBi@U IsbUvte@RBb@Vb@?rATr@AlAt@h@H OkcUj`d@pAnAPp@ Og`Uldd@Ab@LZTFt@MRFLRLdAl@jCJfBzA~CVrB OqvTpyd@d@~D|@vCJ|A OasTfge@G^@nAUhA O}sT`me@@X O{sTzme@DlAXdA SwwTfxe@BLe@t@Qf@ SwwTfxe@CyANa@PS|Bg@ wB_tTb}e@s@n@CJJhAsA|HP`C sBisT|hd@Q_CYaAsBaDy@kB sBisT|hd@?H sBisTfid@D~Bd@`HN~@ sBmqThxd@\\nA|@xE?rAL`BT|@?x@ sBmmT`ke@Hn@C`AJp@ GiuT|nf@^OfDc@`EkFt@e@ GigTvdf@l@U MgwTtpf@PzBJb@dEjDf@N\\EhAFp@G MajTj{f@bABnAGVD^PVZr@bBPHf@EVD IwwTfxe@h@HRP^nA yBoeU`ld@[tB?fA[jBG`ADX\\`@Bv@P`@Al@]bA\\hA@zA yBueUzde@APq@RGJAJPj@@`B~AhCRv@ yBkcUhqe@Ez@\\p@ {BiwUnad@T{BBcE^eA?qAdAyA^GR]h@GNKLm@AmAFi@`@e@\\{@bA[v@cA qBkiUzbc@j@m@ }BqdU~bc@Ll@[t@UpAURENCz@ k@ufUtkc@Qh@Aj@R|Fb@fC^rA _C}gUjhc@?hBQhB?t@\\|DXxA _C}gUjhc@Fe@M{@Rs@Ac@Mc@ aCwjUjtd@Es@o@w@?}@~@_Bz@CRQ`@cBFs@CqA\\mB cCiwUnad@XPb@HbAEt@Jj@OXf@ZHt@]^DV]XILQ^J\\AfA_A eCmtVhsa@Ib@@x@IrAe@l@H~@M|@ eCmtVhsa@HcBRkAMgAFs@x@_En@wAFIL?IK EmnW`j_@h@mAXaBHcAD}ELiAP_Ab@_AXcAd@qDCU_@IPFCn@U`@_@LSEk@o@Ok@W}Ee@}Aq@iAd@{@ToB]sEe@_Bn@aARiAD}COgA eCgcYtj\\d@vBJPPFLCRw@RjA@bEbAlB`ArCWh@k@tHcAfEQrAFbAUfCo@xBClAm@fEBdB]nBE|@Oz@@^DZz@lALz@`@h@StAj@xDB`Bp@dCl@d@`@v@TrAUv@N^Hv@ZZJVFl@Gv@f@`AVNL~@PZMp@TDb@M\\Nn@@pAa@HvAdAnDN`@fAjAv@PPK^C^a@N@d@nAXNZA\\M`@@`@y@RFh@z@p@h@v@fBd@r@h@?`@Vn@?Zb@tA^vAKpAVTK?a@hADhASdAg@\\o@t@GR[^KXyAXUBQ gCyoWrj_@MiBY}@Hu@?mAQqCCmBLqBBuCMqBP{BO}AFyBRcAGs@Js@Wu@MmCJiAQw@R_A@cAGg@d@uDCoAL[JALHJZ ?yoWrj_@Db@Y`@Bd@X|@t@~@x@nB`@Xd@x@VP`AD\\`@|@F\\TJv@Eh@Hv@FHTD@pANf@IbBHXXP gCi`Wlh`@Pz@r@pATnAl@f@r@tAPlAV\\ iCayVtv`@c@HUKMB[n@cAl@i@pAs@~@ gCayVtv`@~@P\\~@fAb@j@j@ gCorVv{`@b@l@Fp@b@v@ kCmxV~ab@OjAWBCNQNLNAJMPUHH^Mx@Xr@NLJCVa@TOL@JP mCasVbva@Tg@Bu@HWGo@XgA@gAd@yC?y@LO^Ex@V\\CHMRmA ?qsVj_b@Gr@Ft@AtA ?ssVjeb@KTEd@oArASd@ oCkjVtxa@eAWKJ[ESNs@K[Nk@qAWA kCqsVj_b@^Id@Fp@]NMFY`@YTc@p@Yj@u@ aBkjVtxa@f@_@r@Nv@@^Ef@Wh@CLBNRd@Dp@v@\\Jl@Wn@u@ qCssVjeb@bB|@nAT`Ax@P^|Af@\\l@b@FFRv@r@z@Nz@d@hAPLHd@QVRFALSB{@PE\\LZa@\\Ul@`@R@Zu@j@g@ gC_pVn`a@zBfAb@B gC_kVzba@`@Vt@jALh@Ez@d@VDd@Xt@PHf@?`@j@hAr@Nf@h@n@VFlAzB^X sCiwV`kb@KRDp@e@p@_@VCb@]fA[jBeAjBMl@a@v@Il@g@TOtAMTGf@k@~@}@\\KVm@l@eAj@ uC_vVxce@Yl@A`BYvDM\\MFEdA wCygYz{d@NKN@JR@l@`@AVW\\Id@a@^Md@}@f@O^Zf@D^q@dAs@R@b@`@|@R\\@f@m@TXH@XWFeAHSTMTBXQd@v@bA|@XH^f@f@HJGDBX_@pBn@|@GPa@JC|@f@Zh@h@N\\\\`AHXKN@Vb@J@f@o@z@m@LwBRs@T[VG|A?z@V|@MRJO^@Pf@\\Br@d@pC@^bAALPAlBJh@tAJTYh@A`Ao@j@DVKzAGDj@Rp@vAD yCkiWbjc@HZ?jBF|@MhBIhHBhAJ^`@f@hAz@V~@^h@p@hDNfBNVZR^@HF\\z@d@ONZj@d@`BUf@?dBt@~AdAfAX wC_vVxce@Dc@t@GTU~@Ah@eAZOR@ {BmnVjxd@@rBG`B {BsnV`_e@?d@Kh@Br@g@XQdAFlAEnAHhAAzAIn@ yAwxVlqe@tAEH^\\BRNb@a@n@LZM k@wjUjtd@mBxCWH]n@On@E`BMR?|@Wr@@rAKj@Dh@WdA?r@Lb@HpBWtBB~@KR IasUrxe@`@m@PIf@Dt@GVLpACx@^`@MRDrAuAlAM {CotUdpf@CWl@q@p@MnBgBrAKzB}A`CqDXkAz@o@|@H~AOPERSTETS {BmnVjxd@JIl@KlACl@a@h@Mz@{@\\ITs@j@UHk@^]T{@v@u@FYZ?Ve@`@QHa@XEV_BTc@~@gA IweVz{e@FD`@YNBXdAPNhAk@NFLVb@?RNt@c@b@Rd@DTKdAkAd@_AJG`AG k@asUrxe@U~BFvBa@tCQ|BY|@@ZPd@?vB k@iuUvpf@Hd@NV k@grU`}f@S{Bs@oE k@grU`}f@`@bCH`DItAVfDGp@k@tBE`AJj@Ef@ yAwhVzug@SVQp@m@xFWz@I`BNjAGJe@HKRB`@^`A }CwhVzug@Nc@p@o@lABf@Mf@Fz@[TAd@BRL`@@Zz@r@LRXXMH@VTb@Hj@c@D@LZP@JZRDBLLB k@arUbxg@DLM^CfAWfADfAGFaAFYNIb@NV?^ k@}uUddh@@T IigWvmi@EmAk@mBGoCH_BImCNwDB{EE{F _DeoWrji@VLd@It@Jj@l@\\@Pd@H@LIRD IuhWlgh@NeBA_D\\{DzAwLT}@VkBPi@?e@XgAPmBFwBd@kBf@MP_@Hi@C_AD[p@Il@wAfAe@v@gAVM yAupVxqe@@jAZn@ aDwoVtue@Ht@Ar@^zBWfAI~@\\p@Jb@ IuuVljf@LeAZWn@aA^M~@?r@e@ cDuhWlgh@h@J\\P|@|@`APl@T`@ARFt@IbAHvBdATNFRH|BJJ k@cvVjsh@Xq@xA}@r@sA`Aa@t@DNS yAasVxyf@b@tAb@n@BnAXlBg@dBX?Ft@tAfBJdAd@vBTZDr@Xl@j@A eDotUdpf@YP eDiuUvpf@Y`@K`@IbB}@nBqA^kBHUReB`@i@f@cAFm@Qg@o@[iAsANiAIqC? k@slVvkh@ZLR\\^LLGN]PGjB@bAcAVi@RKPHJ`@`@Hl@d@^HHIDy@Ps@?{@RYJC\\T\\Q`@EXSp@C IgnVxcf@`@w@vAuAJ]f@Cl@kAr@A k@ccWzvk@Ol@GrAcAtFQ\\]T k@ccWzvk@^q@^cB\\wE\\a@Rs@f@e@DaB\\u@h@cDt@eAtAB k@ogWfdl@Ct@QF]z@Gv@?vDUhA AajWzql@?TPn@IfEV~@LtATX AghW|nm@p@dBBTGpB?nJMvAKP IsjW~kn@{@{@q@aAi@MgB_CSIqAAEE@}AXe@Lk@p@kAz@Bd@^T@lASf@c@JUJ{A`@kBNkCFOZB ?_gXjyk@\\Iv@@ZSTwAbAwBp@{DImAs@oA_@cBe@s@IuA ?ocXv_k@iA{AMs@_@y@UaAm@GIy@e@u@IaAD{@Iu@Uq@_@KIYBkC[{AG}@SYLeACgB ?ocXv_k@hA^`@Df@Cf@Sp@~APFj@j@v@D`@`@ZLd@Fd@EZDr@h@z@NNTv@d@TpAdAjAVLl@?XT^p@t@z@v@|A ?ajWzql@_AMa@]e@EW]e@?{@o@YC}Al@eApBKDSGIB]pA@bAWV[@_@McA}@MYWBq@v@i@Z]t@I@eAm@Ke@_@c@UcAOWy@WkAl@iBcC[eA]QUJQ^m@dFA|E W_t\\`aw@l@iCXg@nB}B\\_AlAsFH_Bn@sBFoBKcBV_@DU?eASw@J_EEa@Nk@ W{bXbuy@aA]c@o@?_@`@{@Ic@@Wc@g@AaBMi@_@MQ[eATw@CqBeAwCq@_AtAc@Eo@Xm@z@ W{bXbuy@`@Dt@MZIRWRANFVd@l@@xBz@RG A}{Whvx@Dk@}BcGGo@M@KGSc@q@TUCKMBSR[Km@?u@\\k@x@k@ A}{Whvx@Fl@b@dAYVGTEfAT`@RLLv@Pb@ AoyW~ay@P\\Nt@h@dAALYPg@GS`@Gj@f@dB^RX\\\\~@ AubXjvw@Ij@RzAp@z@RD^GATa@~@BRU~A Ac}W`sv@Ct@ Ac}W`sv@TgA?q@ Am|Wfov@EqAL{DFSn@STU@sAN]AyCBIRIRc@Fk@Xu@XuA gDe_Wrzo@lBG gDoeWxxo@d@^lB@JPh@D Ce_Wrzo@GfEIRM?EFM`BApB^r@ c@{_W~ip@TDMdE@rCWbG iD}uWrmp@JY`@e@?sAZcBZaEp@wDXcA AojWdxo@BvAPz@@r@Rf@Hv@B~ACl@m@rA AgjWnhp@qAjE kDsfWv|p@aAV]OmADUJgA?AOIGeAE kDi`Wb}p@}BA}@OMD _@}fWvuq@Xe@h@{A~AoCx@mBZa@L[?aA _@olWlar@pDuJ mD}fWvuq@EiNNuH iDehXr`r@IbCgA|K[|Ii@rBML iDa_Xp_q@TWx@kBf@q@Rg@^cCXu@Ls@HwB AylWznp@In@mAxCc@~AWxACr@ mDufWhwr@GfDKd@C~AG\\Fn@Ct@H^@l@QrAInGaHL oDceZxjz@`@Gv@X\\Kl@_Br@Wl@uBFg@ qD_}Yr_y@BfEK`A}AtBs@~CEr@y@h@w@DSJ sD}mZn}y@c@}ACoDRaCMeCSyA?{J`AuAd@c@lAD Q}mZn}y@D\\Cb@Kn@SZ Q}mZn}y@z@c@x@ILIXa@tAiD ?efZbty@Cf@ ?afZj}x@e@Ac@Oq@iA ?afZj}x@x@H~@UV?ZT\\h@|@B ?w}Yb_y@N?FN uDaq[rex@Ah@UrAIdGQvCHhBIfBRdEVn@LbB wDkq[`ex@HP wDaq[rex@`@\\zA@h@^j@@p@hAR~@PPt@Ap@Fj@}@JG^AjAh@|BEd@d@n@L`CGj@FVLn@BhBa@ wDkq[`ex@e@@q@b@SZYfAq@VIJc@tAk@XWCY]YaAyBoCgAIm@a@e@OSSyAUMOIw@Ym@_BeB_@iA{@w@_@_AOK Aey\\jkx@x@wDJcC\\cBRm@t@u@j@mALa@Bk@LO W_t\\`aw@Lp@@v@K~@AzDO~C`@j@Pl@TTJ\\JD Cey\\jkx@m@Ba@G_@VYOoBwDe@_@[oBy@iAo@{B]QUw@k@KIa@K?MF{AlBWJ_@?g@i@K_@[[q@iBc@e@@e@Rw@p@_GTe@p@gD\\qDEwAWGBw@QgB@uANe@B{CIq@KQg@Oa@C Gi{\\|nv@VOV?h@v@b@nBHjAb@z@VfDd@zB ?{`\\zlu@WOc@A[f@qAz@_AdB yDeh\\rru@b@DLH`@l@Z~@p@~@XRx@Df@~@RLTb@H@Jc@NSXEZHBEF}BCiBP_@R?HHLIFw@d@s@V{B\\u@?s@JQTIR@r@Jl@Xd@A`@Y`AkBd@CXLb@h@x@H^j@N?^_@\\L`AlBj@v@RfAVLxASt@`@No@V]n@Kt@[^Cf@_@fAQ^@RRb@tBb@HlBxCpBlC`@Db@[P?v@|A~AfA~ACr@Nj@GbAb@ {DunZrjm@e@cDTg@?a@Q[[K }DorZr}l@v@v@BpA {DspZ|am@Sj@MpAOpFMbB^dAj@l@TtAWf@AVJj@d@~@LjAL^@`@\\l@T|AIv@B`@\\|@LbARn@Bn@f@bC@n@z@dC GiwY|fo@n@r@V`B GiwY|fo@sA}A[w@cAa@a@]m@MUOmAkCs@o@c@G[aA]r@ kDoeXtru@UvBFtBCvA@HJBfACHpAZTLjKnAfAxAD _EopXjrv@@~MCRo@\\ [gtX|nv@u@?]MaBHgAWkACWS [gtX|nv@TJNb@`@^bAPVQx@AlA`BfKC [s~Whtv@H?NNPA aEi_Yhmv@vAa@r@q@tAf@|@t@`Ah@ wA_oZjlq@IhAd@nA [cnZdqq@rAnBThANRNh@l@~Cx@pBfBzAH?j@^Tj@^Rd@hBd@v@PFFKH?j@Zz@@p@Pn@hCTf@^^FDbBCvA`AZFl@Ih@SlADn@WV[d@MlAOb@@ cEobYldr@FnDPzDLt@?~@ GauYrko@p@OZSR?nAt@bCJpCbAhBRxBAh@[f@Kp@[PUj@J GsyXxlo@Rg@Fi@p@[l@I`@WfAC~ARbAq@nAChAi@PCpAH\\s@~BgBd@g@NE eEcgZvxn@WbAKtAQ~@FjAOn@XvA?rDNfCLr@Az@Qh@u@hAc@TQh@MJyCLyAm@c@DSP[dCEzCO\\WtA?pAS`ACp@e@t@g@JIJBzBOtAV~B gEqqYvnp@sALODKNLx@e@~AWd@Aj@U^Mj@Kd@GvALrBEl@PNCdAz@|ADdBPdBV`@l@JHH]jAXz@N`Gf@tAv@dAPHx@Ap@TdAWlAKj@ZVr@d@RXA u@qqYvnp@v@JhAKfBu@N@LXNDPKFS cE_hYbmp@PhAXj@I`AL|AVd@Fj@RVD^PZDdAl@rBBj@d@nBHnC@fM cA}lYr}s@~@OlAEb@Q\\Bh@GdAFbAS Cy`Yz{s@DuNRiA@i@Na@Cy@^eD?_B [gaYnsr@xAB u@_hYbmp@^M\\@l@vA\\FfAy@LiBRY ?k`Yxip@PK`@ZrAZ^y@FAXLlADT\\ cAy`Yz{s@`BNhBe@xAD cAswXj{s@LF yBsyXxlo@IrAHfBIv@Yt@EdBe@n@MdACnAc@l@_@vCi@r@GnA Cm~Xrsr@`@A Ck}Xpsr@^?JJn@FPKBeBYaAGsCb@kB^gD CwxXhar@HSAcG CoxXpxq@CgCOe@EgC@YPa@A}HKmHBs@RoAEcFJe@f@iA Ik}Xpsr@|@rB~@h@j@hAdCnA`A`A|B|@ I{mXhas@J@ iDswXj{s@|@sC~@sFtAwE@uA`BkC GwxXhar@^CZOl@K~BQrAHh@N u@}vXzjp@d@IdBFl@VPXl@Tt@B GomXp`r@jCJ\\I GehXr`r@PI WomXp`r@?y@^{A~BcPp@eD`@iE W{eXf_q@d@gEFkB^UPs@RQ ?gbXvrp@Bo@NK\\C?a@HKAa@ u@k_X`rp@HnL iDsgXh`r@I_BFiEJaAj@iBBgC|BkFlAqD u@mmXdmp@JgAEeEDSn@O\\@v@g@zAk@xA{@\\G~@Jf@g@TE GsgXh`r@vAHpBCtBWdB?ZFj@v@bCC GatWrar@V?DG IkmXt`s@`@?nAo@dCm@vBeCx@qAl@W^g@`Ay@jAgBt@kDZu@BuBZ{@p@u@ IatWrar@JSPG u@m_Xl`q@nB|An@nBv@jH?vAN`ATXNDrAD AktWfvq@F~C^fA?fB AcsWv`r@?R AqqWr|p@WzBBfBKvA?jDc@xBSf@AhD iEm`Xfnp@y@NW^m@H}@v@o@EqAFo@I?eBo@e@ WumX|as@ES W{mXhas@DqLWEEK@sDG_BHkE^sB A_vW~tu@R]nAsEdAsBpAcFZo@VQ CwgWpkv@Lb@PRbApD CygWxjv@@V [ygWxjv@`BY^YzBBZGjAj@ [wgWpkv@_@f@_A@aCv@i@FOXc@\\S`@gCDSHkAnAgAb@e@C CmgWjav@KsAUoA?oBMw@ CmgWjav@Cb@Sb@WVA\\DlB^`A CsdWzrv@EjA[LCZ?\\Np@GZQRQh@F|AW`A[TCNn@L~@rAN?p@]RAZt@ CceWpow@CYfAgDPcA^YHW [caWxew@T@PR\\[d@Sb@G Gs|Vbov@YL_@lA{@?c@X]FgAE kEk`X|rw@TR^~@NLd@cAXU`@ERZXDTK`A_A\\tA _Ee}Whiw@EqB_@m@c@oEViA?m@VuA _E_~Wjwv@\\u@ kEckXb_x@IZqAjBGt@Yn@y@d@cAbAEh@OL[z@IdA_@h@MIKDKf@c@b@GXOH kEckXb_x@JKVCFQbBmBTq@fBuA qDwfYnyv@Vs@|@C mEgmYrzv@fAAz@WjAI oEciZ`qv@RrB|@`BL|@l@rADfATt@VVD`@ uD_kZfiw@YCWOa@^i@Dy@WY@UMuA@iAg@u@Ks@m@UCs@NWxAy@`@cAC]_@i@^_@A]Qe@P]pA}@d@UBSj@m@Zi@|@GZ_@NCz@KRu@BAfN [umZvlx@CeDVm@RSbFOnBD qEu`Zhww@k@K[m@YCQU_@CK[c@_@c@uAC{@i@[_@e@Co@Oi@ aEu`Zhww@M`BCfEK\\ErB uD_kZfiw@TUd@IAe@NQH?ZTP@Fg@z@_@|@}A sEyaZdex@JPl@BhA^bAJBF [k_Zniw@JdCe@bDOnC ?{bZ`bw@FD^QHU^OHYXLT? [o~Yb`w@?\\OX[bBPhBAd@ ?k_Zniw@Z?RM\\?NMlAUn@Rr@BNn@RD ?wuYjjw@ZQh@Bh@p@j@~AVJd@@d@j@ qDm{Yngx@fAB|@Gh@gAbBiAn@u@l@aCFsDPkA^e@HqB mEwuYjjw@ESDWjAwARm@lAeB\\y@RkAb@SJeA c@gmYrzv@BwG qDwmYhpw@Zy@ qD{lYnnw@Re@RuBVeA`@s@Ja@HaB`@cAh@aE uE{lYnnw@Ax@TPXBT\\z@FLXVFv@Fj@O iDgdYtcw@IvADb@KlHD~@ iDadYvwv@B~AK~BDjACpA [o~Yb`w@RiAEiA`@oAHm@x@qA [{zY~tv@DgDP]d@a@fAa@JUDgAHQ [yuYdiv@d@H\\b@f@Db@p@jANZn@RDRR cEqwYz}u@AfBNLTBDHCxCPjA wEylYbuu@@|EP`@AnCb@|Cd@VD`AJHV?HHDhAbAE wE_fYblv@d@P ?krZxkt@FVXAv@yAh@_DrAm@|@uBNQXIZ]v@gAp@m@p@iA^O~@}ArA]\\_@NEj@^VFrALxAIf@\\j@I^W^I cEkoYbss@JQBcAVu@bA{Az@_AXm@z@w@`@Mt@Ap@i@|@cBPs@l@oARC cEkoYbss@B\\VRFpARl@@|AT^A^ wE}lYr}s@I~@HdDc@Zm@PK`BOX@dFJf@?`AE`AQv@PZEdAX`DP~@FFV@HJB`GRzA yE{lYdnu@NDj@Q~@@Av@FR`A?f@`@`A?t@L iDcdYtlv@B_@ iD_dYtkv@BU iD{cY~jv@BY iDwcYdjv@Gu@ iD_dYnhv@AwLNwAZsA?s@Xc@B[ yEwaYvqu@lCGv@\\xJCN@`@T~ACTM`@C|BH iDwaYvqu@@YLY@k@f@oBQiFBcHb@gBKu@Bi@Pm@Za@ZgARgD iDq|Xpjt@zAeKP_@VSTEN] cAqdXhvs@{@LuA@}BQ{AA[JQTA`Ag@`@Ap@i@DeA_@]N cAqdXhvs@dB@nAVf@Kh@JfCCXKh@e@P}@p@GvA? OumX|as@XlAnBdEr@`DfAbBLj@@z@LH [srWbpr@XI`@?TJhAJd@v@dAxCZLxAG c@ufWhwr@`DB|@YN?I~BT^D\\RL AaqWfss@AK AcqWzrs@Y_AM{ABiAUo@FoBOg@ AesWles@MQG]Jm@ AosWnbs@Di@Ge@B_GIiA@ONSPmC ColWr`u@h@lAX\\@tEXlAAjCRnD AolWr`u@Zq@MkAHm@ AaqWfss@HdAl@vBTjBVz@PnDZxBPpD M{kWhmt@eH@Wb@kHGB]SkA?gAqB@ A{kWhmt@F|FLz@IrBGN {EwkWf{t@fBAhAo@lAEn@R\\KbCETM A{rWbgz@Bc@l@i@Vo@~@a@?iAXaA }EwmWv}y@De@f@]d@D QgiW~ly@Rh@R@`@c@pAg@LCHPVCx@}@n@PJPLDZG C{}Vlky@JGLyALU]mBA}@ GcpWtox@ZMZDLNBd@FHXOZ@V|@Z^BNGXi@l@g@hAAx@IX[_@IAUNOb@[zALh@HtCIp@ _FcpWtox@_@Zm@PgBGa@j@cBvAU^g@H aF{`Xvbx@|@}@p@yAPw@d@}@jB{B`@]d@Q?Q kE_vWjtw@hAe@z@s@LARJp@EXm@ROjAC?GLCv@V ?eiW~ow@RAPJNl@Cf@\\LHg@f@sA kEeiW~ow@bAy@RGPHVh@ Ck~Vr{w@BQa@cAAWFWb@s@CWKSk@Ye@yAk@A_@Zu@aA Cm`Wjrx@Nq@n@WHMIk@Ly@q@oA@mAHIj@A\\i@U[Cc@Sa@Ae@Q}@P_C cFscWzkx@ZBp@l@EdB\\v@ GscWzkx@Uw@?iA_@IS_@e@_ENO|@ArAi@fB}ALA GscWzkx@q@l@O]q@m@_ASw@o@_@?YLg@n@K^Cr@g@b@Id@ IarX|bw@@~BUv@U`BNhBOpBB\\f@|Bb@z@h@VJ\\TJz@m@VJJ\\IbATt@ iDqdY~rw@Hh@?jDHbAEvATdAAjCGt@PRf@rBh@nA eF_}Yr_y@j@GHa@bARJAp@g@r@Et@N`@ARQVu@ZQ^Cx@nAXbAXZH|@Nf@f@l@TAH[MeBBoCHKPCNy@Xo@Dc@j@c@Vy@T]Nq@Dw@`@ON_@j@g@ iDs`Ypmx@TNj@z@Hz@b@Nb@x@TDd@Od@P iD}xXjtx@?lAQhBZp@M|@_@n@Y|@Et@UnAHp@TZ?h@ gF{bXbuy@O\\?d@Nb@Y|AJt@c@tB?pBIrA QwdXzfz@TRdAEVD~@lAb@MXh@LSd@Q@WJU Qc{Wdhz@DIx@KDU QgmXlsz@?aBb@Uj@k@d@w@TcBj@wA`@Ot@T QceZxjz@@iAKW@a@IW?]O[QgBA{BR_BCsC QceZxjz@J~@Zl@DZAf@Q`ABfAZfB^z@EvAFVTE\\eAZ@VVj@Vh@lBXd@XF^Mp@aA`@]t@Od@]l@Gv@e@h@HbAUBHd@R`@~@N@d@Q oD{nZ|az@BtAZ^VhCNNNb@FtAd@\\Nj@XCVW`@QD{AL_@RId@C Qiw[nb{@x@_F^Rf@BXQl@Rv@@j@Sr@g@PTLh@NDh@GZr@f@Bh@^p@x@pDuAZ?P_A^?j@[Fs@d@mALsB^aAxAmBJm@Z]r@aEj@a@fAyA Oum\\~l`AXi@dAy@~@QxAFf@O`@c@f@GJF Aiq]bzcAFUXJ\\w@RE`@JZSXiAX@LGND`@INGVa@n@qDhAyB`@yADe@\\[V{C~A_BT_BdAiCL{@vAi@KqANeBh@{Cd@i@f@kB Iue^taaAI\\Pj@PrARj@`@h@r@DNNBl@TjAj@rA?`AVp@NnA [s}]pvaAP@j@s@nBaAl@\\x@CDZZZp@xARRX@zAiCT}APe@\\I@Np@S [yf^`wbAVc@GmBZmAz@iG^{@^EX}A\\e@Em@FkBDUVYJo@HGNw@?e@ kDgh^`zcAUqDUg@WiBAgA\\_E\\sADo@NYAc@L_@?yAKk@AsAHq@Xe@ ?ujYho_A\\UVA~AZTQj@eAf@Fr@Kt@ZFx@L[Es@Ww@k@g@]GqC}CoCeCuAiB[aAAg@PeACw@ Cet\\vcbA^gAtAiCrA]n@k@x@?f@q@XEh@]No@h@k@JERHLCb@}@FETFREh@w@ [ej]bpaAv@GlBeBl@y@t@[b@i@xA{@~@oBfAcA?a@JQfA]X\\d@C Aet\\vcbAMFIIUmAGsCLiAT_ILaAg@}BGy@AcDPg@FuA Aau\\l_aALKJc@j@[TYLk@CW A{q\\bz`ATaF^cAjAoB Gej]bpaA|@sEEo@S{@EqDg@cAA_BOu@?}DLgA?sBFcAUwC?}@XaB cAgj]`b`ABuA\\eBTm@Hw@n@wB cAuv\\db~@f@FXQrBUpAy@^CNWZKVWb@}ATF u@wf]zq}@k@`A@rAD@HAfA}AZK`@FDNH@n@Kj@Up@Jl@?n@Lh@f@j@LNTJl@LbB?rBXxB cAuf]fu_AJu@XWHUBgBl@uE@q@Li@Y_Gl@kDPsCVmBbAmELQp@SNMt@wAh@k@zAo@ Amp\\ra`Ah@i@`@}@d@m@h@{AJ_ATu@PoB`@_Ar@kDCy@N}D}@wBc@wBCoBFsB}@uDX}Ed@_DXeA?u@ Qoi\\tz}@?e@Jc@r@i@FWSyEUw@Gy@?WHE@yAFUj@{@L@Vd@\\?PMD}Bj@u@WyA^kADcBT_@Fi@j@yAb@eC\\M^TLAZm@h@g@t@]f@JZCTKHQGsAYoABmBEk@HQXGHKt@gCK_A@eEIeBNcAQWA}@w@{@[o@QkAAgB iF}h\\r_~@L?d@VRTRGdA?NNPd@LGbAAn@i@t@zAK~ATrAd@`AP@JOD_@NCJVb@\\`@vAh@b@j@@j@_@pA?l@i@ZKb@]RCVJr@Dp@hBl@]Xc@TEt@d@|@~@FZHF~ATXAd@Qn@Zv@KVOD_ANe@V]d@CLM?}@nAwAv@uBv@k@HAHXPDxAc@ ?qkZbc~@C`AH`@GP@bAMn@Fr@BH`@NHNb@NFPGHi@DIFCfALV iFurYtw}@L@JM`@EZTh@Uh@^d@Lb@AJLN@ iDioYts~@K]XMPi@CcAHUSsANkBQm@Ac@]s@OwAYgACeAs@kBDw@ iDurYtw}@S}@MMQBQK_@g@K[a@Hc@p@i@Fi@gAYqA iFqkZbc~@TUFk@PY`Au@b@y@l@e@Ng@^a@L}BVo@^_@Zq@ZWjBo@PPDT iD{{Yfp}@DK?{BIO[Ki@q@CMJmAT[f@YdAGN]XKzAaBTs@Ba@d@m@d@YZ?TO?U}@mBEm@L_@ ?qxYzr|@XM\\@XPl@x@b@QZ@ iDqrYjt|@Jg@Zg@HwA\\i@x@w@HwBXgAV]H_DT}@KyADYGURkBA_BJ[AaA kF}jYpp{@M?c@dA]VSDq@b@q@A iD}jYpp{@^WAwAPk@?q@L_@JoA@oAZaB?g@Kg@[g@QE iDoiYb}z@Bk@ iDkiYv{z@IOGyAL}@RY@QM{ABUMqCTy@RoBz@cCXgBTg@j@s@XoAdA{BTaB|@oBbBoF QkiYv{z@fAGZBPJPQJ?RJLM\\EZ[z@INk@RIDMh@e@THZt@RNH?F_@~@Mz@Rf@EXJbAa@JMHi@f@GTq@^k@J?L^ZC mFgmXlsz@HB@^HLb@BLN?ZHXAr@O~@\\lA?v@O|BUFSRSl@Ir@?tAF^c@z@@nAXbBPXn@~BZh@Bj@OdCSfAKBYIaC|@kA~A_@nA@pAGv@IN^h@d@PFd@RRGf@[j@Cr@D|@Rh@NfBE|@ gAoaWfv{@[fCo@vAo@p@Wh@WJW`@k@RYn@WXYKYNQC gAwlWnd|@a@XEV{@vAIj@@|@]jAEhAS`@Rd@RlB`@DDHI`@?f@ORIzAi@h@iBl@Av@S^Dt@i@t@G\\w@\\aBtBkBpAk@@eAq@_@B{Ar@q@L_AQy@?KLEjAKL[CUHWr@I`BMNg@TYg@UGQJs@J{AQSDUX}@DaAf@MRAXQf@g@z@Qz@Jx@c@|AiBfDo@r@qBfDK\\uAvAUp@c@Z wEwlWnd|@C\\RLNl@Cz@X^d@CI`@NvBh@bA^\\ cAoaWfv{@BjALb@E^RFGXFl@ cAo`Wf}{@MLCRBlAMfBFt@`@Bj@XFP`@NBZTTc@dAWhA yAojWvy{@@Sh@[HmAIeBFWG]FOL? yAojWvy{@_@l@Kf@ID ?wdWth{@f@ARVe@dB?h@UVBLUb@SJIMi@GQTIC ?mhWlp{@?Y oFgtVtg{@NVBd@LLLrBM`@An@KLc@`CMd@SHBX [{q\\bz`AhAAxAo@d@_@i@sC]oD Amp\\ra`APfBPd@r@|E Aym\\lm`ABM Guf]fu_Ad@tEf@lAXCZON?PPZAXQXHZId@_@b@Hf@^d@GR_@\\Lb@Qf@FFZ\\RPCN[NAj@f@D\\Th@?X A}h\\r_~@Q}C Ac_]lez@NWTqAAy@ToBv@uCBsB`@eD?qJl@yIA]Qm@[eFHy@\\eA EuzYvp~@\\Sv@h@h@`Al@n@l@nC E}oYju~@Pf@ EysYny~@x@c@z@?RWB_@ qF_aWbrYZC`@PR@f@p@RCPJ AgyVnnYKj@e@`@EfA_@f@ sF_aWbrYCXKH]?URCVl@j@f@t@MbADJT^p@\\ [umZvlx@\\?D`@R`@l@vHPz@ ?ioVdzXPAR\\ sEafZj}x@QrA?~BEPWXEpGFlAJ`@VXDz@ uF}kWdmZZVR@h@f@PAJF|@x@l@Nd@Q Aq~Vb|YFd@PZDt@T`@AF AgyVnnYFFJELg@^s@Hc@v@BZLf@zAZOP?Z}@ZK A}|VdaZEb@^j@FXAvBKfA Ai|VnjZCN[Py@HsBOI^[NELNzB AyoVdkYz@]f@CJF mD_bVtxXQJEP@~A AubVr|Xk@m@Qq@e@[IWAc@\\Rp@DNNd@N A{bVn~XJa@EY A{bVn~XGH AccVx~XSTWjABbA AkdV~cYc@pA_AdAcAn@g@Im@L qDw}Yb_y@EkEFsEDWz@kBA]Hm@AcC EkdV~cYVJHNNr@Xd@PpAWGYHG\\DTb@r@nCzCdB|CXjAh@rDx@bL~@vf@KhEJvGHtBR~@Tp@^b@iBMgBw@oB_BqGyH}@_@ AqvV|l[p@P }@qlVddZZS`@F~@SJFd@dAx@v@ wFilVjjYZhAB^Iz@L\\TPPj@`@\\N\\hAv@p@bAhCxC A_uVnm[LDNn@ yFqvV|l[RhAPZh@] wFw~UrfZGgCKYYOO[@MNOAgA wFe`V~|Yf@Z`@Bf@f@H`AKj@Xx@D^EvBQFUMs@mA c@cmYzqv@HuA yEylYbuu@_DHKA[YsBBW~AG`BBbB wEylYbuu@A}E AatVdo[~@fAp@vBHHj@BHFNh@V`@t@Xj@~Af@f@ZDf@y@P? [ydYtlv@Sp@ [meYfnv@k@P{AG}@Re@? ?ydYtlv@T? iDcdYtlv@Bp@ iD_dYfnv@?b@ iD_dYjov@CbF iDcdYnvv@@f@ [cdYtlv@ROZ@ [sbYflv@L? [ebYflv@RBVRn@H Cq~Xn}r@I_CL{D ?arX|bw@SG_A@][cDAsBMBhA_E? wDy`Ylxq@hGB ?moUjl\\@K ?koU~k\\Yi@ eAyqUlm\\Cd@Vf@O\\@HTTDP eAyqUlm\\@KJGZXL@Ri@ Ae}Whiw@{@nADl@Lb@e@hBWf@ Ae}Whiw@RSAkAI_@QS[mC^_BHqF iDumX|as@DQ iDomXjas@BU EojWvy{@t@rAN~@ ?m~Uz}^JH ?krUpz]Lc@ ?uiWpxa@vCfA`CRx@XlAdAjAxAZR\\B [q|Uvg^xA`AL@TKVaA`B[PsB kCmxV~ab@XYRsATI A{vWzvy@Jb@E^LP AgvWpyy@h@Ij@|@j@X`AAXNV`@XF Ag}Wvtv@D\\ {FerUba^Nd@v@z@L\\XnB QqqWhfy@GRi@b@GN?j@Q\\Jx@AbAe@h@i@R mCivVf~a@TAb@T oCmtVhsa@J\\?\\LRPH mCotVz~a@LyBR{@@aAH_@ kDgcXvht@AzGl@dCDf@CvDI~C{@jEo@|E?pB QqqWhfy@V?TH OqdXhvs@^~CDdABfJ kCotVz~a@\\N gEyhUfs]]YaB^SK sAsgUbh]LbABtCE`@Dv@ gEagUvq]w@n@ EobW`e{@p@n@N`ENdAf@N sA_pUjq^FT?p@ QcpWrfy@bAz@dB?LMDR QejWthy@BjAX|@ }FgiW~ly@En@g@bB@|AHz@GhBQ`A iDunUrh^|ArA [_pUjq^f@g@FSRMNg@X[Xu@ [wkUfk^P] iDm_Xl`q@J[ yEoeXtru@T_@lB?zBf@hBPd@L^?~@`@ sAagUvq]Ah@\\lBTbANLd@hAER ?ckWx{y@b@Cj@Lf@WLJl@g@n@U ?i~Wz}o@?oB sA{dUl_^ZmB sAekUhj^`AgB sAciU`g^K}@Py@LIZCx@c@PWJq@ Wi~Wz}o@BxCSvAGfEMp@Af@ ?w~Wt_o@rBoA [{dUl_^N^IhBH|@Kn@GnBDp@EDc@HKI_@w@?_As@s@ iEcxWlmp@SFeAC_@ZsB@ iEq_Xnnp@[G EgtVtg{@?[EA_BZm@i@k@@EUs@YU_AS_@_@E AgtVtg{@K|@]FSQm@P_@j@[VUDSE}@bAs@VIL Au~Vho{@AP_@l@QDCt@a@`B iDcxWlmp@dAD C_dWxyy@JcAd@qAJ_APW^MJOPoBhAY@IUk@ uCwxVlqe@OfB aF_pUn_`@@pA mEejWthy@@iCLSf@HxAUl@XLOn@AVSj@SZCLFd@E AurW|ar@MQ _GktWrxo@JYrBB _GktWrxo@E~Fw@pCe@`ACdAOfA?v@ AsrWbpr@FcFIaF ?ezT`b^FYV] {AeyTh`^Zx@IP {AezT`b^PHPALJ aGa_Xp_q@lAA|AX|@?\\SDy@PWnCO yE}hW~vu@}@Ag@[c@Rq@EYIW[IAiDG cGkzUfxa@Rk@ oCszUxwa@FL cGwyUzva@HKF@ OwaUbi_@iA|@aAPoAz@UH[GMBm@lAAVUB {AsxTtb^[|Ar@nCHz@ S{~Tho^p@G`@JpAi@f@g@HSPG GurW|ar@hBAzAM {EylWznp@_DJo@[EWICcAB iDalWrao@YAk@j@k@nEGtADhAC`DQlC AwjWnon@AeA ?c{Wd}n@l@a@Z_@xAI~@OjBiBrBcEb@a@b@I eGogWfdl@mAw@{BsF ?kpW|wo@ZN~CG AyjWhmn@Di@ AsjW~kn@Ns@nAeD AyjWhmn@^p@ yAuuVljf@DTEzD`@nA@hBb@v@Jf@ }BkzUfxa@DR }BezUzxa@NZf@xCBf@Qx@@Tj@bA?j@Vz@PNVBz@lC cAs|Vjtu@_A|@kAr@a@b@k@fAcAvA{@hB mDsfWv|p@Ns@@}BJcAAcGLgA?cA gDojWdxo@LCfCT gDyeWvxo@H@ [ieWphp@K{@A}BU_BEiBb@sB eBarU`lb@pAwC yA_gV`xe@{AKS}@OImAEu@BSH gG_gV`xe@Aj@FX^Z@V CyiWznn@\\V C{hWron@fC|DFZCrBDFnBB\\GBDBzEUj@Ap@FlBd@j@R?FXAdIa@JIb@HbD GolWlar@h@DrAMdALvHM kDs|V~|p@c@PqAM I}|Vzaj@Bb@XFHNPDRz@dAn@\\f@h@dAd@rBDx@Vx@^F I}rVfrj@?bCGTIRw@Di@vB }BosUvlb@PP }B}rUhmb@LjBTbAt@~AZPp@Ln@`@`A`B }BcjU|zb@N`@@^ iG_hUlac@i@gAGeA qBifUjzb@R\\ }BcjU|zb@jA`A }BwgU~|b@j@^ mBkfU~}b@Dw@ mBefUf|b@N] }BkfU~}b@?T qB_hUlac@LK qBqgU`ac@Ri@ qB}fUv_c@Pa@ mBueUh{b@Fc@T_@ kG}rVfrj@b@b@?^HT`@@@Ep@Gh@bAN?F^ eBccUheb@|C@ }BkfUt~b@LV }B}eUl_c@j@pB IasUrxe@DW mFqdU~bc@|@vB YyeUr`d@f@mB ?wjUjtd@fDiG ?oeU`ld@To@HkBj@_BAg@Mi@Fg@ k@otUdpf@D`@El@ sB{lTdpe@RhA sBglTnre@`@dC sBekTtve@Ll@\\\\ mGyiT`ye@Nh@ oGiiTjze@ETJl@ oGciTn|e@PX oGqhTh}e@NV oGahT`~e@|@|BB\\ oG_fT|bf@Bb@ qGiiTjze@VI qGqhT`ze@xBfCNF sGs}S~oe@FZ ?ucUp_d@HX uGczTlzc@cCdAc@@{AlAm@L YqdUd}c@ZjA EyrZzb]KiBF{AhA}FbAwCd@c@h@GRD`@x@`@bDYiGH{@\\wAR[b@Qf@En@LpA~AUoDPoE\\_B\\m@`@]\\IN?RL_@o@M_AXuDhBmIfB}FbAsAn@Br@j@P\\XvA EepYjc[C_B EepYjc[NuCd@eBZg@hA{Ap@i@r@UXFXRWs@[mBIqABiAn@}Cr@kB|@kBvA_AvAk@bAD|@Pv@`@t@r@|@lAZv@B`@YtDd@cF`@yAb@g@d@G`@Jn@^l@n@j@fAv@zBTtAJzB E}`Y|l\\WmCqAg@[y@m@kDqBsG_@wCe@e@{@iBo@yEO_C E{~Wpq[?m@ EkgXvoZHuDM}CFiAH_AVi@XY\\Cb@RV\\Pj@He@Ze@`@_@x@_@|BWxH]zD_@tCI EipYj`[BcC`@kElAwHzAiFrBqE|BeDxDaEzLcIpCmApC_@|BFfCr@pCbAjDvBnBdBzA`BhFtE EseWbzYx@Qp@DRZ E{vWt|[EH E{vWt|[N]Fo@OkA_@_@U@a@XEuA]kAcBkBO?WX EgtWl_\\J}@Ii@SOUC]NMR EuyUhlZIi@uA?y@[OQKs@Ri@ EmnW`j_@a@DIJ E_~Vt~_@cBoG_BeFq@oA}@y@eAa@m@GeBT E_~Vt~_@w@@m@T E_`Wjg`@I`@ Ei`Wlh`@f@eC|@_B Ec}Vfa`@[qA E_~Vt~_@|BJaBdA EgtV|m`@k@Bi@Ki@Ya@e@c@iAuAcG EicV~d]F[f@s@`@UZCl@DvHlB`@RRV^`AMpASR EorVv{`@h@aAb@a@b@S E_bUdg_@xAUhEaC\\A EikTxh_@TH\\n@J`N EiiTty_@iAdCcCvDiC|BWh@ EiiTty_@`@`QJvNMnHa@pB EeoVxg{@YMk@C{@V^c@`@}@^qBNcCXq@TMf@A^gAJKRKn@C\\M Uw{Vx{z@aAjAIb@ Uc~Vh_{@GjA EwuYt{~@J]^a@PE EkbXr{ZNRNdACjBKt@MTXLj@`A\\vBHlA?fB EonW|e]LB\\WVaASmBy@qA\\{AJiCCk@Qu@e@g@Xo@Fo@FmBEs@y@iDq@qAk@s@[YK@ EgtWl_\\IH Eo`Wf}{@v@En@VVXd@|C?b@QfA EojVz}`@VbAB`@ITa@b@ EmgVlwYp@tB@^K^WPt@Vd@b@Pd@F`A?d@Kn@[bAXb@H`@ElAO`@QN]Fq@KNX`@`CLlDAlBSvCKp@_@r@ mG_tTb}e@Yo@ mG_tTb}e@xGoB mGekTrye@j@Q mGwvT`}e@MWg@[]D mGytTr{e@}@l@ kEwvT`}e@iBlA EkoYrv~@VILO AmbWfhz@LnAHP\\VT@^bAHzBFTJBP^Hb@Cf@e@bBa@`CS^Gj@ Ao`Wz_{@Ch@[FOp@ [gtU|b^Ks@^iAD{@`@qA AerUba^RaAZu@N{@EIg@MQLES A}qUly]JDDKHa@Cy@PQFYNC^XPAXg@@i@ cA}qUly]OQs@wCBaBKI cAitUvp]KGCOD{@KkBHmAf@vABxB cAisUzn]x@zAh@Bl@S^AFD@t@ _EgtU|b^REl@s@ wGkjUz{^b@gAf@i@Hk@WgCQIKLM@Wy@[MYH_@h@g@DMXYJ kDa_Xp_q@g@LkBBeA[ cEy`Ylxq@ARi@B?ROb@DnH IwvV|rl@FK EegVjc[RFd@t@L`AXnF?vB]vDe@hB yGkbTj`f@Bk@ yGgbT~~e@FYSY {GsaTxue@`@QdBD cAoaTjvf@Sh@mEl@o@fA cAoaTjvf@rAw@T?PNLC OoaTjvf@g@iC}@s@DgCKSYkBRg@ }GqoT|we@pB] }G_lT~ve@XI u@iuT|nf@tCgH^o@C_@lAWdC}D GgbT~~e@hAp@L?nAdA _Hk}Sftf@DV _He}S~tf@CjAQP[~@?jE _Hw~Sh`g@?hD _Hw~Sreg@FfA sB_|S|tf@k@U sBk}Sftf@KOYkCgAoB aHy`Tzkf@CoAUiB@eAQcBGK aHkbTj`f@O[ aH{bTn_f@OK qGk}Szpe@UNg@x@w@FEH qGgaTvse@K`A qGsaTxue@KdCSjB qGsbTj}e@g@TKN ?_iT|ve@Qa@uAkB cHc~Vh_{@e@\\ cHi_W`b{@?y@ eHoyW~ay@X@lAr@HNb@Nr@D`@d@PF gH_dYjov@LG gHqcYbov@LG gHccYznv@RIHiA gHebYflv@BaASA gHubYbjv@K? gHacYbjv@U@ GgwTtpf@Ek@ GmwThof@bAK aHgdTp~e@ZP A_bW~b{@G|@GB ?i_Wf`{@GI]A Uk~Vta{@KLQA Ui_W`b{@Y\\{@? AubXjvw@hAmB _CyeUr`d@Dg@ _CseUj_d@c@}D OiyTd_^Bb@ Uc{Wdhz@PLJZb@b@N\\M^k@TERFLLNN@RIT?Db@b@E EobW`e{@OEKHDdAM\\ iHi|W~rv@Y@ iHc}W`sv@m@FA^ iHs~Whtv@?l@HHHh@ iH_~Wjwv@BFFE gH_dYjov@OE]] gHmeYfnv@Qc@?_@ gH_fYblv@@c@RWJN`@F Wq_Xnnp@DpB qAgbXvrp@zAU wDmmT`ke@]J_@A kHekTtve@VCl@J mHqhT`ze@McB oGciTn|e@X]xAzAf@B sBy`Tzkf@{@w@k@gA_@] sBaeT|ff@Y{A qAaeT|ff@l@sBVyB ]}nV~w`@h@hAbBpB oHagYxev@h@tAv@? [_dYfnv@J? [scYfnv@N? gDcdYnvv@N]@mE gDqcYbov@A[ qH{zY~tv@dAELBJN`@@HJ~A?L_@b@e@PA^s@fBC ?acYbjv@?^GJUD [sbYflv@Ah@KAAV [ccYfnv@?R oFsbYflv@AcA ?}_W`b{@R? iEgjWnhp@|C@ iEieWphp@fC?\\l@F? iE{_W~ip@vACBIJ? sHs|Vngn@oABEHc@?[t@a@TwC?gA^ C{hWron@YmA uHghWzem@OIMoABy@ZQ wHueUzde@\\WLY`@YNAVo@f@YFMVBFKJAFDPa@H?`@e@XET_@n@MjBcA CcpSrig@EACt@eAbBWbAKc@ eFw~Sreg@Z@B^dDH@ULClA}AIQT_@ wHqvTpyd@b@Gr@Ht@WTQ oHisT|hd@HHI? oHisT|hd@Ye@q@c@Oe@s@H[Xu@eA_@Ma@_@eAPs@\\ yHagTnif@JAPa@EWc@}@HQEK wDkoTjke@gBj@i@H gCicUrrc@lCkB gC{~Tfoc@ZM?sESE]aAMg@?u@IUWWMc@][a@Q wD{sTzme@]Hg@QSLaA?MHMAKLa@IGYWEa@WYJGQKE_@XCRICCf@[LMROUINIAA^WR OigTvdf@g@o@JOe@_AJQ?k@ G_fT|bf@rAyB oGekTrye@EUMMEo@ ?}sSxmg@Dp@ {HeaT`re@At@ oGahT`~e@OW oGciTn|e@q@c@Ow@ oG_lT~ve@e@_C oHunUrh^e@LI\\[h@EVFvA wAmkU~t_@EKg@YI_@?k@JM mEcsWv`r@N[ wD}fWvuq@bDEFK`A?FErA? AesWles@@_@K}@ iDomXjas@HDFM cAepUtj\\Q}A }H_zTb`^T] _IyqUlm\\K@IGEL sAkoU~k\\C[UM aIeyTh`^YE aI_zTb`^KAUT [itUvp]Je@RU iAsbUvfc@H_@?g@ iBcjU~za@HWW_@pAoCXoAx@?FMP??RH?Fa@ cImxUvxa@F?Ph@TDN`@jAnAHMTd@ZLn@rAn@f@ cImxUvxa@SH cIqhU~eb@eA}@e@Rw@o@[G cIqnU|bb@SA eIeoUzbb@LR gIadUpbb@BQNCDKX@n@SPBd@SZH gCocU~~b@YQCOQA gCigUt{b@b@P }AyaU~dc@OO }AibUndc@IS iI}gUjhc@YaB?k@Sa@ iIigUhyc@PB kIwzUbya@PG kIezUzxa@JE mB_eUhcb@?o@FQ mIwgU~|b@Li@ mIigUt{b@DU iAcgU~zb@IK ]cgU~zb@XVRM }AocU~~b@Ca@S[ mIqiU~|b@JX\\ALJZr@ mIqiU~|b@YMq@j@ cGwfUh`c@EQ oIqgU`ac@XW oIwfUh`c@X[ oI}eUl_c@P]F? ]ceUn~b@Cp@RfALFBPOC ]ceUn~b@BS ]_eUz}b@MW"};
+
+/* ══════════════════════════════════════════════════ ROAD TRIP
+   Snap a freehand sketch to highways and list the parks along it. The engine (rt* functions)
+   is a twin copy of the USA guide's: fix it in one, make the same change in the other. Only
+   rtClass (road costs) and the UI below are per-guide. */
+const TRIP_NAV_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-navigation" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
+/* ── Road-trip core: decode network, snap a freehand sketch to highways, measure parks ── */
+const RT_KM_PER_DEG = 111.32;
+const RT_MI_PER_KM = 0.621371;
+
+function rtDecodeNum(s, i){
+  let r = 0, sh = 0, b;
+  do { b = s.charCodeAt(i++) - 63; r |= (b & 0x1f) << sh; sh += 5; } while (b >= 0x20);
+  return [(r & 1) ? ~(r >> 1) : (r >> 1), i];
+}
+
+/* Build the graph once: nodes are shared edge endpoints, edges carry their [lat,lng] path. */
+function rtBuildGraph(data){
+  const q = data.q, nodeIdx = new Map(), nodes = [], edges = [];
+  const nodeOf = (x, y) => {
+    const k = x + ',' + y;
+    let id = nodeIdx.get(k);
+    if (id === undefined){ id = nodes.length; nodeIdx.set(k, id); nodes.push({ lat:y/q, lng:x/q, adj:[] }); }
+    return id;
+  };
+  data.edges.split(' ').forEach(s => {
+    let i = 0, v, x = 0, y = 0;
+    [v, i] = rtDecodeNum(s, i); const name = data.names[v];
+    const xy = [];
+    while (i < s.length){
+      let dy, dx; [dy, i] = rtDecodeNum(s, i); [dx, i] = rtDecodeNum(s, i);
+      y += dy; x += dx; xy.push([x, y]);
+    }
+    const pts = xy.map(([px, py]) => [py / q, px / q]);
+    let km = 0;
+    for (let k = 1; k < pts.length; k++) km += rtKm(pts[k-1], pts[k]);
+    const a = nodeOf(xy[0][0], xy[0][1]), b = nodeOf(xy[xy.length-1][0], xy[xy.length-1][1]);
+    const e = { a, b, pts, km, name, id: edges.length };
+    edges.push(e); nodes[a].adj.push(e.id); nodes[b].adj.push(e.id);
+  });
+  /* connected components, so a sketch in Alaska routes within Alaska */
+  const comp = new Int32Array(nodes.length).fill(-1);
+  let c = 0;
+  for (let s = 0; s < nodes.length; s++){
+    if (comp[s] >= 0) continue;
+    const st = [s]; comp[s] = c;
+    while (st.length){
+      const n = st.pop();
+      nodes[n].adj.forEach(eid => {
+        const e = edges[eid], o = e.a === n ? e.b : e.a;
+        if (comp[o] < 0){ comp[o] = c; st.push(o); }
+      });
+    }
+    c++;
+  }
+  return { nodes, edges, comp };
+}
+
+/* Equirectangular distance, scaled at the pair's own latitude: within 0.5% at these spans. */
+function rtKm(p, q){
+  const cl = Math.cos((p[0] + q[0]) * Math.PI / 360);
+  return RT_KM_PER_DEG * Math.hypot((q[1] - p[1]) * cl, q[0] - p[0]);
+}
+
+/* Distance from point p to polyline line ([lat,lng] arrays), plus how far along the line
+   (km) the nearest point sits. Projected locally around p, so near distances are accurate. */
+function rtNearest(p, line, cum){
+  const cl = Math.cos(p[0] * Math.PI / 180);
+  let best = Infinity, along = 0;
+  for (let i = 1; i < line.length; i++){
+    const ax = (line[i-1][1] - p[1]) * cl, ay = line[i-1][0] - p[0];
+    const bx = (line[i][1] - p[1]) * cl,   by = line[i][0] - p[0];
+    const dx = bx - ax, dy = by - ay, L2 = dx*dx + dy*dy;
+    let t = L2 ? -(ax*dx + ay*dy) / L2 : 0;
+    t = t < 0 ? 0 : t > 1 ? 1 : t;
+    const cx = ax + t*dx, cy = ay + t*dy, d2 = cx*cx + cy*cy;
+    if (d2 < best){
+      best = d2;
+      if (cum) along = cum[i-1] + t * (cum[i] - cum[i-1]);
+    }
+  }
+  return { km: Math.sqrt(best) * RT_KM_PER_DEG, along };
+}
+
+function rtCumulative(line){
+  const cum = [0];
+  for (let i = 1; i < line.length; i++) cum.push(cum[i-1] + rtKm(line[i-1], line[i]));
+  return cum;
+}
+
+/* Thin a raw pointer sketch to points at least minKm apart (keeps the last point). */
+function rtThin(sketch, minKm){
+  if (sketch.length < 2) return sketch.slice();
+  const out = [sketch[0]];
+  for (let i = 1; i < sketch.length - 1; i++)
+    if (rtKm(out[out.length-1], sketch[i]) >= minKm) out.push(sketch[i]);
+  out.push(sketch[sketch.length-1]);
+  return out;
+}
+
+function rtLength(line){ let t = 0; for (let i = 1; i < line.length; i++) t += rtKm(line[i-1], line[i]); return t; }
+
+/* Snap a sketch to the network. Shortest path where each edge's length is inflated by how far
+   it strays from the sketch: cost = km * (1 + W * (dev/D)^2). Following the drawn line is
+   cheap, cutting across country away from it is expensive, so the route keeps the sketch's
+   shape while still running on real highways. D scales with sketch length (a coast-to-coast
+   doodle is allowed more slop than a 300-mile one). Returns null if no route. */
+function rtSnap(G, sketch){
+  const sk = rtThin(sketch, 2);
+  const skLen = rtLength(sk);
+  if (sk.length < 2 || skLen < 20) return null;
+  const D = Math.max(25, Math.min(160, skLen * 0.05)), W = 3;
+
+  /* sketch bounding box padded by 4D: edges far outside it can never be on a good route */
+  let mnLat = 90, mxLat = -90, mnLng = 180, mxLng = -180;
+  sk.forEach(([la, ln]) => { mnLat = Math.min(mnLat, la); mxLat = Math.max(mxLat, la); mnLng = Math.min(mnLng, ln); mxLng = Math.max(mxLng, ln); });
+  const padLat = 4 * D / RT_KM_PER_DEG, padLng = padLat / Math.cos(((mnLat + mxLat) / 2) * Math.PI / 180);
+  const inBox = p => p[0] >= mnLat - padLat && p[0] <= mxLat + padLat && p[1] >= mnLng - padLng && p[1] <= mxLng + padLng;
+
+  /* Anchor each sketch end on the nearest point ALONG a road (not the nearest junction: on
+     long rural stretches junctions can be 70+ km apart). The anchor becomes a temporary node
+     with two half-edges to the road's real ends; the finish must be on the start's network. */
+  const N = G.nodes.length, S = N, T = N + 1;
+  const anchor = (p, compWanted) => {
+    let best = null;
+    G.edges.forEach(e => {
+      if (compWanted !== undefined && G.comp[e.a] !== compWanted) return;
+      const cum = rtCumulative(e.pts), r = rtNearest(p, e.pts, cum);
+      if (!best || r.km < best.km) best = { e, cum, km: r.km, along: r.along };
+    });
+    return best;
+  };
+  const splitAt = (pts, cum, along) => {   // -> [pts from start to X, pts from X to end]
+    let i = 1;
+    while (i < cum.length - 1 && cum[i] < along) i++;
+    const f = cum[i] > cum[i-1] ? (along - cum[i-1]) / (cum[i] - cum[i-1]) : 0;
+    const X = [pts[i-1][0] + f * (pts[i][0] - pts[i-1][0]), pts[i-1][1] + f * (pts[i][1] - pts[i-1][1])];
+    return [pts.slice(0, i).concat([X]), [X].concat(pts.slice(i))];
+  };
+  const as = anchor(sk[0]);
+  if (!as) return null;
+  const at = anchor(sk[sk.length-1], G.comp[as.e.a]);
+  if (!at) return null;
+  const extra = new Map();                  // node -> virtual half-edges
+  const link = (a, b, pts, name) => {
+    const v = { a, b, pts, name, km: rtLength(pts), id: -1 };
+    [a, b].forEach(n => { if (!extra.has(n)) extra.set(n, []); extra.get(n).push(v); });
+  };
+  [[as, S], [at, T]].forEach(([h, node]) => {
+    const [p1, p2] = splitAt(h.e.pts, h.cum, h.along);
+    link(h.e.a, node, p1, h.e.name);
+    link(node, h.e.b, p2, h.e.name);
+  });
+  if (as.e === at.e){                        // both ends on one road: also the direct stretch
+    const lo = Math.min(as.along, at.along), hi = Math.max(as.along, at.along);
+    const first = splitAt(as.e.pts, as.cum, hi)[0];
+    const mid = splitAt(first, rtCumulative(first), lo)[1];
+    if (rtLength(mid) < 1) return null;
+    as.along <= at.along ? link(S, T, mid, as.e.name) : link(T, S, mid, as.e.name);
+  }
+
+  /* per-edge cost (cached per sketch for real edges) */
+  const cost = new Float64Array(G.edges.length).fill(-1);
+  const edgeCost = e => {
+    if (e.id >= 0 && cost[e.id] >= 0) return cost[e.id];
+    let c;
+    if (e.id >= 0 && !inBox(e.pts[0]) && !inBox(e.pts[e.pts.length-1])) c = Infinity;
+    else {
+      const step = Math.max(1, Math.floor(e.pts.length / 6));
+      let sum = 0, n = 0;
+      for (let i = 0; i < e.pts.length; i += step){ sum += rtNearest(e.pts[i], sk).km; n++; }
+      sum += rtNearest(e.pts[e.pts.length-1], sk).km; n++;
+      const dev = sum / n;
+      c = e.km * rtClass(e.name) * (1 + W * (dev / D) * (dev / D));
+    }
+    if (e.id >= 0) cost[e.id] = c;
+    return c;
+  };
+
+  /* Dijkstra with a binary heap, over the real graph plus the two anchor nodes */
+  const dist = new Float64Array(N + 2).fill(Infinity), via = new Array(N + 2).fill(null);
+  const heap = [];
+  const push = (d, n) => { heap.push([d, n]); let i = heap.length - 1;
+    while (i){ const p = (i - 1) >> 1; if (heap[p][0] <= heap[i][0]) break; [heap[p], heap[i]] = [heap[i], heap[p]]; i = p; } };
+  const pop = () => { const top = heap[0], last = heap.pop();
+    if (heap.length){ heap[0] = last; let i = 0;
+      for (;;){ const l = 2*i+1, r = l+1; let m = i;
+        if (l < heap.length && heap[l][0] < heap[m][0]) m = l;
+        if (r < heap.length && heap[r][0] < heap[m][0]) m = r;
+        if (m === i) break; [heap[m], heap[i]] = [heap[i], heap[m]]; i = m; } }
+    return top; };
+  const relax = (d, n, e) => {
+    const o = e.a === n ? e.b : e.a, c = edgeCost(e);
+    if (c === Infinity) return;
+    if (d + c < dist[o]){ dist[o] = d + c; via[o] = e; push(d + c, o); }
+  };
+  dist[S] = 0; push(0, S);
+  while (heap.length){
+    const [d, n] = pop();
+    if (d > dist[n]) continue;
+    if (n === T) break;
+    if (n < N) G.nodes[n].adj.forEach(eid => relax(d, n, G.edges[eid]));
+    (extra.get(n) || []).forEach(e => relax(d, n, e));
+  }
+  if (!via[T]) return null;
+  const s = S, t = T;
+
+  /* walk back, stitching edge paths in travel order */
+  const seq = [];
+  for (let n = t; n !== s; ){ const e = via[n]; seq.push(e); n = e.a === n ? e.b : e.a; }
+  seq.reverse();
+  const path = [];
+  const roads = [];   // [{name, km}] merged runs, for the "via I-90 → I-94" summary
+  let cur = s;
+  seq.forEach(e => {
+    const pts = e.a === cur ? e.pts : e.pts.slice().reverse();
+    path.push(...(path.length ? pts.slice(1) : pts));
+    cur = e.a === cur ? e.b : e.a;
+    const last = roads[roads.length-1];
+    if (e.name && last && last.name === e.name) last.km += e.km;
+    else if (e.name) roads.push({ name: e.name, km: e.km });
+    else if (last) last.km += e.km;
+  });
+  const cum = rtCumulative(path);
+  return { path, cum, km: cum[cum.length-1], roads, sketch: sk };
+}
+
+/* A trip that ends near where it began is a loop: split the sketch at its farthest point and
+   route the two halves, so start and finish don't collapse onto the same spot. */
+function rtSnapTrip(G, sketch){
+  const sk = rtThin(sketch, 2), len = rtLength(sk);
+  if (sk.length > 3 && rtKm(sk[0], sk[sk.length-1]) < Math.max(30, len * 0.1)){
+    let k = 1, far = 0;
+    sk.forEach((p, i) => { const d = rtKm(sk[0], p); if (d > far){ far = d; k = i; } });
+    const a = rtSnap(G, sk.slice(0, k + 1)), b = a && rtSnap(G, sk.slice(k));
+    if (!a || !b) return null;
+    const path = a.path.concat(b.path.slice(1)), cum = rtCumulative(path), roads = a.roads.slice();
+    b.roads.forEach(r => { const l = roads[roads.length-1]; if (l && l.name === r.name) l.km += r.km; else roads.push({ ...r }); });
+    return { path, cum, km: cum[cum.length-1], roads, sketch: sk, loop: true };
+  }
+  return rtSnap(G, sketch);
+}
+
+/* Main roads in travel order: runs of at least 8% of the trip (or 80 km), repeats collapsed. */
+function rtRoadSummary(route, max){
+  const min = Math.min(80, route.km * 0.08);
+  const out = [];
+  route.roads.forEach(r => { if (r.km >= min && out[out.length-1] !== r.name) out.push(r.name); });
+  return out.slice(0, max || 8);
+}
+
+/* Parks within corridorKm of the route, ordered by where they fall along it. */
+function rtParksNear(route, parks, corridorKm){
+  const out = [];
+  parks.forEach(p => {
+    if (!p.coords) return;
+    const r = rtNearest(p.coords, route.path, route.cum);
+    if (r.km <= corridorKm) out.push({ park: p, offKm: r.km, alongKm: r.along });
+  });
+  out.sort((a, b) => a.alongKm - b.alongKm);
+  return out;
+}
+
+/* Canada's network is mostly one highway per corridor, so roads cost their length. Ferries
+   cost double: the crossing is real, but waiting and loading make it far slower than its km. */
+function rtClass(name){ return name === 'Ferry' ? 2 : 1; }
+
+/* ── Road-trip mode: UI (Canada) ─────────────────────────────────────────────
+   "Plan a road trip" turns the map into a sketch pad for one stroke. On release
+   the sketch is snapped to CA_ROADS (rtSnapTrip), drawn as a solid route over a
+   shaded corridor, and every park inside the corridor is listed and numbered in
+   the order you'd reach it. Text comes from T[lang].trip; distances follow the
+   page's units setting. Clear puts the normal map back. */
+const TRIP_MAX_STOPS = 9;   // Google Maps' directions link takes at most 9 waypoints
+/* Corridor choices: a round number in each unit system, so neither reads as a conversion. */
+const TRIP_CORRIDORS = [ {km:15, mi:10}, {km:40, mi:25}, {km:80, mi:50}, {km:150, mi:100}, {km:250, mi:150} ];
+let tripGraph = null, tripNetLayer = null, tripLayer = null, tripBandLine = null;
+let tripDrawing = false, tripPointer = null, tripSketch = [], tripSketchLine = null;
+let tripRoute = null, tripHits = [], tripStops = new Set(), tripPins = {}, tripHintKey = '';
+
+function tx_(){ return T[lang].trip; }
+function tripFill(s, o){ return s.replace(/\{(\w+)\}/g, (m, k) => (k in o ? o[k] : m)); }
+function tripPlural(n, one, many){ return n === 1 ? one : many; }
+
+/* Distance in the page's units: 'metric' km, 'imperial' mi, 'both' "450 km / 280 mi". */
+function tripDist(km){
+  const k = Math.round(km).toLocaleString(), m = Math.round(km * KM_TO_MILES).toLocaleString();
+  if (units === 'metric') return k + NNBSP + 'km';
+  if (units === 'imperial') return m + NNBSP + 'mi';
+  return k + NNBSP + 'km' + THINSP + '/' + THINSP + m + NNBSP + 'mi';
+}
+/* Trip marker: "km 663" (a highway kilometre post), "Mile 412", or both. */
+function tripMarker(km){
+  const k = Math.round(km).toLocaleString(), m = Math.round(km * KM_TO_MILES).toLocaleString();
+  const t = tx_();
+  if (units === 'metric') return 'km' + NNBSP + k;
+  if (units === 'imperial') return t.mile + NNBSP + m;
+  return 'km' + NNBSP + k + THINSP + '/' + THINSP + t.mileShort + NNBSP + m;
+}
+function tripRoadName(n){
+  const t = tx_();
+  if (n === 'Ferry') return t.ferry;
+  return /^\d/.test(n) ? t.hwy + NNBSP + n : n;   // "Hwy 1" / "route 117"; autoroutes keep "A-20"
+}
+
+function tripHint(key, vars){
+  tripHintKey = key ? [key, vars || {}] : '';
+  const h = document.getElementById('trip-hint');
+  if (h) h.textContent = key ? tripFill(tx_()[key], vars || {}) : '';
+}
+
+function tripSetDrawButton(on){
+  const b = document.getElementById('trip-draw-btn');
+  if (!b) return;
+  const t = tx_();
+  b.setAttribute('aria-pressed', on ? 'true' : 'false');
+  b.querySelector('.trip-btn-label').textContent = on ? t.cancel : (tripRoute ? t.redraw : t.plan);
+}
+
+function tripMapLock(lock){
+  ['dragging','touchZoom','doubleClickZoom','boxZoom','keyboard','scrollWheelZoom'].forEach(h => {
+    if (mapInstance[h]) lock ? mapInstance[h].disable() : mapInstance[h].enable();
+  });
+  document.getElementById('park-map').classList.toggle('trip-drawing', lock);
+}
+
+function tripShowNetwork(){
+  if (tripNetLayer) return;
+  tripNetLayer = L.polyline(tripGraph.edges.map(e => e.pts),
+    { className:'trip-net', interactive:false, smoothFactor:1.5, weight:1 }).addTo(mapInstance);
+}
+
+function tripToggleDraw(){
+  if (!mapInstance) return;
+  if (tripDrawing){ tripEndDraw(); tripHint(tripRoute ? '' : 'cancelled'); return; }
+  try { if (!tripGraph) tripGraph = rtBuildGraph(CA_ROADS); }
+  catch (err){ tripHint('loadFail'); return; }
+  tripDrawing = true;
+  tripMapLock(true);
+  tripShowNetwork();
+  if (markerCluster && mapInstance.hasLayer(markerCluster)) mapInstance.removeLayer(markerCluster);
+  tripSetDrawButton(true);
+  document.getElementById('trip-clear-btn').hidden = false;
+  tripHint('hintDraw');
+}
+
+function tripEndDraw(){
+  tripDrawing = false; tripPointer = null;
+  tripMapLock(false);
+  tripSetDrawButton(false);
+  if (!tripRoute && !tripSketchLine) tripClear();
+}
+
+function tripPointerDown(e){
+  if (!tripDrawing || tripPointer !== null) return;
+  if (e.button !== undefined && e.button > 0) return;
+  if (e.target.closest && e.target.closest('.leaflet-control')) return;
+  e.preventDefault();
+  tripPointer = e.pointerId;
+  try { e.currentTarget.setPointerCapture(e.pointerId); } catch (_) {}
+  if (tripSketchLine) mapInstance.removeLayer(tripSketchLine);
+  const ll = mapInstance.mouseEventToLatLng(e);
+  tripSketch = [ll];
+  tripSketchLine = L.polyline([ll], { className:'trip-sketch', interactive:false, weight:2 }).addTo(mapInstance);
+}
+
+function tripPointerMove(e){
+  if (e.pointerId !== tripPointer) return;
+  e.preventDefault();
+  const ll = mapInstance.mouseEventToLatLng(e);
+  const last = tripSketch[tripSketch.length - 1];
+  if (mapInstance.latLngToContainerPoint(last).distanceTo(mapInstance.latLngToContainerPoint(ll)) < 4) return;
+  tripSketch.push(ll);
+  tripSketchLine.addLatLng(ll);
+}
+
+function tripPointerUp(e){
+  if (e.pointerId !== tripPointer) return;
+  tripPointer = null;
+  let px = 0;
+  for (let i = 1; i < tripSketch.length; i++)
+    px += mapInstance.latLngToContainerPoint(tripSketch[i-1]).distanceTo(mapInstance.latLngToContainerPoint(tripSketch[i]));
+  if (px < 40){
+    mapInstance.removeLayer(tripSketchLine); tripSketchLine = null;
+    tripHint('tooShort');
+    return;
+  }
+  tripEndDraw();
+  let route = null;
+  try { route = rtSnapTrip(tripGraph, tripSketch.map(ll => [ll.lat, ll.lng])); } catch (err){ route = null; }
+  if (!route){ tripHint('noRoute'); return; }
+  tripRoute = route;
+  tripStops = new Set();
+  tripSetDrawButton(false);
+  tripRenderRoute();
+  mapInstance.fitBounds(L.polyline(route.path).getBounds(), { padding:[28, 28] });
+}
+
+/* Corridor width in km. Auto ≈ 4% of the trip (40–160 km). A preset uses its own unit's round
+   number: 25 mi under Imperial, 40 km under Metric or Both. */
+function tripCorridorKm(){
+  const v = document.getElementById('trip-corr').value;
+  if (v === 'auto'){
+    const km = tripRoute.km * 0.04;
+    return Math.max(40, Math.min(160, Math.round(km / 5) * 5));
+  }
+  const c = TRIP_CORRIDORS[+v];
+  return units === 'imperial' ? c.mi / KM_TO_MILES : c.km;
+}
+
+function tripBandWeight(){
+  if (!tripRoute) return 1;
+  const mid = tripRoute.path[Math.floor(tripRoute.path.length / 2)][0];
+  const mpp = 156543.03392 * Math.cos(mid * Math.PI / 180) / Math.pow(2, mapInstance.getZoom());
+  return Math.max(2, 2 * tripCorridorKm() * 1000 / mpp);
+}
+function tripUpdateBand(){ if (tripBandLine) tripBandLine.setStyle({ weight: tripBandWeight() }); }
+
+function tripRenderRoute(){
+  if (tripLayer) mapInstance.removeLayer(tripLayer);
+  tripLayer = L.layerGroup().addTo(mapInstance);
+  tripPins = {};
+  const t = tx_(), path = tripRoute.path;
+  tripBandLine = L.polyline(path, { className:'trip-band', interactive:false, lineCap:'round', lineJoin:'round', weight: tripBandWeight() }).addTo(tripLayer);
+  L.polyline(path, { className:'trip-route-casing', interactive:false, weight:7 }).addTo(tripLayer);
+  L.polyline(path, { className:'trip-route', interactive:false, weight:4 }).addTo(tripLayer);
+  if (tripSketchLine) tripSketchLine.bringToFront();
+  const ends = tripRoute.loop ? [[t.startFinish, path[0]]] : [[t.start, path[0]], [t.finish, path[path.length - 1]]];
+  ends.forEach(([label, ll]) => {
+    L.marker(ll, { interactive:false, keyboard:false,
+      icon: L.divIcon({ className:'', html:`<div class="trip-end">${label}</div>`, iconSize:null, iconAnchor:[0, 22] })
+    }).addTo(tripLayer);
+  });
+  tripHits = rtParksNear(tripRoute, PARKS, tripCorridorKm());
+  tripHits.forEach((h, i) => {
+    const p = h.park, closed = p.badges.includes('closed');
+    const m = L.marker(p.coords, {
+      title: p.name[lang] || p.name.en, riseOnHover:true,
+      icon: L.divIcon({ className:'', html:`<div class="trip-pin${closed ? ' is-closed' : ''}">${i + 1}</div>`, iconSize:[22, 22], iconAnchor:[11, 11] })
+    });
+    const base = mapMarkers[p.id] && mapMarkers[p.id].getPopup();
+    if (base) m.bindPopup(base.getContent(), { maxWidth: 240 });
+    m.bindTooltip(`${i + 1}. ${p.name[lang] || p.name.en}`, { direction:'top', offset:[0, -10], className:'trip-tip' });
+    m.addTo(tripLayer);
+    tripPins[p.id] = m;
+  });
+  tripRenderList();
+  tripHint('');
+}
+
+function tripRenderList(){
+  const box = document.getElementById('trip-results');
+  if (!tripRoute){ box.hidden = true; box.innerHTML = ''; return; }
+  const t = tx_(), corr = tripDist(tripCorridorKm());
+  const via = rtRoadSummary(tripRoute, 7).map(tripRoadName);
+  const closedN = tripHits.filter(h => h.park.badges.includes('closed')).length;
+  let html = `<div class="trip-sum"><strong>&asymp;${NNBSP}${tripFill(t.byRoad, { d: tripDist(tripRoute.km) })}</strong>` +
+    (via.length ? ` ${t.via} ${via.join(' &rarr; ')}` : '') +
+    ` &middot; <strong>${tripFill(tripPlural(tripHits.length, t.parkOne, t.parkMany), { n: tripHits.length })}</strong> ` +
+    tripFill(t.within, { d: corr }) +
+    (closedN ? ' ' + tripFill(tripPlural(closedN, t.closedOne, t.closedMany), { n: closedN }) : '') + `</div>`;
+  if (!tripHits.length){
+    html += `<p class="trip-empty">${tripFill(t.empty, { d: corr })}</p>`;
+  } else {
+    html += '<ol class="trip-list">' + tripHits.map((h, i) => {
+      const p = h.park, closed = p.badges.includes('closed'), soon = p.badges.includes('soon');
+      const tag = closed ? renderBadge('closed') : soon ? renderBadge('soon') : '';
+      const offTxt = h.offKm < 1.5 ? t.onRoute : tripFill(t.offRoute, { d: tripDist(h.offKm) });
+      const checked = tripStops.has(p.id) ? ' checked' : '';
+      return `<li class="trip-item${closed ? ' is-closed' : ''}">` +
+        `<span class="trip-num${closed ? ' is-closed' : ''}" aria-hidden="true">${i + 1}</span>` +
+        `<div class="trip-main"><button type="button" class="trip-name" data-id="${p.id}">${p.name[lang] || p.name.en}</button> ${tag}` +
+        `<span class="trip-loc">${p.city[lang] || p.city.en} &middot; ${formatVert(p)}</span></div>` +
+        `<div class="trip-dist"><span class="trip-mile">${tripMarker(h.alongKm)}</span>` +
+        `<span class="trip-off">${offTxt}</span></div>` +
+        (closed ? '<span class="trip-stop trip-stop-na">&mdash;</span>' :
+          `<label class="trip-stop"><input type="checkbox" data-id="${p.id}"${checked}> ${t.stop}</label>`) +
+        `</li>`;
+    }).join('') + '</ol>';
+  }
+  html += `<div class="trip-actions"><a class="trip-btn trip-gmaps" href="#" target="_blank" rel="noopener">` +
+    `${TRIP_NAV_SVG}<span>${t.gmaps}</span></a><span class="trip-stopcount"></span></div>` +
+    `<p class="trip-fine">${t.fine}</p>`;
+  box.innerHTML = html;
+  box.hidden = false;
+  tripUpdateStops();
+}
+
+/* Stop count, the 9-stop cap and the Google Maps link, refreshed without rebuilding the list
+   (so keyboard focus stays on the checkbox that was just ticked). */
+function tripUpdateStops(){
+  const box = document.getElementById('trip-results'), n = tripStops.size, t = tx_();
+  box.querySelectorAll('input[type=checkbox][data-id]').forEach(cb => {
+    cb.disabled = !cb.checked && n >= TRIP_MAX_STOPS;
+  });
+  const cnt = box.querySelector('.trip-stopcount');
+  if (cnt) cnt.textContent = (n ? tripFill(tripPlural(n, t.stopsOne, t.stopsMany), { n }) : t.tickHint) + ' ' + tripFill(t.max, { n: TRIP_MAX_STOPS });
+  const a = box.querySelector('.trip-gmaps');
+  if (a) a.href = tripGoogleUrl();
+}
+
+/* Google Maps directions link (no API key): origin and destination are the snapped route ends;
+   ticked parks become waypoints in travel order, sent as their map coordinates. */
+function tripGoogleUrl(){
+  if (!tripRoute) return '#';
+  const f = ll => ll[0].toFixed(4) + ',' + ll[1].toFixed(4);
+  const path = tripRoute.path;
+  const wps = tripHits.filter(h => tripStops.has(h.park.id)).map(h => f(h.park.coords));
+  return 'https://www.google.com/maps/dir/?api=1&travelmode=driving' + (lang === 'fr' ? '&hl=fr' : '') +
+    '&origin=' + encodeURIComponent(f(path[0])) +
+    '&destination=' + encodeURIComponent(f(path[path.length - 1])) +
+    (wps.length ? '&waypoints=' + encodeURIComponent(wps.join('|')) : '');
+}
+
+function tripClear(){
+  tripDrawing = false; tripPointer = null; tripRoute = null; tripHits = []; tripStops = new Set();
+  if (mapInstance){
+    tripMapLock(false);
+    [tripLayer, tripSketchLine, tripNetLayer].forEach(l => l && mapInstance.removeLayer(l));
+    if (markerCluster && !mapInstance.hasLayer(markerCluster)) mapInstance.addLayer(markerCluster);
+  }
+  tripLayer = tripSketchLine = tripNetLayer = tripBandLine = null;
+  tripSetDrawButton(false);
+  const c = document.getElementById('trip-clear-btn'); if (c) c.hidden = true;
+  tripRenderList();
+  tripHint('');
+}
+
+function tripFocusPark(id){
+  const p = PARKS.find(x => String(x.id) === String(id)), m = tripPins[p && p.id];
+  if (!p || !m) return;
+  mapInstance.setView(p.coords, Math.max(mapInstance.getZoom(), 8));
+  m.openPopup();
+  const y = document.getElementById('park-map').getBoundingClientRect().top + window.pageYOffset - 70;
+  window.scrollTo({ top: y, behavior: 'smooth' });
+}
+
+/* Language or units changed (called from renderAll): re-label everything in place. */
+function tripRenderText(){
+  const t = tx_();
+  if (!t || !document.getElementById('trip-bar')) return;
+  tripSetDrawButton(tripDrawing);
+  document.getElementById('trip-clear-label').textContent = t.clear;
+  document.getElementById('trip-corr-pre').textContent = t.within1;
+  document.getElementById('trip-corr-post').textContent = t.within2;
+  const sel = document.getElementById('trip-corr');
+  sel.options[0].text = t.auto;
+  TRIP_CORRIDORS.forEach((c, i) => {
+    sel.options[i + 1].text = units === 'metric' ? c.km + ' km' : units === 'imperial' ? c.mi + ' mi' : c.km + ' km / ' + c.mi + ' mi';
+  });
+  const credit = document.getElementById('roads-credit');
+  if (credit) credit.innerHTML = t.credit;
+  if (tripHintKey) tripHint(tripHintKey[0], tripHintKey[1]);
+  if (tripRoute && mapInstance) tripRenderRoute();
+}
+
+/* Map tab only: the trip bar and list hide on Stats / Mountain (called from toggleView). */
+function tripSyncView(view){
+  const show = view === 'map';
+  ['trip-bar', 'trip-results'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.classList.toggle('trip-off-tab', !show);
+  });
+  if (!show && tripDrawing){ tripEndDraw(); tripHint(''); }
+}
+
+(function initTrip(){
+  const mapEl = document.getElementById('park-map');
+  const drawBtn = document.getElementById('trip-draw-btn');
+  if (!mapEl || !drawBtn || typeof L === 'undefined' || typeof CA_ROADS === 'undefined') return;
+  drawBtn.addEventListener('click', tripToggleDraw);
+  document.getElementById('trip-clear-btn').addEventListener('click', tripClear);
+  document.getElementById('trip-corr').addEventListener('change', () => { if (tripRoute) tripRenderRoute(); });
+  mapEl.addEventListener('pointerdown', tripPointerDown);
+  mapEl.addEventListener('pointermove', tripPointerMove);
+  mapEl.addEventListener('pointerup', tripPointerUp);
+  mapEl.addEventListener('pointercancel', tripPointerUp);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && tripDrawing){ tripEndDraw(); tripHint('cancelled'); } });
+  const res = document.getElementById('trip-results');
+  res.addEventListener('click', e => {
+    const b = e.target.closest('.trip-name');
+    if (b) tripFocusPark(b.dataset.id);
+  });
+  res.addEventListener('change', e => {
+    const cb = e.target.closest('input[type=checkbox][data-id]');
+    if (!cb) return;
+    const id = PARKS.find(x => String(x.id) === cb.dataset.id).id;
+    cb.checked ? tripStops.add(id) : tripStops.delete(id);
+    tripUpdateStops();
+  });
+  tripRenderText();
+  const hook = () => { if (mapInstance){ mapInstance.on('zoomend', tripUpdateBand); } else setTimeout(hook, 200); };
+  hook();
+})();
 
 /* ══════════════════════════════════════════════════ EVENT HANDLERS */
 document.getElementById('lang-btn').addEventListener('click', () => {

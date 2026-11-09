@@ -141,6 +141,9 @@ off-season, which is already handled by each park's `season` field).
   to shift the total park count, update the README too (see
   `git log --grep=README` for the established one-line style: "Update
   README for Cypress Mountain and current park count").
+- **Then run the park sync** (see "Park sync between the two guides"): any add, close,
+  reopen, rename or move changes what the other guide's road trips show. If you can't run it,
+  end the handover with the reminder line given there.
 
 ## Gotchas (recorded so nobody re-introduces them)
 
@@ -218,11 +221,73 @@ off-season, which is already handled by each park's `season` field).
   and `rtClass` (one set of road costs). Each guide also carries a snapshot of the OTHER guide's
   parks, `OTHER_PARKS` (between the `OTHER_PARKS:BEGIN` / `OTHER_PARKS:END` markers), so trips
   list, pin and route through parks across the border, tagged with their country and linked to
-  their own guide. Each guide stays the only place its own parks are edited. **After adding,
-  closing or moving a park in either guide, run `node tools/sync-other-parks.js
-  ../USA-bike-parks ../Canada-mtb-parks`** (needs Playwright and both repos) to refresh the other
-  guide's snapshot; the snapshot records its sync date.
+  their own guide. Each guide stays the only place its own parks are edited. **Keeping that
+  snapshot current is the park sync: see "Park sync between the two guides" below, and follow
+  it exactly.**
+  **Park access roads (November 2026).** Natural Earth stops short of many resorts (CO-135 to
+  Crested Butte and US-26 over Mt. Hood aren't in it), so `NA_ROADS` also holds ~50 access
+  roads from OpenStreetMap: `tools/park-access.geojson`, fetched once from the public OSRM
+  router by `tools/fetch-park-access.py` for every park more than 15 km from the network, up to
+  three roads per park in different directions, and committed. The page fetches nothing; the
+  roads are baked in like the rest. ODbL requires the "(c) OpenStreetMap contributors" credit
+  (USA: footer credit line; Canada: map attribution): keep it while these roads are in the data.
+  Every park was within 14 km of a routable road after this change; the park sync check flags
+  any new or moved park that isn't.
 - Open idea, not scheduled: a separate Routes tab (see the USA repo README). Ask first.
+
+## Park sync between the two guides (required; follow this exactly)
+
+The two guides depend on each other. Each page carries a snapshot of the OTHER guide's parks
+(`OTHER_PARKS`) so road trips can list, pin and route through parks across the border. The
+snapshot is only refreshed by running the sync, so after a park is added, removed, closed or
+reopened, renamed, moved or has its vertical changed in either guide, the other guide's road
+trips keep showing the old details until someone runs it. Use the steps below. Don't improvise
+or explore: the commands do the comparing, and you never need to open either `index.html` to sync.
+
+**Reminder rule.** Whenever a session changes the park list in either guide (any of the edits
+above), run the sync as the last step of that same change if both repos are in the session
+(steps 1-5). If the other repo isn't attached and can't be added, end the handover to Jon with
+this line, word for word:
+> A park sync is recommended: the other guide's road trips still show the old details for
+> <park(s)>. Ask any Claude session to "run the park sync".
+
+**When Jon asks for a sync ("run the park sync", "sync the guides"):**
+1. Both repos must sit side by side (`../USA-bike-parks`, `../Canada-mtb-parks`). If one is
+   missing, attach it with `add_repo` (`postmillennium-MTB/USA-bike-parks` or
+   `postmillennium-MTB/Canada-mtb-parks`) and clone it next to the other on the same branch.
+   Playwright is pre-installed in cloud sessions; don't install it.
+2. From either repo root, run the read-only check (it writes nothing):
+   `node tools/sync-other-parks.js --check ../USA-bike-parks ../Canada-mtb-parks`
+   It prints, for each guide, when its snapshot was last synced and every park added, removed
+   or changed since then (with the field that changed), or "up to date".
+3. Report to Jon: the last sync date for each direction, and the differences, copied from the
+   output.
+4. **If both say "up to date": take no action.** No files change and there's no commit. Report
+   that and ask Jon whether more review is warranted. A check for real-world park openings and
+   closures is the separate "Recurring maintenance" task above, not part of a sync, and costs
+   far more (web research), so only do it if he says yes.
+5. **If there are differences:** run the same command without `--check`. It rewrites only the
+   snapshot(s) that are out of date. Commit in each repo that changed, with a message naming the
+   parks (e.g. "Sync OTHER_PARKS snapshot: Telluride, Powder Mountain reopened"), and push to
+   the session's branch.
+6. **Only if the check printed `FAR FROM ROADS`** for a park (new or moved, more than 15 km from
+   the road-trip network): it needs an access road, or trips can't end there. Ask Jon before
+   doing this, because it rebuilds the road data in both pages. Run these from the USA repo root
+   (the scratch folder can be any temp folder):
+   - download and unzip Natural Earth roads: `https://naciscdn.org/naturalearth/10m/cultural/ne_10m_roads.zip`
+     (`pip install pyshp shapely` if needed)
+   - `python3 tools/build-road-network.py <ne>/ne_10m_roads <tmp>/roads-base.json 0.01 4 250 NA`
+   - `python3 tools/fetch-park-access.py <tmp>/roads-base.json index.html ../Canada-mtb-parks/index.html tools/park-access.geojson`
+     (keeps every existing access road and only fetches the new far parks)
+   - `python3 tools/build-road-network.py <ne>/ne_10m_roads <tmp>/roads.json 0.01 4 250 NA tools/park-access.geojson`
+   - `python3 tools/install-road-network.py <tmp>/roads.json index.html ../Canada-mtb-parks/index.html`
+     (must print "identical in all pages")
+   - copy `tools/park-access.geojson` to the Canada repo, update the km/KB totals in the
+     comment above `NA_ROADS` in both pages if they moved, draw one trip to the new park in a
+     browser, and commit both repos naming the park and "access road (OpenStreetMap)".
+   Without the 7th argument `build-road-network.py` reproduces the base network exactly; with
+   it, it reproduces the shipped `NA_ROADS` exactly. If either doesn't match, stop and report;
+   don't push a mismatched road network.
 
 ## Mountain chart and page texture (shared with the USA guide)
 

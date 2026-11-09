@@ -128,10 +128,11 @@ The four colour schemes are named for Fathers of Confederation. The active name 
 
 Developed for Post Millennium Renaissance for trail advocacy and community planning. Trail data and builder attributions were researched from publicly available sources.
 
-Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlines, place names and road-trip highways from Natural Earth (public domain). Background patterns from US Design Patent Nos. 12,657 and 268,339.
+Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlines, place names and road-trip highways from Natural Earth (public domain); park access roads © OpenStreetMap contributors (ODbL). Background patterns from US Design Patent Nos. 12,657 and 268,339.
 
 ### Changelog
 
+- Nov 2026 — Park access roads: the last stretch of road to ~50 parks the highway data didn't reach (Sun Peaks, Panorama, Mont Sutton, Montcalm, Crested Butte, Mt. Hood…) added from OpenStreetMap, so trips can end at those parks. Baked into the file; nothing fetched at runtime. Park sync now has a read-only `--check` mode.
 - Nov 2026 — Cross-border road trips: one shared US + Canada road network, so trips cross the border where highways do; US parks along a route are listed, tagged É.-U./USA and linked to the USA guide (snapshot refreshed by tools/sync-other-parks.js). Drawn loops are followed all the way round.
 - Nov 2026 — Add to my trip: after a route is drawn, other parks stay on the map as dots; tapping one (or ticking “Stop”) re-plans the route through that park and adds it to the Google Maps link (EN/FR).
 - Nov 2026 — Map tiles replaced by built-in Natural Earth outlines (provinces, neighbouring countries, lakes) and zoom-aware city labels; no tile server or outside requests, re-coloured by every theme.
@@ -219,7 +220,7 @@ Les quatre thèmes portent le nom de Pères de la Confédération. Le nom actif 
 
 ### Crédits
 
-Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Contours, localités et routes des virées : Natural Earth (domaine public).
+Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Contours, localités et routes des virées : Natural Earth (domaine public) ; routes d'accès aux parcs © les contributeurs d'OpenStreetMap (ODbL).
 
 ## License
 

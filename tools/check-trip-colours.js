@@ -41,12 +41,12 @@ const dE = (a, b, k) => { const x = oklab(sim(a, k)), y = oklab(sim(b, k)); retu
   const browser = await chromium.launch();
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   await page.goto(file); await page.waitForTimeout(1200);
-  const canada = await page.evaluate(() => typeof CA_ROADS !== 'undefined');
+  const canada = await page.evaluate(() => typeof CA_LAND_GEO !== 'undefined');   // the Canada guide's vector basemap
   const themes = await page.evaluate(() => typeof THEMES !== 'undefined' && typeof setTheme === 'function'
     ? THEMES.map(t => t.id) : [...document.querySelectorAll('.theme-btn[data-theme]')].map(b => b.dataset.theme));
   /* plan a real trip with sketch, route, numbered pins and (for the drawing view) park dots */
   await page.evaluate(canada => {
-    tripGraph = rtBuildGraph(canada ? CA_ROADS : US_ROADS);
+    tripGraph = rtBuildGraph(typeof NA_ROADS !== 'undefined' ? NA_ROADS : canada ? CA_ROADS : US_ROADS);
     const sk = canada ? [[51.05, -114.07], [51.2, -116.0], [51.0, -118.2], [50.4, -119.3], [49.88, -119.49]]
                       : [[39.74, -104.99], [39.6, -106.0], [39.55, -107.3], [39.06, -108.55], [38.57, -109.55]];
     tripRoute = rtSnapTrip(tripGraph, sk);

@@ -12,6 +12,9 @@ sparse to reach the parks, plus "Ferry Route" (Vancouver Island is otherwise
 unreachable). Québec autoroutes (level "Interstate", a known A-number, east of
 80°W) are named A-20, ferries "Ferry", everything else by its bare number
 ("1", "401").
+NA: both of the above in one network (each country keeps its own rules and
+names), joined where the highways cross the border. This is what both guides
+ship as NA_ROADS, so road trips can cross the border.
 
 Steps: join lines where they cross or nearly touch (2 km), collapse interchange
 clusters (~1.6 km) into one junction, close gaps in the source (a dead end
@@ -24,7 +27,7 @@ edge is the encoded name index followed by its encoded lat/lng deltas.
 
 Usage:  pip install pyshp shapely
         python3 build-road-network.py ne_10m_roads roads.json [simplify_deg cluster_units q country]
-Defaults reproduce the shipped data: 0.01 4 250 USA. For Canada: 0.01 4 250 CAN.
+Shipped data: 0.01 4 250 NA (both guides). USA / CAN build one country only.
 """
 import shapefile, sys, json, collections, math
 from shapely.geometry import LineString, Point
@@ -34,6 +37,8 @@ SRC, OUT = sys.argv[1], sys.argv[2]
 SNAP, SIMP = 0.02, float(sys.argv[3]) if len(sys.argv) > 3 else 0.01
 Q = int(sys.argv[5]) if len(sys.argv) > 5 else 250
 COUNTRY = sys.argv[6] if len(sys.argv) > 6 else 'USA'
+# NA = both countries in one network, noded together so the border crossings connect
+WANT = {'USA': {'USA'}, 'CAN': {'CAN'}, 'NA': {'USA', 'CAN'}}[COUNTRY]
 # Natural Earth tags Canadian freeways "Interstate" coast to coast; only Québec's are autoroutes
 QC_AUTOROUTES = {'5', '10', '13', '15', '19', '20', '25', '30', '31', '35', '40', '50', '55', '70', '73',
                  '85', '410', '440', '520', '540', '573', '610', '640', '720', '730', '740', '930', '955', '973'}
@@ -41,11 +46,12 @@ r = shapefile.Reader(SRC)
 src = []
 for sr in r.iterShapeRecords():
     d = sr.record.as_dict()
-    if d['sov_a3'] != COUNTRY: continue
+    if d['sov_a3'] not in WANT: continue
+    ctry = d['sov_a3']
     t, lv = d['type'], d['level']
     n = (d['name'] or '').strip()
     numbered = n.isdigit() or (n[:-1].isdigit() and n)
-    if COUNTRY == 'USA':
+    if ctry == 'USA':
         # Alaska has no US-numbered routes: its highways (Seward, Glenn, Parks...) are state routes
         alaska = any(x < -129 and y > 51 for x, y in sr.shape.points)
         if not (t in ('Major Highway', 'Beltway') or (t == 'Secondary Highway' and lv == 'Federal')

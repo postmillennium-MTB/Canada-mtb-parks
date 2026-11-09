@@ -179,13 +179,14 @@ off-season, which is already handled by each park's `season` field).
 
 ## Road-trip mode (Map tab; shared engine with the USA guide)
 
-- Search `MAP DATA — Canadian highway network` (`CA_ROADS`) and `ROAD TRIP`. The engine
+- Search `MAP DATA — US + Canada highway network` (`NA_ROADS`) and `ROAD TRIP`. The engine
   (`rtBuildGraph`, `rtSnap`, `rtSnapTrip`, `rtParksNear`, ...) is a **twin copy** of the USA
-  guide's, byte-for-byte: fix it in one, make the same change in the other. Only `rtClass`
-  (road costs: ferries ×2 here, US routes ×1.2 there) and the `trip*` UI are per-guide.
-- Data: Natural Earth 1:10m roads, every Canadian class plus ferries (Vancouver Island is
-  unreachable without them). `tools/build-road-network.py ... 0.01 4 250 CAN` rebuilds it
-  exactly; the same script, with defaults for USA, lives in the USA repo. No routing API, same
+  guide's, byte-for-byte: fix it in one, make the same change in the other. `rtClass` (road costs:
+  ferries ×2, US routes ×1.2, other numbered highways ×1.1) is shared too; only the `trip*` UI is
+  per-guide.
+- Data: Natural Earth 1:10m roads (see the cross-border note below for what `NA_ROADS` holds;
+  Canadian ferries matter, Vancouver Island is unreachable without them). The same build script
+  lives in both repos. No routing API, same
   reasoning as the tile gotcha above.
 - Text is `T.en.trip` / `T.fr.trip`; both must stay complete. Distances follow `units`
   (corridor presets are round numbers in each system, see `TRIP_CORRIDORS`).
@@ -210,10 +211,17 @@ off-season, which is already handled by each park's `season` field).
   must-visit point when that gap is over 8% of the line (100–250 km) and a road is within 40 km;
   repeats up to 8 times. This is what makes a narrow loop (down the coast, back up the Rockies)
   get driven instead of cut across. Ordinary drawings never reach the threshold.
-- **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
-  The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
-  fix is one combined US+CA network with both park lists. That needs a decision on how the two
-  separate files share data, so ask Jon first.
+- **Cross-border trips (November 2026).** Both guides route on one network, `NA_ROADS` (search
+  `MAP DATA — US + Canada highway network`): US interstates, US routes and Alaska's highways plus
+  every Canadian road class and ferries, built together by `tools/build-road-network.py ... 0.01
+  4 250 NA` so the border crossings connect. It is byte-identical in both pages, as are the engine
+  and `rtClass` (one set of road costs). Each guide also carries a snapshot of the OTHER guide's
+  parks, `OTHER_PARKS` (between the `OTHER_PARKS:BEGIN` / `OTHER_PARKS:END` markers), so trips
+  list, pin and route through parks across the border, tagged with their country and linked to
+  their own guide. Each guide stays the only place its own parks are edited. **After adding,
+  closing or moving a park in either guide, run `node tools/sync-other-parks.js
+  ../USA-bike-parks ../Canada-mtb-parks`** (needs Playwright and both repos) to refresh the other
+  guide's snapshot; the snapshot records its sync date.
 - Open idea, not scheduled: a separate Routes tab (see the USA repo README). Ask first.
 
 ## Mountain chart and page texture (shared with the USA guide)

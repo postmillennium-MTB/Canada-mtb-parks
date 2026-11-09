@@ -15,7 +15,7 @@ Last update: October 2026.
 
 A single-file interactive HTML guide to every lift-served mountain bike park in Canada: parks reached by chairlift, gondola or similar fixed lift for bike uplift. It covers seven provinces and territories and was built for trail advocacy, tourism research and the Canadian MTB community.
 
-It is fully bilingual (English/French), supports Metric / Imperial / Both unit display, and is self-contained. The only things loaded from the network are the map tiles and the Google Fonts stylesheet.
+It is fully bilingual (English/French), supports Metric / Imperial / Both unit display, and is self-contained. The only thing loaded from the network is the Google Fonts stylesheet; the map is built in.
 
 **Scope.** "Bike park" here means lift-access, downhill-oriented riding. Pump tracks, dirt-jump lines, skills parks and shuttle-only operations are excluded even when the operator calls them a bike park. The test is "is there a lift", never "does the operator call it a bike park". (Nitehawk, Sir Sam's, Mont Sutton and Vélo MSM are included with the *Surface Lift* or *Limited Uplift* badges so the limitation is visible.) See `CLAUDE.md` for the reasoning.
 
@@ -103,10 +103,10 @@ The badge list and its order live in one place (`BADGE_ORDER` in `index.html`); 
 
 - Single HTML file (about 650 KB including the embedded libraries and highway data); no build step, bundler or package manager
 - Leaflet 1.9.4 and Leaflet.MarkerCluster 1.5.3 embedded inline
-- **Map tiles:** OpenStreetMap's standard tile server (no key needed), with Esri's keyless World Street Map as a fallback if OSM is unreachable. Dark themes darken the tiles with a CSS filter. *(The map previously used CARTO tiles, which now require an API key and return an "API KEY REQUIRED" image with HTTP 200.)* OSM's usage policy discourages embedded production use at scale, so a bundled vector basemap (as the USA guide now has) is the long-term fix — it needs real province boundary geometry. See `CLAUDE.md`.
+- **Map:** real province, territory, neighbouring-country and lake outlines from Natural Earth (public domain) baked into the file, with city labels that appear as you zoom. No tile server, no outside requests, re-coloured by each theme. (It used OpenStreetMap tiles until November 2026; CARTO before that, until CARTO required an API key.)
 - **Road-trip highways:** `CA_ROADS`, every Canadian road class plus ferries from Natural Earth's public-domain 1:10m roads (~74,000 km in ~28 KB), baked into the file. `tools/build-road-network.py ne_10m_roads out.json 0.01 4 250 CAN` rebuilds it exactly (the USA guide uses the same script). No routing server. Routing never crosses into the US yet; cross-border trips are a known next step.
 - Iframe-safe and mobile-first; designed to embed on postmillenniumrenaissance.com and in Pinkbike articles
-- No analytics and no data collection; the only external requests are map tiles and Google Fonts
+- No analytics and no data collection; the only external request is Google Fonts
 
 ### Appearance
 
@@ -128,10 +128,12 @@ The four colour schemes are named for Fathers of Confederation. The active name 
 
 Developed for Post Millennium Renaissance for trail advocacy and community planning. Trail data and builder attributions were researched from publicly available sources.
 
-Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map imagery © OpenStreetMap contributors (Esri fallback). Road-trip highways from Natural Earth (public domain). Background patterns from US Design Patent Nos. 12,657 and 268,339.
+Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlines, place names and road-trip highways from Natural Earth (public domain). Background patterns from US Design Patent Nos. 12,657 and 268,339.
 
 ### Changelog
 
+- Nov 2026 — Add to my trip: after a route is drawn, other parks stay on the map as dots; tapping one (or ticking “Stop”) re-plans the route through that park and adds it to the Google Maps link (EN/FR).
+- Nov 2026 — Map tiles replaced by built-in Natural Earth outlines (provinces, neighbouring countries, lakes) and zoom-aware city labels; no tile server or outside requests, re-coloured by every theme.
 - Nov 2026 — Road-trip review fixes: sharp corners in a drawing are must-visit points (Tremblant detours no longer get cut); clear EN/FR messages for lines over water, past the US border (with a link to the USA guide) or too short; park dots and dashed highways while drawing; overlapping trip pins merge into a "4–8" badge; Start/Finish labels kept clear of pins; one-row controls on phones; switching language mid-drawing keeps the instructions.
 - Nov 2026 — Road-trip mode on the Map tab (draw a route, snap to highways and ferries, parks listed in travel order, Google Maps export); bilingual, follows units. Colours checked in all four schemes and print.
 - Oct 2026 — Mountain tab rebuilt: legible labels at any park count, hover/tap name, one-time shimmer for new peaks
@@ -197,7 +199,7 @@ Sites officiels des parcs et stations ; Trailforks ; liste officielle des client
 ### Notes techniques
 
 - Fichier HTML unique (environ 650 Ko avec les bibliothèques et les données routières intégrées) ; aucun processus de construction
-- **Tuiles de la carte :** serveur de tuiles standard d'OpenStreetMap (sans clé), avec Esri en secours ; les thèmes sombres assombrissent les tuiles par un filtre CSS. (CARTO exige désormais une clé d'API.)
+- **Carte :** contours des provinces, territoires, pays voisins et lacs tirés de Natural Earth (domaine public), intégrés au fichier, avec des noms de villes qui apparaissent au zoom. Aucun serveur de tuiles ni requête externe ; la carte suit chaque thème.
 - **Routes des virées :** `CA_ROADS`, routes et traversiers canadiens tirés des routes 1:10m de Natural Earth (domaine public), intégrés au fichier ; aucun serveur d'itinéraires. Les itinéraires ne passent pas encore par les États-Unis.
 - Aucune analytique ni collecte de données ; seules requêtes externes : tuiles de carte et Google Fonts
 
@@ -216,7 +218,7 @@ Les quatre thèmes portent le nom de Pères de la Confédération. Le nom actif 
 
 ### Crédits
 
-Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Imagerie cartographique © contributeurs OpenStreetMap (secours Esri). Routes des virées : Natural Earth (domaine public).
+Développé pour Post Millennium Renaissance pour le plaidoyer en faveur des sentiers et la planification communautaire. Construit avec Leaflet.js (BSD 2-Clause) et Leaflet.MarkerCluster (MIT). Contours, localités et routes des virées : Natural Earth (domaine public).
 
 ## License
 

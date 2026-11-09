@@ -83,10 +83,9 @@ not git. That means:
   the `T` translations object (both `en` and `fr` copies — keep them in sync).
   `closed` is the status badge (see Maintenance below); a closed park's card also
   gets `.is-closed` (dashed outline — never dimmed text).
-- `const THEMES` — 4 color schemes, each tagged `basemap: 'light'|'dark'`.
-  `alpine` is the light one and the default.
-- Basemap/tile logic — search `OSM_TILES` — see Gotchas below before
-  touching this.
+- `const THEMES` — 4 color schemes, each tagged `basemap: 'light'|'dark'` (descriptive
+  only since the vector basemap; nothing reads it). `alpine` is the light one and the default.
+- Basemap — search `CA_LAND_GEO` (vector land, lakes and city labels; see Gotchas below).
 
 ## Recurring maintenance: park openings & closures
 
@@ -166,32 +165,17 @@ off-season, which is already handled by each park's `season` field).
   Not currently relevant (CARTO is gone), but if a raster tile provider
   is ever reintroduced, verify the literal URL path against that
   provider's docs rather than the display name of the style.
-- **This repo still runs on tiles (OSM + Esri fallback) — the sibling USA
-  repo does not anymore.** USA replaced its raster basemap outright with
-  real vector state-boundary polygons baked into the file (see its
-  CLAUDE.md), which permanently ends this whole class of bug rather than
-  swapping to a different tile host that will eventually squeeze its free
-  tier too, or get rate-limited (OSM's own usage policy already says its
-  tile server isn't meant for embedded production use at real traffic —
-  the current fix here is a reprieve, not a permanent one). The reason
-  Canada didn't get the same fix in the same session: doing it right needs
-  *real* WGS84 province/territory boundary geometry Leaflet can project
-  the normal way (matching how it already projects every park marker) —
-  not a pre-projected decorative image. The obvious npm candidate,
-  `@svg-maps/canada`, is exactly that: a static illustration in an unknown,
-  undocumented projection, fine for a flat picture but not safely
-  reverse-engineerable into real coordinates without guessing. A search of
-  npm and PyPI (the only registries directly reachable from a standard
-  sandboxed session, no general internet fetch) turned up nothing
-  bundling genuine Canada admin-1 boundary data — `us-atlas` (used for the
-  USA fix) has no Canadian counterpart. Two ways to unblock this:
-  1. Jon downloads Natural Earth's `ne_50m_admin_1_states_provinces` (or
-     Statistics Canada's own boundary files) himself and hands the file
-     over — either converts in minutes once the raw geometry exists.
-  2. A future session with broader network access fetches it directly.
-  Don't reach for `@svg-maps/canada` as a shortcut in the meantime; a
-  province boundary that's subtly wrong everywhere is worse than the
-  current tile dependency, not better.
+- **Resolved November 2026: the map has no tile server any more** (same fix as the USA
+  guide). `CA_LAND_GEO` (search it) is Natural Earth 1:50m provinces and territories, the
+  neighbouring countries (USA incl. Alaska, Greenland, Mexico) and large lakes, as real WGS84
+  polygons baked into the file (~111 KB; Arctic islands simplified harder, since there are no
+  parks or roads there). `CA_CITIES` adds ~120 place labels that appear by zoom level, because
+  the tiles used to supply place names. Colours come from CSS (`.land-ca`, `.land-other`,
+  `.land-lake`, `.map-city`) via `--map-water` / `--map-land` / `--map-other` / `--map-line`,
+  which derive from each theme's own tokens, so theme switches need no JS. The map makes no
+  outside requests and its max zoom is 10, since 1:50m outlines only get coarser beyond that.
+  The OSM/Esri tile version is in git history before this change (main at `cbf0124`) if it
+  is ever needed; re-check this file's CARTO notes above before reintroducing any tile host.
 
 ## Road-trip mode (Map tab; shared engine with the USA guide)
 
@@ -211,12 +195,17 @@ off-season, which is already handled by each park's `season` field).
   a route carries `offStartKm` / `offEndKm`, and the page warns (EN/FR `farStart` / `farEnd` /
   `farBoth` / `farTail`) when a drawn end is over 30 km from a road. Sharp corners are
   must-visit points (`rtCorners`). The highway overlay shows only while drawing, dashed in
-  `--gold` so it reads against the OSM tiles.
+  `--gold` so it reads as a guide layer, distinct from the drawn sketch.
   A drawn end that runs past the roads (border, sea) is trimmed back to where the line leaves the
   road network, so a trip stops at the crossing the line used. Trip ends ignore road fragments
   under 300 km (`compKm`). Colour check for trip mode: `node tools/check-trip-colours.js` (needs
   Playwright). It measures the rendered colours in every theme and print, and the same file is
   in both repos.
+  "Add to my trip": after a route is drawn every other park stays on the map as a tappable dot
+  (`.trip-ghost-live`); ticking "Stop" in the list, or Add / Remove in a pin or dot popup, re-plans
+  the trip through that park (`rtSnapTrip(G, sketch, vias)`; vias slot into the sketch in travel
+  order and become must-visit points) and makes it a Google Maps stop (max 9). A park you added
+  stays listed even if its road is outside the band.
 - **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
   The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
   fix is one combined US+CA network with both park lists. That needs a decision on how the two
@@ -269,6 +258,8 @@ Standard for every theme, solved numerically against that theme's real surfaces
   (mid-luminance window), and each province has its own hue. AB and YK used to be
   the same colour; YK is now violet.
 - No dimming text with `opacity` or translucent white — use a solid token.
+- Map: coast and province lines use `--border-lit` (>= 3:1 on the land in every theme), city
+  labels `--text-muted` with a land-coloured halo (>= 7:1).
 - `@media print` (search `PRINT / SAVE-AS-PDF PALETTE`) forces the solved Alpine
   palette for every theme, because browsers drop dark backgrounds when printing and
   light text on white vanishes. No print button exists by design; the block only

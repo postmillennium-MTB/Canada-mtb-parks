@@ -201,6 +201,11 @@ off-season, which is already handled by each park's `season` field).
   under 300 km (`compKm`). Colour check for trip mode: `node tools/check-trip-colours.js` (needs
   Playwright). It measures the rendered colours in every theme and print, and the same file is
   in both repos.
+  "Add to my trip": after a route is drawn every other park stays on the map as a tappable dot
+  (`.trip-ghost-live`); ticking "Stop" in the list, or Add / Remove in a pin or dot popup, re-plans
+  the trip through that park (`rtSnapTrip(G, sketch, vias)`; vias slot into the sketch in travel
+  order and become must-visit points) and makes it a Google Maps stop (max 9). A park you added
+  stays listed even if its road is outside the band.
 - **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
   The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
   fix is one combined US+CA network with both park lists. That needs a decision on how the two

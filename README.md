@@ -132,6 +132,7 @@ Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlin
 
 ### Changelog
 
+- Nov 2026 — Add to my trip: after a route is drawn, other parks stay on the map as dots; tapping one (or ticking “Stop”) re-plans the route through that park and adds it to the Google Maps link (EN/FR).
 - Nov 2026 — Map tiles replaced by built-in Natural Earth outlines (provinces, neighbouring countries, lakes) and zoom-aware city labels; no tile server or outside requests, re-coloured by every theme.
 - Nov 2026 — Road-trip review fixes: sharp corners in a drawing are must-visit points (Tremblant detours no longer get cut); clear EN/FR messages for lines over water, past the US border (with a link to the USA guide) or too short; park dots and dashed highways while drawing; overlapping trip pins merge into a "4–8" badge; Start/Finish labels kept clear of pins; one-row controls on phones; switching language mid-drawing keeps the instructions.
 - Nov 2026 — Road-trip mode on the Map tab (draw a route, snap to highways and ferries, parks listed in travel order, Google Maps export); bilingual, follows units. Colours checked in all four schemes and print.

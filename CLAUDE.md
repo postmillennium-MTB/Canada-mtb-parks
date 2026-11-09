@@ -207,6 +207,11 @@ off-season, which is already handled by each park's `season` field).
   (corridor presets are round numbers in each system, see `TRIP_CORRIDORS`).
   `toggleView` hides the bar on Stats/Mountain (`tripSyncView`); `renderAll` re-labels it
   (`tripRenderText`).
+- `rtSnapTrip` returns a route or `{ error: 'short' | 'noroad' | 'disconnected' | 'none' }`;
+  a route carries `offStartKm` / `offEndKm`, and the page warns (EN/FR `farStart` / `farEnd` /
+  `farBoth` / `farTail`) when a drawn end is over 30 km from a road. Sharp corners are
+  must-visit points (`rtCorners`). The highway overlay shows only while drawing, dashed in
+  `--gold` so it reads against the OSM tiles.
 - **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
   The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
   fix is one combined US+CA network with both park lists. That needs a decision on how the two

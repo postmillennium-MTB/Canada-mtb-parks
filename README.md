@@ -132,6 +132,7 @@ Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map imager
 
 ### Changelog
 
+- Nov 2026 — Road-trip review fixes: sharp corners in a drawing are must-visit points (Tremblant detours no longer get cut); clear EN/FR messages for lines over water, past the US border (with a link to the USA guide) or too short; park dots and dashed highways while drawing; overlapping trip pins merge into a "4–8" badge; Start/Finish labels kept clear of pins; one-row controls on phones; switching language mid-drawing keeps the instructions.
 - Nov 2026 — Road-trip mode on the Map tab (draw a route, snap to highways and ferries, parks listed in travel order, Google Maps export); bilingual, follows units. Colours checked in all four schemes and print.
 - Oct 2026 — Mountain tab rebuilt: legible labels at any park count, hover/tap name, one-time shimmer for new peaks
 - Oct 2026 — Colour schemes revised for print/PDF-level contrast; print palette added

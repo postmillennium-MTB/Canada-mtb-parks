@@ -4,8 +4,9 @@ USA guide, CA_ROADS in the Canada guide. The same script lives in both repos.
 Source: Natural Earth 1:10m "Roads" (ne_10m_roads, public domain,
 https://www.naturalearthdata.com/downloads/10m-cultural-vectors/roads/).
 USA: sov_a3 = USA; type "Major Highway" or "Beltway" (interstates and other
-expressways) plus "Secondary Highway" at level "Federal" (US routes). Named
-I-90 / US-2 / SR-9.
+expressways) plus "Secondary Highway" at level "Federal" (US routes), plus
+Alaska's state highways (Alaska has no US routes; without them Alyeska and
+Hilltop are unreachable). Named I-90 / US-2 / AK-1 / SR-9.
 CAN: sov_a3 = CAN; every class, because Canada's major-highway layer alone is too
 sparse to reach the parks, plus "Ferry Route" (Vancouver Island is otherwise
 unreachable). Québec autoroutes (level "Interstate", a known A-number, east of
@@ -45,8 +46,11 @@ for sr in r.iterShapeRecords():
     n = (d['name'] or '').strip()
     numbered = n.isdigit() or (n[:-1].isdigit() and n)
     if COUNTRY == 'USA':
-        if not (t in ('Major Highway', 'Beltway') or (t == 'Secondary Highway' and lv == 'Federal')): continue
-        if numbered: n = ('I-' if lv == 'Interstate' else 'US-' if lv == 'Federal' else 'SR-') + n
+        # Alaska has no US-numbered routes: its highways (Seward, Glenn, Parks...) are state routes
+        alaska = any(x < -129 and y > 51 for x, y in sr.shape.points)
+        if not (t in ('Major Highway', 'Beltway') or (t == 'Secondary Highway' and lv == 'Federal')
+                or (alaska and t in ('Secondary Highway', 'Major Highway'))): continue
+        if numbered: n = ('I-' if lv == 'Interstate' else 'US-' if lv == 'Federal' else 'AK-' if alaska else 'SR-') + n
     else:
         if t not in ('Major Highway', 'Beltway', 'Secondary Highway', 'Road', 'Ferry Route'): continue
         if t == 'Ferry Route': n = 'Ferry'

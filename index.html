@@ -1614,7 +1614,8 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .trip-off-tab { display: none !important; }
 #park-map.trip-drawing, #park-map.trip-drawing .leaflet-interactive { cursor: crosshair; }
 #park-map.trip-drawing { touch-action: none; }
-.trip-net { stroke: var(--border-lit); stroke-opacity: 0.9; fill: none; }
+/* dashed accent so the usable highways stand out from the roads printed on the OSM tiles */
+.trip-net { stroke: var(--gold); stroke-opacity: 0.8; stroke-dasharray: 5 4; fill: none; }
 .trip-sketch { stroke: var(--text); stroke-dasharray: 6 6; fill: none; }
 .trip-band { stroke: var(--gold); stroke-opacity: 0.18; fill: none; }
 .trip-route-casing { stroke: var(--bg); fill: none; }
@@ -1634,6 +1635,27 @@ details[open] .prov-chevron { transform: rotate(180deg); }
 .leaflet-tooltip.trip-tip {
   background: var(--bg-raised); color: var(--text); border: 1px solid var(--border-lit);
   font-family: var(--font-b); font-size: 0.75rem; font-weight: 600; box-shadow: 0 3px 10px rgba(0,0,0,0.35);
+}
+.trip-ghost { fill: var(--text-dim); fill-opacity: 0.9; stroke: var(--bg); }
+.trip-pin-group { padding: 0 5px; white-space: nowrap; }
+.trip-end-wrap .trip-end { position: absolute; left: 0; top: 0; }
+.trip-warn {
+  display: flex; gap: 8px; align-items: flex-start; margin: 0 0 0.6rem; padding: 8px 10px;
+  border: 1px solid var(--border); border-left: 3px solid var(--gold); border-radius: var(--r-sm);
+  font-size: 0.8rem; line-height: 1.45; color: var(--text);
+}
+.trip-warn svg { width: 16px; height: 16px; flex: 0 0 auto; color: var(--gold); margin-top: 1px; }
+.trip-warn a { color: var(--gold); }
+.trip-grp { font-size: 0.8rem; line-height: 1.6; color: var(--text); }
+.trip-corr-short { display: none; }
+@media (max-width: 600px) {
+  .trip-bar { gap: 6px; }
+  .trip-btn { padding: 6px 10px; }
+  .trip-corr-long { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+  .trip-corr-short { display: inline; }
+  #trip-clear-btn .trip-btn-text { display: none; }
+  #trip-draw-btn svg { display: none; }
+  .trip-corr select { padding: 5px 4px; font-size: 0.74rem; }
 }
 .trip-results {
   margin-top: 0.75rem; padding: 0.8rem 1rem;
@@ -2062,10 +2084,10 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   <div class="prov-legend" id="prov-legend"></div>
   <div class="trip-bar" id="trip-bar">
     <button type="button" class="trip-btn" id="trip-draw-btn" aria-pressed="false"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-route" aria-hidden="true" focusable="false"><circle cx="6" cy="19" r="3"/><path d="M9 19h8.5a3.5 3.5 0 0 0 0-7h-11a3.5 3.5 0 0 1 0-7H15"/><circle cx="18" cy="5" r="3"/></svg><span class="trip-btn-label">Plan a road trip</span></button>
-    <label class="trip-corr"><span id="trip-corr-pre">Parks within</span>
+    <label class="trip-corr"><span id="trip-corr-pre" class="trip-corr-long">Parks within</span><span id="trip-corr-short" class="trip-corr-short" aria-hidden="true">Within</span>
       <select id="trip-corr"><option value="auto" selected>Auto distance</option><option value="0">15 km</option><option value="1">40 km</option><option value="2">80 km</option><option value="3">150 km</option><option value="4">250 km</option></select>
-      <span id="trip-corr-post">of the route</span></label>
-    <button type="button" class="trip-btn" id="trip-clear-btn" hidden><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span id="trip-clear-label">Clear trip</span></button>
+      <span id="trip-corr-post" class="trip-corr-long">of the route</span></label>
+    <button type="button" class="trip-btn" id="trip-clear-btn" aria-label="Clear trip" hidden><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-x" aria-hidden="true" focusable="false"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg><span id="trip-clear-label" class="trip-btn-text">Clear trip</span></button>
     <p class="trip-hint" id="trip-hint" aria-live="polite"></p>
   </div>
   <div class="map-wrap" id="map-wrap"><div id="park-map"></div></div>
@@ -2228,10 +2250,10 @@ const T = {
       within1: "Parks within",
       within2: "of the route",
       auto: "Auto distance",
-      hintDraw: "Drag one line across the map from start to finish (the thin lines are the highways it can use). Let go and it snaps to the nearest highways. Esc cancels.",
+      hintDraw: "Drag one line across the map from start to finish (the dashed lines are the highways it can use). Let go and it snaps to the nearest highways. Esc cancels.",
       cancelled: "Drawing cancelled.",
-      tooShort: "That line is too short. Press and drag from where the trip starts to where it ends.",
-      noRoute: "No highway route matched that line. Start and finish on land in Canada, then try again.",
+      tooShort: "That line is too short to plan a trip. For a short trip, zoom in with the + button first, then draw it.",
+      noRoute: "No highway route matched that line. Try drawing it again a little differently.",
       loadFail: "The highway data could not be loaded, so road trips are unavailable right now.",
       byRoad: "{d} by road",
       via: "via",
@@ -2256,8 +2278,17 @@ const T = {
       startFinish: "Start / Finish",
       hwy: "Hwy",
       ferry: "ferry",
-      fine: "Road distances are measured on a simplified highway map (Natural Earth), so treat them as roughly ±10% and check real directions before you go. The km / Mile figure is how far along the route the park sits; “off route” is the straight-line distance from the highway to the park pin, not the drive. Routes use Canadian highways and ferries only and never cross into the US. Only Canadian parks are listed.",
-      credit: "Road-trip highways: <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> 1:10m roads (public domain), simplified."
+      fine: "Road distances are measured on a simplified highway map (Natural Earth), so treat them as roughly ±10% and check real directions before you go. The km / Mile figure is how far along the route the park sits; “off route” is the straight-line distance from the highway to the park pin, not the drive. A sharp corner in your line is treated as a place to visit. Routes use Canadian highways and ferries only and never cross into the US. Only Canadian parks are listed.",
+      credit: "Road-trip highways: <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> 1:10m roads (public domain), simplified.",
+      tap: "Press and drag to draw the trip; a tap doesn’t draw a line.",
+      noRoad: "Your line doesn’t start or finish near a road this guide routes on. Start and finish on land in Canada (US parks are in the USA guide).",
+      disconnected: "No road links those two places without leaving Canada. Plan each side separately.",
+      withinShort: "Within",
+      otherGuide: "USA guide",
+      farStart: "Your line starts about {d} from the nearest road this guide routes on, so the trip starts there instead.",
+      farEnd: "Your line ends about {d} from the nearest road this guide routes on, so the trip ends there instead.",
+      farBoth: "Both ends of your line are far from the roads this guide routes on (about {a} and {b}), so the trip starts and ends at the nearest ones instead.",
+      farTail: "Routes stay inside Canada and stop at coasts and at the US border; US parks are in the {guide}."
     },
   },
   fr: {
@@ -2340,10 +2371,10 @@ const T = {
       within1: "Parcs à moins de",
       within2: "du trajet",
       auto: "Distance auto",
-      hintDraw: "Glissez un seul trait sur la carte, du départ à l’arrivée (les traits fins sont les routes utilisables). Relâchez : le tracé s’aligne sur les routes les plus proches. Échap pour annuler.",
+      hintDraw: "Glissez un seul trait sur la carte, du départ à l’arrivée (les traits pointillés sont les routes utilisables). Relâchez : le tracé s’aligne sur les routes les plus proches. Échap pour annuler.",
       cancelled: "Tracé annulé.",
-      tooShort: "Ce trait est trop court. Appuyez et glissez du point de départ jusqu’à l’arrivée.",
-      noRoute: "Aucun itinéraire routier ne correspond à ce trait. Commencez et terminez sur la terre ferme au Canada, puis réessayez.",
+      tooShort: "Ce trait est trop court pour planifier une virée. Pour un court trajet, zoomez d’abord avec le bouton +, puis tracez-le.",
+      noRoute: "Aucun itinéraire routier ne correspond à ce trait. Essayez de le tracer un peu autrement.",
       loadFail: "Les données routières n’ont pas pu être chargées : les virées sont indisponibles pour le moment.",
       byRoad: "{d} par la route",
       via: "via",
@@ -2368,8 +2399,17 @@ const T = {
       startFinish: "Départ / arrivée",
       hwy: "route",
       ferry: "traversier",
-      fine: "Les distances routières sont mesurées sur une carte routière simplifiée (Natural Earth) : comptez environ ±10 % et vérifiez l’itinéraire réel avant de partir. Le repère km / Mille indique où le parc se situe le long du trajet ; « à … du trajet » est la distance à vol d’oiseau entre la route et l’épingle du parc, pas le trajet en voiture. Les itinéraires n’utilisent que les routes et traversiers canadiens et ne passent jamais par les États-Unis. Seuls les parcs canadiens sont listés.",
-      credit: "Routes des virées : routes 1:10m de <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> (domaine public), simplifiées."
+      fine: "Les distances routières sont mesurées sur une carte routière simplifiée (Natural Earth) : comptez environ ±10 % et vérifiez l’itinéraire réel avant de partir. Le repère km / Mille indique où le parc se situe le long du trajet ; « à … du trajet » est la distance à vol d’oiseau entre la route et l’épingle du parc, pas le trajet en voiture. Un virage serré dans votre trait est traité comme un endroit à visiter. Les itinéraires n’utilisent que les routes et traversiers canadiens et ne passent jamais par les États-Unis. Seuls les parcs canadiens sont listés.",
+      credit: "Routes des virées : routes 1:10m de <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> (domaine public), simplifiées.",
+      tap: "Appuyez et glissez pour tracer la virée ; un simple toucher ne trace rien.",
+      noRoad: "Votre trait ne commence ni ne finit près d’une route utilisée par ce guide. Commencez et terminez sur la terre ferme au Canada (les parcs américains sont dans le guide des États-Unis).",
+      disconnected: "Aucune route ne relie ces deux endroits sans quitter le Canada. Planifiez chaque partie séparément.",
+      withinShort: "Rayon",
+      otherGuide: "guide des États-Unis",
+      farStart: "Votre trait commence à environ {d} de la route la plus proche utilisée par ce guide ; la virée commence donc là.",
+      farEnd: "Votre trait se termine à environ {d} de la route la plus proche utilisée par ce guide ; la virée se termine donc là.",
+      farBoth: "Les deux extrémités de votre trait sont loin des routes utilisées par ce guide (environ {a} et {b}) ; la virée commence et se termine donc aux routes les plus proches.",
+      farTail: "Les itinéraires restent au Canada et s’arrêtent aux côtes et à la frontière américaine ; les parcs américains sont dans le {guide} (en anglais)."
     },
   }
 };
@@ -4049,6 +4089,7 @@ const CA_ROADS = {"q":250,"names":["","1","3","Ferry","6","11","373","21","7","9
    Snap a freehand sketch to highways and list the parks along it. The engine (rt* functions)
    is a twin copy of the USA guide's: fix it in one, make the same change in the other. Only
    rtClass (road costs) and the UI below are per-guide. */
+const TRIP_INFO_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>';
 const TRIP_NAV_SVG = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-navigation" aria-hidden="true" focusable="false"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>';
 /* ── Road-trip core: decode network, snap a freehand sketch to highways, measure parks ── */
 const RT_KM_PER_DEG = 111.32;
@@ -4144,6 +4185,18 @@ function rtThin(sketch, minKm){
   return out;
 }
 
+/* Nearest point ALONG any road to p (optionally only roads on network component `comp`):
+   { e: edge, cum: its cumulative km, km: distance from p, along: km along e }. */
+function rtAnchor(G, p, comp){
+  let best = null;
+  G.edges.forEach(e => {
+    if (comp !== undefined && G.comp[e.a] !== comp) return;
+    const cum = e.cum || (e.cum = rtCumulative(e.pts)), r = rtNearest(p, e.pts, cum);
+    if (!best || r.km < best.km) best = { e, cum, km: r.km, along: r.along };
+  });
+  return best;
+}
+
 function rtLength(line){ let t = 0; for (let i = 1; i < line.length; i++) t += rtKm(line[i-1], line[i]); return t; }
 
 /* Snap a sketch to the network. Shortest path where each edge's length is inflated by how far
@@ -4167,15 +4220,7 @@ function rtSnap(G, sketch){
      long rural stretches junctions can be 70+ km apart). The anchor becomes a temporary node
      with two half-edges to the road's real ends; the finish must be on the start's network. */
   const N = G.nodes.length, S = N, T = N + 1;
-  const anchor = (p, compWanted) => {
-    let best = null;
-    G.edges.forEach(e => {
-      if (compWanted !== undefined && G.comp[e.a] !== compWanted) return;
-      const cum = rtCumulative(e.pts), r = rtNearest(p, e.pts, cum);
-      if (!best || r.km < best.km) best = { e, cum, km: r.km, along: r.along };
-    });
-    return best;
-  };
+  const anchor = (p, comp) => rtAnchor(G, p, comp);
   const splitAt = (pts, cum, along) => {   // -> [pts from start to X, pts from X to end]
     let i = 1;
     while (i < cum.length - 1 && cum[i] < along) i++;
@@ -4271,20 +4316,82 @@ function rtSnap(G, sketch){
   return { path, cum, km: cum[cum.length-1], roads, sketch: sk };
 }
 
-/* A trip that ends near where it began is a loop: split the sketch at its farthest point and
-   route the two halves, so start and finish don't collapse onto the same spot. */
+/* Sharp corners in a sketch are deliberate ("go up to Tremblant, then across to Québec"), so
+   they become must-visit points; otherwise the cheapest path can cut the corner when no road
+   follows the drawn leg. A corner = the line turns >= 60 deg measured over a window of L km on
+   each side (so finger wobble doesn't count), at least 1.5 L from either end, 2 L apart, and
+   within 40 km of a road (a bend drawn round a lake isn't a place). Returns sketch indexes. */
+function rtCorners(G, sk){
+  const cum = rtCumulative(sk), len = cum[cum.length-1];
+  const L = Math.max(15, Math.min(80, len * 0.06));
+  const at = d => {                          // point at distance d along the sketch
+    let i = 1; while (i < cum.length - 1 && cum[i] < d) i++;
+    const f = cum[i] > cum[i-1] ? (d - cum[i-1]) / (cum[i] - cum[i-1]) : 0;
+    return [sk[i-1][0] + f * (sk[i][0] - sk[i-1][0]), sk[i-1][1] + f * (sk[i][1] - sk[i-1][1])];
+  };
+  const cand = [];
+  for (let i = 1; i < sk.length - 1; i++){
+    if (cum[i] < 1.5 * L || len - cum[i] < 1.5 * L) continue;
+    const p = sk[i], a = at(cum[i] - L), c = at(cum[i] + L), cl = Math.cos(p[0] * Math.PI / 180);
+    const v1 = [(p[1] - a[1]) * cl, p[0] - a[0]], v2 = [(c[1] - p[1]) * cl, c[0] - p[0]];
+    const n1 = Math.hypot(v1[0], v1[1]), n2 = Math.hypot(v2[0], v2[1]);
+    if (!n1 || !n2) continue;
+    const deg = Math.acos(Math.max(-1, Math.min(1, (v1[0]*v2[0] + v1[1]*v2[1]) / (n1 * n2)))) * 180 / Math.PI;
+    if (deg >= 60) cand.push({ i, deg, d: cum[i] });
+  }
+  cand.sort((x, y) => y.deg - x.deg);
+  const picked = [];
+  cand.forEach(c => {
+    if (picked.length >= 8 || picked.some(p => Math.abs(p.d - c.d) < 2 * L)) return;
+    const an = rtAnchor(G, sk[c.i]);
+    if (an && an.km <= 40) picked.push(c);
+  });
+  return picked.sort((x, y) => x.d - y.d).map(c => c.i);
+}
+
+/* Plan a whole trip from a raw sketch. Returns a route, or { error } with one of:
+     'short'        — under 20 km of line;
+     'noroad'       — neither end is within 60 km of a road this guide routes on (over water,
+                      or entirely in the other country);
+     'disconnected' — the two ends are on road networks with no link inside this country
+                      (Anchorage -> Seattle needs Canada);
+     'none'         — no path found.
+   A route carries offStartKm / offEndKm (drawn end to where the trip actually starts / ends),
+   so the page can say when a trip was cut short at a coast or the border. A line drawn back to
+   its start is a loop (split at its farthest point); sharp corners are must-visit points. */
 function rtSnapTrip(G, sketch){
   const sk = rtThin(sketch, 2), len = rtLength(sk);
+  if (sk.length < 2 || len < 20) return { error: 'short' };
+  const a0 = rtAnchor(G, sk[0]), a1 = rtAnchor(G, sk[sk.length-1]);
+  if (!a0 || !a1 || (a0.km > 60 && a1.km > 60)) return { error: 'noroad' };
+  /* the finish is planned on the start's network; it only counts as cut off when that network
+     has no road within 60 km of it but another one does (Anchorage -> Seattle). A stray ferry
+     stub near the finish must not hide a perfectly good road on the start's network. */
+  if (G.comp[a0.e.a] !== G.comp[a1.e.a] && a1.km <= 60 && rtAnchor(G, sk[sk.length-1], G.comp[a0.e.a]).km > 60)
+    return { error: 'disconnected' };
+  const cuts = rtCorners(G, sk);
   if (sk.length > 3 && rtKm(sk[0], sk[sk.length-1]) < Math.max(30, len * 0.1)){
     let k = 1, far = 0;
     sk.forEach((p, i) => { const d = rtKm(sk[0], p); if (d > far){ far = d; k = i; } });
-    const a = rtSnap(G, sk.slice(0, k + 1)), b = a && rtSnap(G, sk.slice(k));
-    if (!a || !b) return null;
-    const path = a.path.concat(b.path.slice(1)), cum = rtCumulative(path), roads = a.roads.slice();
-    b.roads.forEach(r => { const l = roads[roads.length-1]; if (l && l.name === r.name) l.km += r.km; else roads.push({ ...r }); });
-    return { path, cum, km: cum[cum.length-1], roads, sketch: sk, loop: true };
+    if (!cuts.some(c => Math.abs(c - k) < 3)) cuts.push(k);
+    cuts.sort((x, y) => x - y);
   }
-  return rtSnap(G, sketch);
+  const idx = [0].concat(cuts, [sk.length - 1]);
+  let route = null;
+  for (let j = 1; j < idx.length; j++){
+    const r = rtSnap(G, sk.slice(idx[j-1], idx[j] + 1));
+    if (!r) return { error: 'none' };
+    if (!route){ route = r; continue; }
+    route.path = route.path.concat(r.path.slice(1));
+    r.roads.forEach(x => { const l = route.roads[route.roads.length-1]; if (l && l.name === x.name) l.km += x.km; else route.roads.push({ ...x }); });
+  }
+  route.cum = rtCumulative(route.path);
+  route.km = route.cum[route.cum.length-1];
+  route.sketch = sk;
+  route.loop = rtKm(sk[0], sk[sk.length-1]) < Math.max(30, len * 0.1);
+  route.offStartKm = rtKm(sk[0], route.path[0]);
+  route.offEndKm = rtKm(sk[sk.length-1], route.path[route.path.length-1]);
+  return route;
 }
 
 /* Main roads in travel order: runs of at least 8% of the trip (or 80 km), repeats collapsed. */
@@ -4312,15 +4419,17 @@ function rtParksNear(route, parks, corridorKm){
 function rtClass(name){ return name === 'Ferry' ? 2 : 1; }
 
 /* ── Road-trip mode: UI (Canada) ─────────────────────────────────────────────
-   "Plan a road trip" turns the map into a sketch pad for one stroke. On release
-   the sketch is snapped to CA_ROADS (rtSnapTrip), drawn as a solid route over a
-   shaded corridor, and every park inside the corridor is listed and numbered in
-   the order you'd reach it. Text comes from T[lang].trip; distances follow the
+   "Plan a road trip" turns the map into a sketch pad for one stroke (park dots and the
+   usable highways show while drawing). On release the sketch is snapped to CA_ROADS
+   (rtSnapTrip), drawn as a solid route over a shaded corridor, and every park inside the
+   corridor is listed and numbered in the order you'd reach it; pins that would overlap at the
+   current zoom merge into one "4–8" badge. Text comes from T[lang].trip; distances follow the
    page's units setting. Clear puts the normal map back. */
 const TRIP_MAX_STOPS = 9;   // Google Maps' directions link takes at most 9 waypoints
+const TRIP_OTHER_GUIDE_URL = 'https://postmillennium-mtb.github.io/USA-bike-parks/';
 /* Corridor choices: a round number in each unit system, so neither reads as a conversion. */
 const TRIP_CORRIDORS = [ {km:15, mi:10}, {km:40, mi:25}, {km:80, mi:50}, {km:150, mi:100}, {km:250, mi:150} ];
-let tripGraph = null, tripNetLayer = null, tripLayer = null, tripBandLine = null;
+let tripGraph = null, tripNetLayer = null, tripLayer = null, tripBandLine = null, tripPinLayer = null, tripGhostLayer = null;
 let tripDrawing = false, tripPointer = null, tripSketch = [], tripSketchLine = null;
 let tripRoute = null, tripHits = [], tripStops = new Set(), tripPins = {}, tripHintKey = '';
 
@@ -4370,10 +4479,21 @@ function tripMapLock(lock){
   document.getElementById('park-map').classList.toggle('trip-drawing', lock);
 }
 
-function tripShowNetwork(){
-  if (tripNetLayer) return;
+/* The usable highways, shown only while drawing: the OSM tiles already show every road once a
+   trip is on the map, and this overlay would compete with the route. */
+function tripShowNetwork(on){
+  if (tripNetLayer){ mapInstance.removeLayer(tripNetLayer); tripNetLayer = null; }
+  if (!on) return;
   tripNetLayer = L.polyline(tripGraph.edges.map(e => e.pts),
-    { className:'trip-net', interactive:false, smoothFactor:1.5, weight:1 }).addTo(mapInstance);
+    { className:'trip-net', interactive:false, smoothFactor:1.5, weight:1.5 }).addTo(mapInstance);
+}
+
+/* Every park as a small dot while drawing, so you can aim the line at them. */
+function tripShowGhosts(on){
+  if (tripGhostLayer){ mapInstance.removeLayer(tripGhostLayer); tripGhostLayer = null; }
+  if (!on) return;
+  tripGhostLayer = L.layerGroup(PARKS.map(p => L.circleMarker(p.coords,
+    { radius:4, weight:1.5, className:'trip-ghost', interactive:false }))).addTo(mapInstance);
 }
 
 function tripToggleDraw(){
@@ -4383,7 +4503,8 @@ function tripToggleDraw(){
   catch (err){ tripHint('loadFail'); return; }
   tripDrawing = true;
   tripMapLock(true);
-  tripShowNetwork();
+  tripShowNetwork(true);
+  tripShowGhosts(true);
   if (markerCluster && mapInstance.hasLayer(markerCluster)) mapInstance.removeLayer(markerCluster);
   tripSetDrawButton(true);
   document.getElementById('trip-clear-btn').hidden = false;
@@ -4393,6 +4514,8 @@ function tripToggleDraw(){
 function tripEndDraw(){
   tripDrawing = false; tripPointer = null;
   tripMapLock(false);
+  tripShowNetwork(false);
+  tripShowGhosts(false);
   tripSetDrawButton(false);
   if (!tripRoute && !tripSketchLine) tripClear();
 }
@@ -4423,23 +4546,34 @@ function tripPointerMove(e){
 function tripPointerUp(e){
   if (e.pointerId !== tripPointer) return;
   tripPointer = null;
+  const sk = tripSketch.map(ll => [ll.lat, ll.lng]);
   let px = 0;
   for (let i = 1; i < tripSketch.length; i++)
     px += mapInstance.latLngToContainerPoint(tripSketch[i-1]).distanceTo(mapInstance.latLngToContainerPoint(tripSketch[i]));
-  if (px < 40){
+  /* A tap, or a line too short to be a road trip: stay in drawing mode and say why. The minimum
+     is a distance (20 km), not screen pixels, so short trips work once you zoom in. */
+  if (px < 8 || rtLength(sk) < 20){
     mapInstance.removeLayer(tripSketchLine); tripSketchLine = null;
     tripHint('tooShort');
     return;
   }
   tripEndDraw();
-  let route = null;
-  try { route = rtSnapTrip(tripGraph, tripSketch.map(ll => [ll.lat, ll.lng])); } catch (err){ route = null; }
-  if (!route){ tripHint('noRoute'); return; }
+  let route;
+  try { route = rtSnapTrip(tripGraph, sk); } catch (err){ route = { error: 'none' }; }
+  if (route.error){
+    if (tripSketchLine){ mapInstance.removeLayer(tripSketchLine); tripSketchLine = null; }
+    if (!tripRoute) tripClear();
+    tripHint({ short:'tooShort', noroad:'noRoad', disconnected:'disconnected', none:'noRoute' }[route.error] || 'noRoute');
+    return;
+  }
   tripRoute = route;
   tripStops = new Set();
   tripSetDrawButton(false);
+  tripHint('');
   tripRenderRoute();
-  mapInstance.fitBounds(L.polyline(route.path).getBounds(), { padding:[28, 28] });
+  /* extra side padding leaves room for the Start / Finish labels beside the route ends */
+  const side = Math.min(80, mapInstance.getSize().x * 0.15);
+  mapInstance.fitBounds(L.polyline(route.path).getBounds(), { paddingTopLeft:[side, 40], paddingBottomRight:[side, 40] });
 }
 
 /* Corridor width in km. Auto ≈ 4% of the trip (40–160 km). A preset uses its own unit's round
@@ -4460,38 +4594,118 @@ function tripBandWeight(){
   const mpp = 156543.03392 * Math.cos(mid * Math.PI / 180) / Math.pow(2, mapInstance.getZoom());
   return Math.max(2, 2 * tripCorridorKm() * 1000 / mpp);
 }
-function tripUpdateBand(){ if (tripBandLine) tripBandLine.setStyle({ weight: tripBandWeight() }); }
+function tripOnZoom(){
+  if (tripBandLine) tripBandLine.setStyle({ weight: tripBandWeight() });
+  if (tripRoute) tripRenderPins();
+}
+
+/* Start / Finish labels sit beside the route end, on the side away from the route (behind the
+   start, beyond the finish), so they don't cover the line or the first and last pins. */
+function tripEndLabel(label, at, toward){
+  const dx = (toward[1] - at[1]) * Math.cos(at[0] * Math.PI / 180);
+  const right = dx < 0;   // label goes on the side away from the neighbouring stretch of route
+  const tx = right ? '10px' : 'calc(-100% - 10px)';
+  return L.marker(at, { interactive:false, keyboard:false, zIndexOffset:-1000,
+    icon: L.divIcon({ className:'trip-end-wrap', iconSize:[0, 0], iconAnchor:[0, 0],
+      html:`<div class="trip-end" style="transform:translate(${tx},-50%)">${label}</div>` }) });
+}
 
 function tripRenderRoute(){
   if (tripLayer) mapInstance.removeLayer(tripLayer);
   tripLayer = L.layerGroup().addTo(mapInstance);
-  tripPins = {};
-  const t = tx_(), path = tripRoute.path;
+  tripPinLayer = null;
+  const t = tx_(), path = tripRoute.path, cum = tripRoute.cum, km = tripRoute.km;
+  const atKm = d => path[Math.max(0, cum.findIndex(c => c >= d))];
   tripBandLine = L.polyline(path, { className:'trip-band', interactive:false, lineCap:'round', lineJoin:'round', weight: tripBandWeight() }).addTo(tripLayer);
   L.polyline(path, { className:'trip-route-casing', interactive:false, weight:7 }).addTo(tripLayer);
   L.polyline(path, { className:'trip-route', interactive:false, weight:4 }).addTo(tripLayer);
   if (tripSketchLine) tripSketchLine.bringToFront();
-  const ends = tripRoute.loop ? [[t.startFinish, path[0]]] : [[t.start, path[0]], [t.finish, path[path.length - 1]]];
-  ends.forEach(([label, ll]) => {
-    L.marker(ll, { interactive:false, keyboard:false,
-      icon: L.divIcon({ className:'', html:`<div class="trip-end">${label}</div>`, iconSize:null, iconAnchor:[0, 22] })
-    }).addTo(tripLayer);
-  });
+  const look = Math.min(40, km * 0.1);
+  if (tripRoute.loop) tripEndLabel(t.startFinish, path[0], atKm(look)).addTo(tripLayer);
+  else {
+    tripEndLabel(t.start, path[0], atKm(look)).addTo(tripLayer);
+    tripEndLabel(t.finish, path[path.length - 1], atKm(km - look)).addTo(tripLayer);
+  }
   tripHits = rtParksNear(tripRoute, PARKS, tripCorridorKm());
-  tripHits.forEach((h, i) => {
-    const p = h.park, closed = p.badges.includes('closed');
-    const m = L.marker(p.coords, {
-      title: p.name[lang] || p.name.en, riseOnHover:true,
-      icon: L.divIcon({ className:'', html:`<div class="trip-pin${closed ? ' is-closed' : ''}">${i + 1}</div>`, iconSize:[22, 22], iconAnchor:[11, 11] })
-    });
-    const base = mapMarkers[p.id] && mapMarkers[p.id].getPopup();
-    if (base) m.bindPopup(base.getContent(), { maxWidth: 240 });
-    m.bindTooltip(`${i + 1}. ${p.name[lang] || p.name.en}`, { direction:'top', offset:[0, -10], className:'trip-tip' });
-    m.addTo(tripLayer);
-    tripPins[p.id] = m;
-  });
+  tripRenderPins();
   tripRenderList();
-  tripHint('');
+}
+
+/* "4–8" for a run of numbers, "2, 5" for a few, "2, 5 +3" beyond that. */
+function tripGroupLabel(nums){
+  const run = nums.every((n, i) => !i || n === nums[i-1] + 1);
+  if (run) return nums[0] + '–' + nums[nums.length - 1];
+  return nums.length <= 3 ? nums.join(', ') : nums.slice(0, 2).join(', ') + ' +' + (nums.length - 2);
+}
+
+/* Numbered pins, regrouped at every zoom: pins closer than 24 px merge into one badge.
+   Clicking a badge zooms in until they separate; at full zoom it lists them. */
+function tripRenderPins(){
+  if (!tripLayer) return;
+  if (tripPinLayer) tripLayer.removeLayer(tripPinLayer);
+  tripPinLayer = L.layerGroup().addTo(tripLayer);
+  tripPins = {};
+  const groups = [];
+  tripHits.forEach((h, i) => {
+    const pt = mapInstance.latLngToLayerPoint(h.park.coords);
+    const g = groups.find(g => g.pt.distanceTo(pt) < 24);
+    if (g) g.items.push({ h, n: i + 1 }); else groups.push({ pt, items: [{ h, n: i + 1 }] });
+  });
+  const width = g => g.items.length === 1 ? 22 : 14 + tripGroupLabel(g.items.map(x => x.n).sort((a, b) => a - b)).length * 7;
+  const centre = g => g.items.reduce((s, x) => s.add(mapInstance.latLngToLayerPoint(x.h.park.coords)), L.point(0, 0)).divideBy(g.items.length);
+  for (let merged = true; merged; ){
+    merged = false;
+    for (let i = 0; i < groups.length && !merged; i++) for (let j = i + 1; j < groups.length && !merged; j++){
+      const a = centre(groups[i]), c = centre(groups[j]);
+      if (Math.abs(a.x - c.x) < (width(groups[i]) + width(groups[j])) / 2 + 4 && Math.abs(a.y - c.y) < 26){
+        groups[i].items = groups[i].items.concat(groups[j].items).sort((x, y) => x.n - y.n);
+        groups.splice(j, 1); merged = true;
+      }
+    }
+  }
+  const nm = p => p.name[lang] || p.name.en;
+  groups.forEach(g => {
+    if (g.items.length === 1){
+      const { h, n } = g.items[0], p = h.park, closed = p.badges.includes('closed');
+      const m = L.marker(p.coords, { title: nm(p), riseOnHover:true, zIndexOffset:1000,
+        icon: L.divIcon({ className:'', html:`<div class="trip-pin${closed ? ' is-closed' : ''}">${n}</div>`, iconSize:[22, 22], iconAnchor:[11, 11] }) });
+      const base = mapMarkers[p.id] && mapMarkers[p.id].getPopup();
+      if (base) m.bindPopup(base.getContent(), { maxWidth: 240 });
+      m.bindTooltip(`${n}. ${nm(p)}`, { direction:'top', offset:[0, -10], className:'trip-tip' });
+      m.addTo(tripPinLayer);
+      tripPins[p.id] = m;
+      return;
+    }
+    const nums = g.items.map(x => x.n), label = tripGroupLabel(nums);
+    const lat = g.items.reduce((s, x) => s + x.h.park.coords[0], 0) / g.items.length;
+    const lng = g.items.reduce((s, x) => s + x.h.park.coords[1], 0) / g.items.length;
+    const closed = g.items.every(x => x.h.park.badges.includes('closed'));
+    const w = 14 + label.length * 7;
+    const names = g.items.map(x => `${x.n}. ${nm(x.h.park)}`);
+    const m = L.marker([lat, lng], { title: names.join('; '), riseOnHover:true, zIndexOffset:1000,
+      icon: L.divIcon({ className:'', html:`<div class="trip-pin trip-pin-group${closed ? ' is-closed' : ''}">${label}</div>`, iconSize:[w, 22], iconAnchor:[w / 2, 11] }) });
+    m.bindTooltip(names.join('<br>'), { direction:'top', offset:[0, -10], className:'trip-tip' });
+    m.isGroup = true;
+    m.on('click', () => {
+      if (mapInstance.getZoom() < mapInstance.getMaxZoom())
+        mapInstance.fitBounds(L.latLngBounds(g.items.map(x => x.h.park.coords)), { padding:[60, 60], maxZoom: mapInstance.getMaxZoom() });
+      else
+        L.popup().setLatLng([lat, lng]).setContent(`<div class="trip-grp">${names.join('<br>')}</div>`).openOn(mapInstance);
+    });
+    m.addTo(tripPinLayer);
+    g.items.forEach(x => { tripPins[x.h.park.id] = m; });
+  });
+}
+
+/* When a drawn end lands far from the roads this guide routes on (out to sea, or across the
+   border), the trip starts or ends at the nearest road instead; say so. */
+function tripEndsNote(){
+  const t = tx_(), s = tripRoute.offStartKm, f = tripRoute.offEndKm, lim = 30;
+  if (s < lim && f < lim) return '';
+  const link = `<a href="${TRIP_OTHER_GUIDE_URL}" target="_blank" rel="noopener">${t.otherGuide}</a>`;
+  const msg = s >= lim && f >= lim ? tripFill(t.farBoth, { a: tripDist(s), b: tripDist(f) })
+            : s >= lim ? tripFill(t.farStart, { d: tripDist(s) }) : tripFill(t.farEnd, { d: tripDist(f) });
+  return `<p class="trip-warn">${TRIP_INFO_SVG}<span>${msg} ${tripFill(t.farTail, { guide: link })}</span></p>`;
 }
 
 function tripRenderList(){
@@ -4500,7 +4714,7 @@ function tripRenderList(){
   const t = tx_(), corr = tripDist(tripCorridorKm());
   const via = rtRoadSummary(tripRoute, 7).map(tripRoadName);
   const closedN = tripHits.filter(h => h.park.badges.includes('closed')).length;
-  let html = `<div class="trip-sum"><strong>&asymp;${NNBSP}${tripFill(t.byRoad, { d: tripDist(tripRoute.km) })}</strong>` +
+  let html = tripEndsNote() + `<div class="trip-sum"><strong>&asymp;${NNBSP}${tripFill(t.byRoad, { d: tripDist(tripRoute.km) })}</strong>` +
     (via.length ? ` ${t.via} ${via.join(' &rarr; ')}` : '') +
     ` &middot; <strong>${tripFill(tripPlural(tripHits.length, t.parkOne, t.parkMany), { n: tripHits.length })}</strong> ` +
     tripFill(t.within, { d: corr }) +
@@ -4562,32 +4776,46 @@ function tripClear(){
   tripDrawing = false; tripPointer = null; tripRoute = null; tripHits = []; tripStops = new Set();
   if (mapInstance){
     tripMapLock(false);
-    [tripLayer, tripSketchLine, tripNetLayer].forEach(l => l && mapInstance.removeLayer(l));
+    tripShowNetwork(false);
+    tripShowGhosts(false);
+    [tripLayer, tripSketchLine].forEach(l => l && mapInstance.removeLayer(l));
     if (markerCluster && !mapInstance.hasLayer(markerCluster)) mapInstance.addLayer(markerCluster);
   }
-  tripLayer = tripSketchLine = tripNetLayer = tripBandLine = null;
+  tripLayer = tripSketchLine = tripBandLine = tripPinLayer = null;
   tripSetDrawButton(false);
   const c = document.getElementById('trip-clear-btn'); if (c) c.hidden = true;
   tripRenderList();
   tripHint('');
 }
 
+/* List name -> map: zoom in until the park's pin stands on its own, then open its popup. */
 function tripFocusPark(id){
-  const p = PARKS.find(x => String(x.id) === String(id)), m = tripPins[p && p.id];
-  if (!p || !m) return;
-  mapInstance.setView(p.coords, Math.max(mapInstance.getZoom(), 8));
-  m.openPopup();
+  const p = PARKS.find(x => String(x.id) === String(id));
+  if (!p || !tripPins[p.id]) return;
+  let z = Math.max(mapInstance.getZoom(), 8);
+  const maxZ = Math.min(mapInstance.getMaxZoom(), 13);
+  mapInstance.setView(p.coords, z, { animate:false });
+  tripRenderPins();
+  while (tripPins[p.id] && tripPins[p.id].isGroup && z < maxZ){
+    mapInstance.setView(p.coords, ++z, { animate:false });
+    tripRenderPins();
+  }
+  const m = tripPins[p.id];
+  if (m && !m.isGroup) m.openPopup(); else if (m) m.fire('click');
   const y = document.getElementById('park-map').getBoundingClientRect().top + window.pageYOffset - 70;
   window.scrollTo({ top: y, behavior: 'smooth' });
 }
 
-/* Language or units changed (called from renderAll): re-label everything in place. */
+/* Language or units changed (called from renderAll): re-label everything in place, keeping
+   whatever message is on screen (including the drawing instructions mid-drawing). */
 function tripRenderText(){
   const t = tx_();
   if (!t || !document.getElementById('trip-bar')) return;
   tripSetDrawButton(tripDrawing);
   document.getElementById('trip-clear-label').textContent = t.clear;
+  document.getElementById('trip-clear-btn').setAttribute('aria-label', t.clear);
   document.getElementById('trip-corr-pre').textContent = t.within1;
+  document.getElementById('trip-corr-short').textContent = t.withinShort;
   document.getElementById('trip-corr-post').textContent = t.within2;
   const sel = document.getElementById('trip-corr');
   sel.options[0].text = t.auto;
@@ -4596,8 +4824,8 @@ function tripRenderText(){
   });
   const credit = document.getElementById('roads-credit');
   if (credit) credit.innerHTML = t.credit;
-  if (tripHintKey) tripHint(tripHintKey[0], tripHintKey[1]);
   if (tripRoute && mapInstance) tripRenderRoute();
+  if (tripHintKey) tripHint(tripHintKey[0], tripHintKey[1]); else tripHint('');
 }
 
 /* Map tab only: the trip bar and list hide on Stats / Mountain (called from toggleView). */
@@ -4635,7 +4863,7 @@ function tripSyncView(view){
     tripUpdateStops();
   });
   tripRenderText();
-  const hook = () => { if (mapInstance){ mapInstance.on('zoomend', tripUpdateBand); } else setTimeout(hook, 200); };
+  const hook = () => { if (mapInstance){ mapInstance.on('zoomend', tripOnZoom); } else setTimeout(hook, 200); };
   hook();
 })();
 

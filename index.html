@@ -1111,9 +1111,10 @@ details summary::-webkit-details-marker { display: none; }
 }
 .lang-btn:hover, .lang-btn:focus-visible { background: var(--bg-hover); border-color: var(--gold-dim); }
 .lang-btn:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
-/* Share button: same pill as the language button; the status bubble drops below it */
+/* Share button: icon only (paper plane; its name, EN/FR, is in aria-label), same pill as the language
+   button; the status bubble drops below it */
 .share-wrap { position: relative; }
-.share-btn { display: inline-flex; align-items: center; gap: 6px; cursor: pointer; line-height: 1; }
+.share-btn { display: inline-flex; align-items: center; justify-content: center; cursor: pointer; line-height: 1; padding-left: 10px; padding-right: 10px; }
 .share-btn .lucide { width: 15px; height: 15px; flex: 0 0 auto; }
 .share-status {
   position: absolute; top: calc(100% + 8px); right: 0; z-index: 300;
@@ -1126,7 +1127,6 @@ details summary::-webkit-details-marker { display: none; }
   background: var(--bg); border: 1px solid var(--border-lit); border-radius: 4px; padding: 4px 6px;
 }
 @media (max-width: 560px) {
-  .share-label { display: none; }   /* icon only on phones; the name is in aria-label */
   .share-btn { padding-left: 9px; padding-right: 9px; }
   /* the phone spacing from the TOKENS-era rule above .topbar never applied (the base .topbar
      rule comes later and wins); restated here, after it, so narrow bars get the tighter spacing */
@@ -2049,7 +2049,7 @@ body[data-theme="alpine"]  { --trip-loam: #297d0f; --trip-loam-fg: #ffffff; }
     </select>
     <button class="lang-btn" id="lang-btn" aria-label="Switch language">FR</button>
     <div class="share-wrap">
-      <button type="button" class="lang-btn share-btn" id="share-btn" aria-label="Share this guide"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg><span class="share-label" id="share-label">Share</span></button>
+      <button type="button" class="lang-btn share-btn" id="share-btn" aria-label="Share this guide"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-send" aria-hidden="true" focusable="false"><path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/></svg></button>
       <div class="share-status" id="share-status" role="status" aria-live="polite" hidden></div>
     </div>
     <a class="pmr-link" href="https://www.postmillenniumrenaissance.com" target="_top" rel="noopener"
@@ -2260,7 +2260,7 @@ const T = {
     pillParks: '{n} lift-served parks',
     pillProvs: '{p} provinces & territories',
     langBtn: 'FR',
-    share: { btn: 'Share', aria: 'Share this guide', copied: 'Link copied', manual: 'Copy this link:', field: 'Link to this guide',
+    share: { aria: 'Share this guide', copied: 'Link copied', manual: 'Copy this link:', field: 'Link to this guide',
       title: 'Canada MTB Parks Guide', text: 'Every lift-served mountain bike park in Canada, with a map, stats and a road-trip planner.' },
     units: {metric:'Metric', imperial:'Imperial', both:'Both'},
     originEyebrow: 'Origin Story / Histoire des origines',
@@ -2390,7 +2390,7 @@ const T = {
     pillParks: '{n} parcs avec remontée',
     pillProvs: '{p} provinces et territoires',
     langBtn: 'EN',
-    share: { btn: 'Partager', aria: 'Partager ce guide', copied: 'Lien copié', manual: 'Copiez ce lien :', field: 'Lien vers ce guide',
+    share: { aria: 'Partager ce guide', copied: 'Lien copié', manual: 'Copiez ce lien :', field: 'Lien vers ce guide',
       title: 'Guide des parcs vélo du Canada', text: 'Tous les parcs de vélo de montagne avec remontée au Canada : carte, statistiques et planificateur de virée.' },
     units: {metric:'Métrique', imperial:'Impérial', both:'Les deux'},
     originEyebrow: 'Origin Story / Histoire des origines',
@@ -3346,7 +3346,6 @@ function applyStaticText() {
 
   document.getElementById('tb-brand').textContent = tx.topbrand;
   document.getElementById('lang-btn').textContent = tx.langBtn;
-  document.getElementById('share-label').textContent = tx.share.btn;
   document.getElementById('share-btn').setAttribute('aria-label', tx.share.aria);
   document.getElementById('hero-eyebrow').textContent = tx.eyebrow;
   document.getElementById('hero-title').innerHTML = lang === 'fr'

@@ -4060,8 +4060,11 @@ function initMap() {
     },
     /* px radius within which markers merge into a cluster bubble. Leaflet's
        default is 80, which over-merged the tightly packed Québec parks;
-       50 keeps them individually clickable at province zoom. */
-    maxClusterRadius: 50
+       50 keeps them individually clickable at province zoom. Since Nov 2026 it groups at country /
+       multi-province zooms only (24px at zoom 5); from zoom 6 a park merges only with one its dot
+       would almost completely cover (within 4px), so zooming into a region shows every park as
+       its own dot. Same rule in the USA guide. */
+    maxClusterRadius: z => z <= 4 ? 50 : z === 5 ? 24 : 4
   });
 
   PARKS.forEach(park => {

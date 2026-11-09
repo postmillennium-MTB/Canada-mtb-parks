@@ -2307,7 +2307,7 @@ const T = {
       startFinish: "Start / Finish",
       hwy: "Hwy",
       ferry: "ferry",
-      fine: "Road distances are measured on a simplified highway map (Natural Earth), so treat them as roughly ±10% and check real directions before you go. The km / Mile figure is how far along the route the park sits; “off route” is the straight-line distance from the highway to the park pin, not the drive. A sharp corner in your line is treated as a place to visit, and ticking “Stop” bends the route through that park and adds it to the Google Maps link. Routes use Canadian highways and ferries only and never cross into the US. Only Canadian parks are listed.",
+      fine: "Road distances are measured on a simplified highway map (Natural Earth), so treat them as roughly ±10% and check real directions before you go. The km / Mile figure is how far along the route the park sits; “off route” is the straight-line distance from the highway to the park pin, not the drive. The route follows your whole line: sharp corners, and any part of the line it would otherwise cut across (a loop, say), are treated as places to visit. Ticking “Stop” bends the route through that park and adds it to the Google Maps link. Routes use Canadian highways and ferries only and never cross into the US. Only Canadian parks are listed.",
       credit: "Map and road-trip highways: <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> 1:50m boundaries, 1:10m roads and places (public domain), simplified.",
       tap: "Press and drag to draw the trip; a tap doesn’t draw a line.",
       noRoad: "Your line doesn’t start or finish near a road this guide routes on. Start and finish on land in Canada (US parks are in the USA guide).",
@@ -2432,7 +2432,7 @@ const T = {
       startFinish: "Départ / arrivée",
       hwy: "route",
       ferry: "traversier",
-      fine: "Les distances routières sont mesurées sur une carte routière simplifiée (Natural Earth) : comptez environ ±10 % et vérifiez l’itinéraire réel avant de partir. Le repère km / Mille indique où le parc se situe le long du trajet ; « à … du trajet » est la distance à vol d’oiseau entre la route et l’épingle du parc, pas le trajet en voiture. Un virage serré dans votre trait est traité comme un endroit à visiter, et cocher « Arrêt » fait passer le trajet par ce parc et l’ajoute au lien Google Maps. Les itinéraires n’utilisent que les routes et traversiers canadiens et ne passent jamais par les États-Unis. Seuls les parcs canadiens sont listés.",
+      fine: "Les distances routières sont mesurées sur une carte routière simplifiée (Natural Earth) : comptez environ ±10 % et vérifiez l’itinéraire réel avant de partir. Le repère km / Mille indique où le parc se situe le long du trajet ; « à … du trajet » est la distance à vol d’oiseau entre la route et l’épingle du parc, pas le trajet en voiture. Le trajet suit tout votre trait : les virages serrés, et toute partie du trait qu’il couperait autrement (une boucle, par exemple), sont traités comme des endroits à visiter. Cocher « Arrêt » fait passer le trajet par ce parc et l’ajoute au lien Google Maps. Les itinéraires n’utilisent que les routes et traversiers canadiens et ne passent jamais par les États-Unis. Seuls les parcs canadiens sont listés.",
       credit: "Carte et routes des virées : <a href=\"https://www.naturalearthdata.com/\" target=\"_blank\" rel=\"noopener\">Natural Earth</a> (limites 1:50m, routes et localités 1:10m, domaine public), simplifiées.",
       tap: "Appuyez et glissez pour tracer la virée ; un simple toucher ne trace rien.",
       noRoad: "Votre trait ne commence ni ne finit près d’une route utilisée par ce guide. Commencez et terminez sur la terre ferme au Canada (les parcs américains sont dans le guide des États-Unis).",
@@ -4433,16 +4433,47 @@ function rtSnapTrip(G, sketch, vias){
     if (!cuts.some(c => Math.abs(c - k) < 3)) cuts.push(k);
     cuts.sort((x, y) => x - y);
   }
-  const idx = [0].concat(cuts, [sk.length - 1]);
-  let route = null;
-  for (let j = 1; j < idx.length; j++){
-    const piece = sk.slice(idx[j-1], idx[j] + 1);
-    if (rtLength(piece) < 1) continue;               // two must-visit points on the same spot
-    const r = rtSnap(G, piece, 0);
-    if (!r){ if (rtLength(piece) < 5) continue; return { error: 'none' }; }
-    if (!route){ route = r; continue; }
-    route.path = route.path.concat(r.path.slice(1));
-    r.roads.forEach(x => { const l = route.roads[route.roads.length-1]; if (l && l.name === x.name) l.km += x.km; else route.roads.push({ ...x }); });
+  /* plan through a set of must-visit sketch indexes (cuts), one piece at a time */
+  const plan = cs => {
+    const idx = [0].concat(cs, [sk.length - 1]);
+    let route = null;
+    for (let j = 1; j < idx.length; j++){
+      const piece = sk.slice(idx[j-1], idx[j] + 1);
+      if (rtLength(piece) < 1) continue;             // two must-visit points on the same spot
+      const r = rtSnap(G, piece, 0);
+      if (!r){ if (rtLength(piece) < 5) continue; return null; }
+      if (!route){ route = r; continue; }
+      route.path = route.path.concat(r.path.slice(1));
+      r.roads.forEach(x => { const l = route.roads[route.roads.length-1]; if (l && l.name === x.name) l.km += x.km; else route.roads.push({ ...x }); });
+    }
+    return route;
+  };
+  let route = plan(cuts);
+  if (!route) return { error: 'none' };
+  /* Cover the whole drawing ("key points become must-visit"). Roads are scored by how far they
+     stray from ANY part of the line, so a narrow loop (down the coast and back up the Rockies)
+     can be skipped: cutting across near both legs is cheaper than driving the loop. So: find
+     the drawn point the route strays farthest from; if that gap is big (8% of the line, 100 to
+     250 km: well beyond freehand wobble) and a road is within 40 km of it, make it a must-visit point and plan again. Repeats
+     up to 8 times. Ordinary drawings have no big gap, so they are planned exactly as before. */
+  const gapKm = Math.max(100, Math.min(250, len * 0.08));
+  const skCum = rtCumulative(sk), skip = new Set();
+  for (let pass = 0; pass < 8; pass++){
+    const rc = rtCumulative(route.path);
+    let worst = null, lastD = -Infinity;
+    for (let i = 1; i < sk.length - 1; i++){
+      if (skCum[i] - lastD < 10) continue;             // sample about every 10 km of line
+      lastD = skCum[i];
+      if (skip.has(i) || cuts.includes(i)) continue;
+      const d = rtNearest(sk[i], route.path, rc).km;
+      if (d > gapKm && (!worst || d > worst.d)) worst = { i, d };
+    }
+    if (!worst) break;
+    if (rtAnchor(G, sk[worst.i], comp).km > 40){ skip.add(worst.i); pass--; if (skip.size > 60) break; continue; }
+    const next = plan([...new Set(cuts.concat(worst.i))].sort((x, y) => x - y));
+    if (!next) break;                                 // keep the last good route
+    cuts = [...new Set(cuts.concat(worst.i))].sort((x, y) => x - y);
+    route = next;
   }
   route.cum = rtCumulative(route.path);
   route.km = route.cum[route.cum.length-1];

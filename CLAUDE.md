@@ -206,6 +206,10 @@ off-season, which is already handled by each park's `season` field).
   the trip through that park (`rtSnapTrip(G, sketch, vias)`; vias slot into the sketch in travel
   order and become must-visit points) and makes it a Google Maps stop (max 9). A park you added
   stays listed even if its road is outside the band.
+  Whole-line coverage: after planning, the drawn point the route strays farthest from becomes a
+  must-visit point when that gap is over 8% of the line (100–250 km) and a road is within 40 km;
+  repeats up to 8 times. This is what makes a narrow loop (down the coast, back up the Rockies)
+  get driven instead of cut across. Ordinary drawings never reach the threshold.
 - **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
   The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
   fix is one combined US+CA network with both park lists. That needs a decision on how the two

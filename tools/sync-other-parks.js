@@ -12,7 +12,8 @@
    own guide. Run it again after adding, closing or moving a park in either guide, or the other
    guide's road trips will show the old details. Only the fields a trip needs are copied: name,
    town, position, vertical (as published: feet for US parks, metres and feet for Canadian
-   parks) and open / coming / closed.
+   parks), whether it is on the Loam Pass (road trips can highlight Loam parks) and
+   open / coming / closed.
 
      node tools/sync-other-parks.js --check <USA-bike-parks> <Canada-mtb-parks>
      reads both pages and reports, for each direction, the last sync date and every park added,
@@ -33,9 +34,9 @@ const GUIDE = { usa: 'https://postmillennium-mtb.github.io/USA-bike-parks/', ca:
   const browser = await chromium.launch();
   const read = async (file, fn, arg) => { const pg = await browser.newPage(); await pg.goto('file://' + file); await pg.waitForTimeout(800); const v = await pg.evaluate(fn, arg); await pg.close(); return v; };
   const usa = await read(pages.usa, () => MAPPED.map(p => ({ id: p.id, name: p.name, city: p.city, coords: p.coords,
-    vertFt: p.vertFt, approx: !!p.vertApprox, status: p.status === 'closed' ? 'closed' : p.status === 'coming' ? 'coming' : 'open' })));
+    vertFt: p.vertFt, approx: !!p.vertApprox, loam: !!p.isLoam, status: p.status === 'closed' ? 'closed' : p.status === 'coming' ? 'coming' : 'open' })));
   const ca = await read(pages.ca, () => PARKS.map(p => ({ id: p.id, name: p.name, city: p.city, coords: p.coords,
-    vertFt: p.vertFt, vertM: p.vertM, status: p.badges.includes('closed') ? 'closed' : p.badges.includes('soon') ? 'coming' : 'open' })));
+    vertFt: p.vertFt, vertM: p.vertM, loam: p.badges.includes('loam'), status: p.badges.includes('closed') ? 'closed' : p.badges.includes('soon') ? 'coming' : 'open' })));
   /* how far each park sits from the road-trip network (NA_ROADS is the same in both pages) */
   const offRoad = new Map(Object.entries(await read(pages.usa, list => {
     const G = rtBuildGraph(NA_ROADS), out = {};
@@ -57,7 +58,7 @@ const GUIDE = { usa: 'https://postmillennium-mtb.github.io/USA-bike-parks/', ca:
       const far = () => { const d = offRoad.get(tag + p.id); return d > FAR_KM ?
         `\n    FAR FROM ROADS: ${Math.round(d)} km from the road-trip network; it needs an access road (CLAUDE.md, park sync step 6)` : ''; };
       if (!o) { lines.push(`  added:   ${nm(p)}` + far()); return; }
-      const keys = ['name', 'city', 'coords', 'vertFt', 'vertM', 'approx', 'status']
+      const keys = ['name', 'city', 'coords', 'vertFt', 'vertM', 'approx', 'loam', 'status']
         .filter(k => JSON.stringify(o[k]) !== JSON.stringify(p[k]));
       const ch = keys.map(k => k === 'status' ? `status ${o.status} -> ${p.status}` : k);
       if (ch.length) lines.push(`  changed: ${nm(p)} (${ch.join(', ')})` + (keys.includes('coords') ? far() : ''));

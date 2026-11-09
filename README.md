@@ -132,6 +132,7 @@ Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlin
 
 ### Changelog
 
+- Nov 2026 — Road trips: “Highlight Loam Pass” option (EN/FR) colours Loam Pass parks along the trip, in Canada and the US. Map: parks only group at country / multi-province zoom; zoomed into a region, each park is its own dot.
 - Nov 2026 — Share button in the top bar (EN/FR): opens the phone's share sheet, or copies the postmillenniumrenaissance.com/parks-ca/ link (icon only on phones).
 - Nov 2026 — Map / Stats / Mountain panel moved to the top, right under its tabs and above the province list (same layout as the USA guide); on phones it used to sit below all 29 park cards.
 - Nov 2026 — Park access roads: the last stretch of road to ~50 parks the highway data didn't reach (Sun Peaks, Panorama, Mont Sutton, Montcalm, Crested Butte, Mt. Hood…) added from OpenStreetMap, so trips can end at those parks. Baked into the file; nothing fetched at runtime. Park sync now has a read-only `--check` mode.

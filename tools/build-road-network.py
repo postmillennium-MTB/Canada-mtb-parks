@@ -25,9 +25,15 @@ pieces under 40 km, simplify (~1 km), round to 0.004 deg and polyline-encode.
 Output JSON: {"q": 250, "names": [...], "edges": "<edge> <edge> ..."}; each
 edge is the encoded name index followed by its encoded lat/lng deltas.
 
+Park access roads: Natural Earth stops short of many resorts (CO-135 to Crested Butte isn't in
+it at all). An optional 7th argument adds tools/park-access.geojson, the last stretch of road to
+each park more than 15 km from the network, fetched once from OpenStreetMap (via the OSRM
+router) by fetch-park-access.py and committed with the repo; (c) OpenStreetMap contributors, ODbL.
+
 Usage:  pip install pyshp shapely
-        python3 build-road-network.py ne_10m_roads roads.json [simplify_deg cluster_units q country]
-Shipped data: 0.01 4 250 NA (both guides). USA / CAN build one country only.
+        python3 build-road-network.py ne_10m_roads roads.json [simplify_deg cluster_units q country [access.geojson]]
+Shipped data: 0.01 4 250 NA tools/park-access.geojson (both guides). USA / CAN build one
+country only. Build without the 7th argument to get the base network fetch-park-access.py needs.
 """
 import shapefile, sys, json, collections, math
 from shapely.geometry import LineString, Point
@@ -66,6 +72,12 @@ for sr in r.iterShapeRecords():
         e = sr.shape.parts[i+1] if i+1 < len(sr.shape.parts) else len(pts)
         seg = pts[s:e]
         if len(seg) >= 2: src.append((LineString(seg), n))
+# optional park access roads (tools/park-access.geojson, from fetch-park-access.py): the last
+# stretch of road to resorts Natural Earth doesn't reach, (c) OpenStreetMap contributors, ODbL
+ACCESS = sys.argv[7] if len(sys.argv) > 7 else None
+if ACCESS:
+    for f in json.load(open(ACCESS))['features']:
+        src.append((LineString(f['geometry']['coordinates']), f['properties']['road']))
 lines = [l for l, _ in src]
 tree = STRtree(lines)
 connectors = []

@@ -233,6 +233,12 @@ off-season, which is already handled by each park's `season` field).
   (USA: footer credit line; Canada: map attribution): keep it while these roads are in the data.
   Every park was within 14 km of a routable road after this change; the park sync check flags
   any new or moved park that isn't.
+- **Highlight Loam Pass (November 2026).** Trip mode offers a "Highlight Loam Pass" checkbox
+  (shown only while a trip is drawn or being drawn). Loam parks then get `--trip-loam` (solved per
+  theme and for print; the values sit next to the `.trip-pin.is-loam` rule) and a second cue: round
+  pins instead of square, bigger dots, a ring on a merged pin that contains one, and a Loam tag in
+  the list. Cross-border Loam status comes from the `loam` field the park sync copies. Re-run
+  `node tools/check-trip-colours.js` after changing any theme colour: it checks the Loam marks too.
 - Open idea, not scheduled: a separate Routes tab (see the USA repo README). Ask first.
 
 ## Park sync between the two guides (required; follow this exactly)

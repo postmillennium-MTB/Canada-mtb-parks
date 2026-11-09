@@ -14,6 +14,8 @@ const path = require('path');
 const { chromium } = require('playwright');
 
 const hexOrRgb = c => {
+  const sr = c.match(/color\(srgb ([^)]+)\)/);
+  if (sr) return sr[1].trim().split(/\s+/).slice(0, 3).map(Number);
   const m = c.match(/rgba?\(([^)]+)\)/);
   if (m) return m[1].split(',').slice(0, 3).map(v => parseFloat(v) / 255);
   const h = c.replace('#', '');
@@ -52,6 +54,9 @@ const dE = (a, b, k) => { const x = oklab(sim(a, k)), y = oklab(sim(b, k)); retu
     tripRoute = rtSnapTrip(tripGraph, sk);
     tripSketchLine = L.polyline(sk, { className: 'trip-sketch', interactive: false, weight: 2 }).addTo(mapInstance);
     tripRenderRoute();
+    /* "Highlight Loam Pass" on, so its marks are drawn and measured too */
+    const lc = document.getElementById(canada ? 'trip-loam' : 'tripLoam');
+    if (lc) lc.checked = true;
     tripShowGhosts(true);
     mapInstance.fitBounds(L.polyline(tripRoute.path).getBounds());
   }, canada);
@@ -62,8 +67,11 @@ const dE = (a, b, k) => { const x = oklab(sim(a, k)), y = oklab(sim(b, k)); retu
     return {
       route: cs('.trip-route').stroke, casing: cs('.trip-route-casing').stroke,
       band: cs('.trip-band').stroke, bandA: parseFloat(cs('.trip-band').strokeOpacity),
-      sketch: cs('.trip-sketch').stroke, ghost: cs('.trip-ghost').fill, ghostRing: cs('.trip-ghost').stroke,
-      pinBg: cs('.trip-pin').backgroundColor, pinFg: cs('.trip-pin').color,
+      sketch: cs('.trip-sketch').stroke, ghost: cs('.trip-ghost:not(.is-loam)').fill, ghostRing: cs('.trip-ghost:not(.is-loam)').stroke,
+      pinBg: cs('.trip-pin:not(.is-loam)').backgroundColor, pinFg: cs('.trip-pin:not(.is-loam)').color,
+      loam: (cs('.trip-ghost.is-loam') || {}).fill || null,
+      loamPinBg: v('--trip-loam'), loamPinFg: v('--trip-loam-fg'),
+      land: canada ? cs('.land-ca').fill : cs('.us-state-shape').fill,
       ground: canada ? v('--bg') : cs('.us-state-shape').fill,       // what the route crosses (Canada: OSM tiles; the casing is the guaranteed ground)
       card: getComputedStyle(document.getElementById(canada ? 'trip-results' : 'tripResults')).backgroundColor,
       text: v(canada ? '--text' : '--chalk'), dim: v(canada ? '--text-dim' : '--chalk-dim'), mute: v(canada ? '--text-muted' : '--chalk-mute')
@@ -86,6 +94,14 @@ const dE = (a, b, k) => { const x = oklab(sim(a, k)), y = oklab(sim(b, k)); retu
     check('fine print vs card', ratio(c.mute, c.card), 4.5);
     for (const [k, min] of [[null, 15], ['deutan', 8], ['protan', 8], ['tritan', 8]])
       check(`route vs sketch dE ${k || 'normal'}`, dE(c.route, c.sketch, k), min);
+    /* "Highlight Loam Pass": the Loam colour sits on the land with the route, pins, dots and sketch */
+    if (c.loam){
+      check('Loam dot vs land', ratio(c.loam, c.land), 3);
+      check('Loam pin number vs Loam pin', ratio(c.loamPinFg, c.loamPinBg), 4.5);
+      for (const [nm, o] of [['route', c.route], ['pin', c.pinBg], ['park dot', c.ghost], ['sketch', c.sketch]])
+        for (const [k, min] of [[null, 15], ['deutan', 8], ['protan', 8], ['tritan', 8]])
+          check(`Loam vs ${nm} dE ${k || 'normal'}`, dE(c.loam, o, k), min);
+    } else { fails++; console.log('  FAIL Loam marks not found'); }
   };
   for (const t of themes) {
     await page.evaluate(t => typeof setTheme === 'function' && typeof THEMES !== 'undefined'

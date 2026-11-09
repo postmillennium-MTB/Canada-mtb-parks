@@ -132,6 +132,7 @@ Built with Leaflet.js (BSD 2-Clause) and Leaflet.MarkerCluster (MIT). Map outlin
 
 ### Changelog
 
+- Nov 2026 — Map / Stats / Mountain panel moved to the top, right under its tabs and above the province list (same layout as the USA guide); on phones it used to sit below all 29 park cards.
 - Nov 2026 — Park access roads: the last stretch of road to ~50 parks the highway data didn't reach (Sun Peaks, Panorama, Mont Sutton, Montcalm, Crested Butte, Mt. Hood…) added from OpenStreetMap, so trips can end at those parks. Baked into the file; nothing fetched at runtime. Park sync now has a read-only `--check` mode.
 - Nov 2026 — Cross-border road trips: one shared US + Canada road network, so trips cross the border where highways do; US parks along a route are listed, tagged É.-U./USA and linked to the USA guide (snapshot refreshed by tools/sync-other-parks.js). Drawn loops are followed all the way round.
 - Nov 2026 — Add to my trip: after a route is drawn, other parks stay on the map as dots; tapping one (or ticking “Stop”) re-plans the route through that park and adds it to the Google Maps link (EN/FR).

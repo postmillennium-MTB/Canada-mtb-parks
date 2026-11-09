@@ -212,6 +212,11 @@ off-season, which is already handled by each park's `season` field).
   `farBoth` / `farTail`) when a drawn end is over 30 km from a road. Sharp corners are
   must-visit points (`rtCorners`). The highway overlay shows only while drawing, dashed in
   `--gold` so it reads against the OSM tiles.
+  A drawn end that runs past the roads (border, sea) is trimmed back to where the line leaves the
+  road network, so a trip stops at the crossing the line used. Trip ends ignore road fragments
+  under 300 km (`compKm`). Colour check for trip mode: `node tools/check-trip-colours.js` (needs
+  Playwright). It measures the rendered colours in every theme and print, and the same file is
+  in both repos.
 - **Cross-border trips are not supported yet** (Jon: "cross that bridge when we get there").
   The networks are separate per country, so a Seattle → Whistler sketch can't route. The likely
   fix is one combined US+CA network with both park lists. That needs a decision on how the two

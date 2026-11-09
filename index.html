@@ -2285,9 +2285,9 @@ const T = {
       disconnected: "No road links those two places without leaving Canada. Plan each side separately.",
       withinShort: "Within",
       otherGuide: "USA guide",
-      farStart: "Your line starts about {d} from the nearest road this guide routes on, so the trip starts there instead.",
-      farEnd: "Your line ends about {d} from the nearest road this guide routes on, so the trip ends there instead.",
-      farBoth: "Both ends of your line are far from the roads this guide routes on (about {a} and {b}), so the trip starts and ends at the nearest ones instead.",
+      farStart: "Your line starts about {d} before the first road this guide routes on, so the trip starts there.",
+      farEnd: "Your line ends about {d} past the last road this guide routes on, so the trip stops there.",
+      farBoth: "Both ends of your line run past the roads this guide routes on (by about {a} and {b}), so the trip starts and ends where your line meets them.",
       farTail: "Routes stay inside Canada and stop at coasts and at the US border; US parks are in the {guide}."
     },
   },
@@ -2406,9 +2406,9 @@ const T = {
       disconnected: "Aucune route ne relie ces deux endroits sans quitter le Canada. Planifiez chaque partie séparément.",
       withinShort: "Rayon",
       otherGuide: "guide des États-Unis",
-      farStart: "Votre trait commence à environ {d} de la route la plus proche utilisée par ce guide ; la virée commence donc là.",
-      farEnd: "Votre trait se termine à environ {d} de la route la plus proche utilisée par ce guide ; la virée se termine donc là.",
-      farBoth: "Les deux extrémités de votre trait sont loin des routes utilisées par ce guide (environ {a} et {b}) ; la virée commence et se termine donc aux routes les plus proches.",
+      farStart: "Votre trait commence à environ {d} avant la première route utilisée par ce guide ; la virée commence donc là.",
+      farEnd: "Votre trait se termine à environ {d} au-delà de la dernière route utilisée par ce guide ; la virée s’arrête donc là.",
+      farBoth: "Les deux extrémités de votre trait dépassent les routes utilisées par ce guide (d’environ {a} et {b}) ; la virée commence et se termine là où votre trait les rejoint.",
       farTail: "Les itinéraires restent au Canada et s’arrêtent aux côtes et à la frontière américaine ; les parcs américains sont dans le {guide} (en anglais)."
     },
   }
@@ -4140,7 +4140,11 @@ function rtBuildGraph(data){
     }
     c++;
   }
-  return { nodes, edges, comp };
+  /* road km per component: trip ends ignore fragments under 300 km (a ferry stub on the far side
+     of the border, a short isolated piece), so they can't hijack a start or finish */
+  const compKm = new Float64Array(c);
+  edges.forEach(e => { compKm[comp[e.a]] += e.km; });
+  return { nodes, edges, comp, compKm };
 }
 
 /* Equirectangular distance, scaled at the pair's own latitude: within 0.5% at these spans. */
@@ -4186,11 +4190,12 @@ function rtThin(sketch, minKm){
 }
 
 /* Nearest point ALONG any road to p (optionally only roads on network component `comp`):
-   { e: edge, cum: its cumulative km, km: distance from p, along: km along e }. */
+   { e: edge, cum: its cumulative km, km: distance from p, along: km along e }. Without `comp`,
+   fragments under 300 km of road are skipped (see compKm in rtBuildGraph). */
 function rtAnchor(G, p, comp){
   let best = null;
   G.edges.forEach(e => {
-    if (comp !== undefined && G.comp[e.a] !== comp) return;
+    if (comp !== undefined ? G.comp[e.a] !== comp : G.compKm[G.comp[e.a]] < 300) return;
     const cum = e.cum || (e.cum = rtCumulative(e.pts)), r = rtNearest(p, e.pts, cum);
     if (!best || r.km < best.km) best = { e, cum, km: r.km, along: r.along };
   });
@@ -4360,7 +4365,8 @@ function rtCorners(G, sk){
    so the page can say when a trip was cut short at a coast or the border. A line drawn back to
    its start is a loop (split at its farthest point); sharp corners are must-visit points. */
 function rtSnapTrip(G, sketch){
-  const sk = rtThin(sketch, 2), len = rtLength(sk);
+  let sk = rtThin(sketch, 2);
+  const len = rtLength(sk);
   if (sk.length < 2 || len < 20) return { error: 'short' };
   const a0 = rtAnchor(G, sk[0]), a1 = rtAnchor(G, sk[sk.length-1]);
   if (!a0 || !a1 || (a0.km > 60 && a1.km > 60)) return { error: 'noroad' };
@@ -4369,8 +4375,18 @@ function rtSnapTrip(G, sketch){
      stub near the finish must not hide a perfectly good road on the start's network. */
   if (G.comp[a0.e.a] !== G.comp[a1.e.a] && a1.km <= 60 && rtAnchor(G, sk[sk.length-1], G.comp[a0.e.a]).km > 60)
     return { error: 'disconnected' };
+  /* An end drawn far from any road (past the border, out to sea) is trimmed back to where the
+     line leaves the road network, so Whistler -> Seattle stops at the border crossing the line
+     actually used, not at whichever road happens to be closest to Seattle (Victoria, by ferry).
+     The far ends are still reported (offStartKm / offEndKm) against the line as drawn. */
+  const full = sk, comp = G.comp[(a0.km <= 60 ? a0 : a1).e.a];
+  const near = p => rtAnchor(G, p, comp).km <= 15;
+  let lo = 0, hi = sk.length - 1;
+  if (rtAnchor(G, sk[hi], comp).km > 30){ while (hi > 0 && !near(sk[hi])) hi = Math.max(0, hi - 3); }
+  if (rtAnchor(G, sk[lo], comp).km > 30){ while (lo < hi && !near(sk[lo])) lo = Math.min(hi, lo + 3); }
+  if (hi - lo >= 1 && rtLength(sk.slice(lo, hi + 1)) >= 20) sk = sk.slice(lo, hi + 1);
   const cuts = rtCorners(G, sk);
-  if (sk.length > 3 && rtKm(sk[0], sk[sk.length-1]) < Math.max(30, len * 0.1)){
+  if (sk.length > 3 && rtKm(full[0], full[full.length-1]) < Math.max(30, len * 0.1)){
     let k = 1, far = 0;
     sk.forEach((p, i) => { const d = rtKm(sk[0], p); if (d > far){ far = d; k = i; } });
     if (!cuts.some(c => Math.abs(c - k) < 3)) cuts.push(k);
@@ -4387,10 +4403,10 @@ function rtSnapTrip(G, sketch){
   }
   route.cum = rtCumulative(route.path);
   route.km = route.cum[route.cum.length-1];
-  route.sketch = sk;
-  route.loop = rtKm(sk[0], sk[sk.length-1]) < Math.max(30, len * 0.1);
-  route.offStartKm = rtKm(sk[0], route.path[0]);
-  route.offEndKm = rtKm(sk[sk.length-1], route.path[route.path.length-1]);
+  route.sketch = full;
+  route.loop = rtKm(full[0], full[full.length-1]) < Math.max(30, len * 0.1);
+  route.offStartKm = rtKm(full[0], route.path[0]);
+  route.offEndKm = rtKm(full[full.length-1], route.path[route.path.length-1]);
   return route;
 }
 

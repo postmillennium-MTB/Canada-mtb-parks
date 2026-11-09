@@ -1323,7 +1323,7 @@ details summary::-webkit-details-marker { display: none; }
 
 /* ═══════════════════════════════════════════════════════════ ACCORDIONS */
 .provinces-section {
-  max-width: 900px; margin: 0 auto; padding: 0 1.25rem 1rem;
+  max-width: 900px; margin: 1.5rem auto 0; padding: 0 1.25rem 1rem;
   display: flex; flex-direction: column; gap: 0.6rem;
 }
 .province-accordion {
@@ -2099,11 +2099,6 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   </div>
 </div>
 
-<!-- PROVINCE ACCORDIONS -->
-<div class="provinces-section" id="provinces-section">
-  <!-- rendered by JS -->
-</div>
-
 <!-- MAP -->
 <section class="map-section">
   <div class="map-header">
@@ -2134,10 +2129,16 @@ details[open] .prov-chevron { transform: rotate(180deg); }
   </div><!-- /map-body -->
 </section>
 
+<!-- PROVINCE ACCORDIONS -->
+<div class="provinces-section" id="provinces-section">
+  <!-- rendered by JS -->
+</div>
+
+
 <!-- FOOTER -->
 <footer class="footer">
   <p class="footer-note" id="footer-note">
-    Last update: October 2026. Base list sourced from <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — Becky Timbers' website. Loam Pass status subject to change. Always verify hours and season status directly with each park before visiting.<br><br>
+    Last update: November 2026. Base list sourced from <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — Becky Timbers' website. Loam Pass status subject to change. Always verify hours and season status directly with each park before visiting.<br><br>
     Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br><br>
     Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.
   </p>
@@ -2234,7 +2235,7 @@ const T = {
     mapTitle: 'Map',
     btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces with no lift-served parks:</strong> Manitoba, Saskatchewan, Prince Edward Island, Newfoundland &amp; Labrador, Northwest Territories, and Nunavut have no confirmed lift-served mountain bike parks. The concentration of Canadian lift infrastructure falls primarily in mountainous BC and the Laurentian ski corridor of Québec.`,
-    footerNote: `Last update: October 2026. Base list sourced from <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — Becky Timbers' website. Loam Pass status subject to change. Always verify hours and season status directly with each park before visiting.<br><br>Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br><br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
+    footerNote: `Last update: November 2026. Base list sourced from <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — Becky Timbers' website. Loam Pass status subject to change. Always verify hours and season status directly with each park before visiting.<br><br>Trail counts, vert, and season dates are approximate and subject to change. Inclusion requires chairlift or gondola access for bikes; shuttle-only parks excluded.<br><br>Sources: park websites, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, UCI MTB World Series.`,
     noResults: 'No parks match your filters.',
     searchCount: '{n} parks',
     searchCountOne: '1 park',
@@ -2361,7 +2362,7 @@ const T = {
     mapTitle: 'Carte',
     btnCanada: '🇨🇦 Canada',
     mapNote: `<strong>Provinces sans parc avec remontée :</strong> Le Manitoba, la Saskatchewan, l'Île-du-Prince-Édouard, Terre-Neuve-et-Labrador, les Territoires du Nord-Ouest et le Nunavut n'ont aucun parc de vélo desservi par remontée mécanique. La concentration des infrastructures se trouve principalement en Colombie-Britannique et dans le corridor skiable des Laurentides au Québec.`,
-    footerNote: `Dernière mise à jour : octobre 2026. Liste de base tirée de <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — le site de Becky Timbers. Le statut du Loam Pass peut changer. Vérifiez toujours les heures et l'état de la saison directement auprès de chaque parc avant votre visite.<br><br>Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br><br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
+    footerNote: `Dernière mise à jour : novembre 2026. Liste de base tirée de <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Two Wheeled Wanderer</a> — le site de Becky Timbers. Le statut du Loam Pass peut changer. Vérifiez toujours les heures et l'état de la saison directement auprès de chaque parc avant votre visite.<br><br>Le nombre de sentiers, le dénivelé et les dates de saison sont approximatifs et peuvent changer. L'inclusion exige un accès par télésiège ou télécabine pour les vélos ; les parcs navette seulement sont exclus.<br><br>Sources : sites des parcs, <a href="https://www.twowheeledwanderer.com/posts/mountain-bike-parks-canada/" target="_blank" rel="noopener">Becky Timbers</a>, Trailforks, Singletracks, Gravity Logic, Kodiak Trail Works, Séries mondiales UCI.`,
     noResults: 'Aucun parc ne correspond à vos filtres.',
     searchCount: '{n} parcs',
     searchCountOne: '1 parc',
@@ -3201,7 +3202,7 @@ function toggleBadgeKey() {
 }
 
 /* Shared helper: make sure the map/stats/mountain section is expanded
-   (it auto-collapses on mobile) and bring it into view. */
+   (the - button can collapse it) and bring it into view. */
 function revealMapSection() {
   var body = document.getElementById('map-body');
   var btn  = document.getElementById('map-collapse-btn');
